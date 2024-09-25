@@ -1,5 +1,8 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
+import { clearJwtToken } from '../../../../redux/actions/authActions';
+import { useDispatch } from 'react-redux';
+import { useNavigate  } from 'react-router-dom';
 import {
   Box,
   styled,
@@ -13,7 +16,8 @@ import {
 
 import { NotificationProvider } from "app/contexts/NotificationContext";
 
-import useAuth from "app/hooks/useAuth";
+// Remove useAuth import and related logic
+// import useAuth from "app/hooks/useAuth";
 import useSettings from "app/hooks/useSettings";
 
 import { Span } from "app/components/Typography";
@@ -31,8 +35,7 @@ import {
   Settings,
   WebAsset,
   MailOutline,
-  StarOutline,
-  PowerSettingsNew
+  StarOutline
 } from "@mui/icons-material";
 
 // STYLED COMPONENTS
@@ -90,8 +93,11 @@ const IconBox = styled("div")(({ theme }) => ({
 
 const Layout1Topbar = () => {
   const theme = useTheme();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { settings, updateSettings } = useSettings();
-  const { logout, user } = useAuth();
+  // Remove useAuth hook
+  // const { logout, user } = useAuth();
   const isMdScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const updateSidebarMode = (sidebarSettings) => {
@@ -107,6 +113,11 @@ const Layout1Topbar = () => {
       mode = layout1Settings.leftSidebar.mode === "full" ? "close" : "full";
     }
     updateSidebarMode({ mode });
+  };
+
+  const handleSignOut = () => {
+    dispatch(clearJwtToken());
+    navigate('/session/signin');
   };
 
   return (
@@ -146,10 +157,10 @@ const Layout1Topbar = () => {
               <UserMenu>
                 <Hidden xsDown>
                   <Span>
-                    Hi <strong>{user.name}</strong>
+                    Hi <strong>Guest</strong>
                   </Span>
                 </Hidden>
-                <Avatar src={user.avatar} sx={{ cursor: "pointer" }} />
+                <Avatar src="" sx={{ cursor: "pointer" }} />
               </UserMenu>
             }>
             <StyledItem>
@@ -166,15 +177,16 @@ const Layout1Topbar = () => {
               </Link>
             </StyledItem>
 
-            <StyledItem>
+            <StyledItem onClick={handleSignOut}>
               <Settings />
-              <Span>Settings</Span>
-            </StyledItem>
-
-            <StyledItem onClick={logout}>
-              <PowerSettingsNew />
               <Span>Logout</Span>
             </StyledItem>
+
+            {/* Remove or adjust the logout item */}
+            {/* <StyledItem onClick={logout}>
+              <PowerSettingsNew />
+              <Span>Logout</Span>
+            </StyledItem> */}
           </MatxMenu>
         </Box>
       </TopbarContainer>

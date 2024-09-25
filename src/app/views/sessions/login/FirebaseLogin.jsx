@@ -71,7 +71,7 @@ const FirebaseRoot = styled("div")(({ theme }) => ({
 
 // initial login credentials
 const initialValues = {
-  email: "jason@ui-lib.com",
+  email: "",
   password: "dummyPass",
   remember: true
 };

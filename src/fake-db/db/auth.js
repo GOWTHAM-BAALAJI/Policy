@@ -9,7 +9,7 @@ const userList = [
     role: "SA",
     name: "Jason Alexander",
     username: "jason_alexander",
-    email: "jason@ui-lib.com",
+    email: "rajesh.gajula@spandanasphoorty.com",
     avatar: "/assets/images/face-6.jpg",
     age: 25
   }
