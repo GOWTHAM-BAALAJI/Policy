@@ -17,6 +17,7 @@ const AppCheckbox = Loadable(lazy(() => import("./checkbox/AppCheckbox")));
 const AppSnackbar = Loadable(lazy(() => import("./snackbar/AppSnackbar")));
 const AppAutoComplete = Loadable(lazy(() => import("./auto-complete/AppAutoComplete")));
 const AppExpansionPanel = Loadable(lazy(() => import("./expansion-panel/AppExpansionPanel")));
+const InitiatePSG = Loadable(lazy(() => import("./initiate/InitiatePSG")));
 
 const materialRoutes = [
   { path: "/material/table", element: <PrivateRoute element={<AppTable />} /> },
@@ -32,7 +33,8 @@ const materialRoutes = [
   { path: "/material/autocomplete", element: <PrivateRoute element={<AppAutoComplete />} /> },
   { path: "/material/expansion-panel", element: <PrivateRoute element={<AppExpansionPanel />} /> },
   { path: "/material/dialog", element: <PrivateRoute element={<AppDialog />} /> },
-  { path: "/material/snackbar", element: <PrivateRoute element={<AppSnackbar />} /> }
+  { path: "/material/snackbar", element: <PrivateRoute element={<AppSnackbar />} /> },
+  { path: "/initiate/psg", element: <PrivateRoute element={<InitiatePSG />} /> },
 ];
 
 export default materialRoutes;

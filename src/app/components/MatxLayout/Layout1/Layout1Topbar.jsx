@@ -40,7 +40,13 @@ import {
 
 // STYLED COMPONENTS
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  color: theme.palette.text.primary
+  width: '55px',
+  height: '55px',
+  borderRadius: '50%',
+  color: theme.palette.text.primary,
+  '&:hover': {
+    boxShadow: 'none', // Remove any default shadow if needed
+  }
 }));
 
 const TopbarRoot = styled("div")({
@@ -76,7 +82,7 @@ const UserMenu = styled(Box)({
 const StyledItem = styled(MenuItem)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  minWidth: 185,
+  minWidth: 125,
   "& a": {
     width: "100%",
     display: "flex",
@@ -127,31 +133,10 @@ const Layout1Topbar = () => {
           <StyledIconButton onClick={handleSidebarToggle}>
             <Menu />
           </StyledIconButton>
-
-          <IconBox>
-            <StyledIconButton>
-              <MailOutline />
-            </StyledIconButton>
-
-            <StyledIconButton>
-              <WebAsset />
-            </StyledIconButton>
-
-            <StyledIconButton>
-              <StarOutline />
-            </StyledIconButton>
-          </IconBox>
+          <p style={{ marginLeft: '8px', fontFamily: 'sans-serif', fontSize: '16px', fontWeight: 'bold' }}>POLICY PROJECT</p>
         </Box>
 
         <Box display="flex" alignItems="center">
-          <MatxSearchBox />
-
-          <NotificationProvider>
-            <NotificationBar />
-          </NotificationProvider>
-
-          <ShoppingCart />
-
           <MatxMenu
             menuButton={
               <UserMenu>
@@ -163,12 +148,6 @@ const Layout1Topbar = () => {
                 <Avatar src="" sx={{ cursor: "pointer" }} />
               </UserMenu>
             }>
-            <StyledItem>
-              <Link to="/">
-                <Home />
-                <Span>Home</Span>
-              </Link>
-            </StyledItem>
 
             <StyledItem>
               <Link to="/page-layouts/user-profile">

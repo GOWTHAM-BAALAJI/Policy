@@ -1,7 +1,8 @@
 import { Box, styled } from "@mui/material";
 
 import { Span } from "./Typography";
-import { MatxLogo } from "app/components";
+// import { MatxLogo } from "app/components";
+import SpandanaLogo from "../assets/logo.png";
 import useSettings from "app/hooks/useSettings";
 
 // STYLED COMPONENTS
@@ -26,15 +27,16 @@ export default function Brand({ children }) {
   return (
     <BrandRoot>
       <Box display="flex" alignItems="center">
-        <MatxLogo />
+        {/* <MatxLogo /> */}
+        <img src={SpandanaLogo} alt="Spandana Logo" style={{ height: '30px' }} />
         <StyledSpan mode={mode} className="sidenavHoverShow">
-          Matx
+          Spandana
         </StyledSpan>
       </Box>
 
-      <Box className="sidenavHoverShow" sx={{ display: mode === "compact" ? "none" : "block" }}>
+      {/* <Box className="sidenavHoverShow" sx={{ display: mode === "compact" ? "none" : "block" }}>
         {children || null}
-      </Box>
+      </Box> */}
     </BrandRoot>
   );
 }

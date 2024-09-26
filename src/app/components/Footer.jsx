@@ -18,7 +18,12 @@ const AppFooter = styled(Toolbar)(() => ({
       flexDirection: "column !important",
       "& a": { margin: "0 0 16px !important" }
     }
-  }
+  },
+  backgroundColor: 'white',
+  color: 'black',
+  // fontFamily: 'sans-serif',
+  // fontWeight: '500',
+  opacity: '1',
 }));
 
 const FooterContent = styled("div")(() => ({
@@ -27,7 +32,10 @@ const FooterContent = styled("div")(() => ({
   alignItems: "center",
   padding: "0px 1rem",
   maxWidth: "1170px",
-  margin: "0 auto"
+  margin: "0 auto",
+  opacity: '0.4',
+  // fontWeight: '20',
+  // fontFamily: 'sans-serif',
 }));
 
 export default function Footer() {
@@ -41,17 +49,13 @@ export default function Footer() {
       <AppBar color="primary" position="static" sx={{ zIndex: 96 }}>
         <AppFooter>
           <FooterContent>
-            <a href="https://ui-lib.com/downloads/matx-pro-react-admin/">
-              <Button variant="contained" color="secondary">
-                Get MatX Pro
-              </Button>
-            </a>
+            2024 © Policy project by Spandana
 
-            <Span m="auto"></Span>
+            {/* <Span m="auto"></Span>
 
             <Paragraph m={0}>
               Design and Developed by <a href="http://ui-lib.com">UI Lib</a>
-            </Paragraph>
+            </Paragraph> */}
           </FooterContent>
         </AppFooter>
       </AppBar>

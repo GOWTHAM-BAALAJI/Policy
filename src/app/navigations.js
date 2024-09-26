@@ -1,14 +1,30 @@
 export const navigations = [
-  { name: "Dashboard", path: "/dashboard/default", icon: "dashboard" },
   { label: "PAGES", type: "label" },
   {
-    name: "Session/Auth",
-    icon: "security",
+    name: "Dashboard",
+    icon: "dashboard",
     children: [
-      { name: "Sign in", iconText: "SI", path: "/session/signin" },
-      { name: "Sign up", iconText: "SU", path: "/session/signup" },
-      { name: "Forgot Password", iconText: "FP", path: "/session/forgot-password" },
-      { name: "Error", iconText: "404", path: "/session/404" }
+      { name: "Go to Dashboard", iconText: "SI", path: "/dashboard/default" },
+      { name: "Approved", iconText: "SU", path: "/session/signup" },
+      { name: "Rejected", iconText: "SU", path: "/session/signup" },
+      { name: "Approval pending", iconText: "SU", path: "/session/signup" },
+      { name: "Review raised", iconText: "SU", path: "/session/signup" },
+    ]
+  },
+  {
+    name: "Policy, SOP & Guidance Note",
+    icon: "description",
+    children: [
+      { name: "List of Policies, SOPs & Guidance notes", iconText: "SI", path: "/dashboard/default" },
+      { name: "Initiate a Policy, SOP or Guidance note", iconText: "SU", path: "/initiate/psg" },
+    ]
+  },
+  {
+    name: "Circulars & Advisories",
+    icon: "timer",
+    children: [
+      { name: "List of Circulars & Advisories", iconText: "SI", path: "/dashboard/default" },
+      { name: "Initiate a Circular or Advisory", iconText: "SU", path: "/session/signup" },
     ]
   },
   { label: "Components", type: "label" },
