@@ -13,11 +13,11 @@ import "perfect-scrollbar/css/perfect-scrollbar.css";
 const root = createRoot(document.getElementById("root"));
 
 root.render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <Provider store={store}>
       <App />
     </Provider>
-    </React.StrictMode>
+    // </React.StrictMode>
 );
 
 // for IE-11 support un-comment cssVars() and it's import in this file

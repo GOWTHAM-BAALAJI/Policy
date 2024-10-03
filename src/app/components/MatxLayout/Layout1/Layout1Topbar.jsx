@@ -123,7 +123,7 @@ const Layout1Topbar = () => {
 
   const handleSignOut = () => {
     dispatch(clearJwtToken());
-    navigate('/session/signin');
+    navigate('/');
   };
 
   return (
@@ -150,7 +150,7 @@ const Layout1Topbar = () => {
             }>
 
             <StyledItem>
-              <Link to="/page-layouts/user-profile">
+              <Link to="/profile">
                 <Person />
                 <Span>Profile</Span>
               </Link>

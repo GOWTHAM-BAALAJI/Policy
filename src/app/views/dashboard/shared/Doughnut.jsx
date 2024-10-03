@@ -1,10 +1,32 @@
 import { useTheme } from "@mui/material/styles";
 import ReactEcharts from "echarts-for-react";
+import { useNavigate } from "react-router-dom";
 
 export default function DoughnutChart({ height = '100%', color = [] }) {
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const colors = ["#02ad2d", "#ff0303", "#fffb03", "#ff6303"];
+
+  // Define your navigation function
+  const navigateToPage = (name) => {
+    switch (name) {
+      case "Approved":
+        navigate("/list/approved");
+        break;
+      case "Rejected":
+        navigate("/list/rejected");
+        break;
+      case "Approval pending":
+        navigate("/list/approvalpending");
+        break;
+      case "Review raised":
+        navigate("/list/reviewraised");
+        break;
+      default:
+        break;
+    }
+  };
 
   const option = {
     legend: {
@@ -14,7 +36,7 @@ export default function DoughnutChart({ height = '100%', color = [] }) {
       bottom: 20,
       textStyle: { color: theme.palette.text.secondary, fontSize: 13, fontFamily: "roboto" },
       formatter: function (name) {
-        return name.split(' ').join('\n'); // Splitting to two lines if needed
+        return name.split(' ').join('\n');
       }
     },
     tooltip: { show: false, trigger: "item", formatter: "{a} <br/>{b}: {c} ({d}%)" },
@@ -60,5 +82,20 @@ export default function DoughnutChart({ height = '100%', color = [] }) {
     ]
   };
 
-  return <ReactEcharts style={{ height: height, width: "100%" }} option={{ ...option }} />;
+  // Event handler for chart clicks
+  const onChartClick = (params) => {
+    if (params && params.data && params.data.name) {
+      navigateToPage(params.data.name);
+    }
+  };
+
+  return (
+    <ReactEcharts
+      style={{ height: height, width: "100%" }}
+      option={option}
+      onEvents={{
+        'click': onChartClick  // Register the click event
+      }}
+    />
+  );
 }

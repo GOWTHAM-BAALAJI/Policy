@@ -24,6 +24,8 @@ const AppFooter = styled(Toolbar)(() => ({
   // fontFamily: 'sans-serif',
   // fontWeight: '500',
   opacity: '1',
+  border: '1px solid #e0e0e0',
+  boxShadow: '0px 0px 8px 2px rgba(0, 0, 0, 0.1)'
 }));
 
 const FooterContent = styled("div")(() => ({

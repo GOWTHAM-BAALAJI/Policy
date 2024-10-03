@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Grid, styled, TextField } from "@mui/material";
+import img1 from "../../assets/spandana_logo.png";
 
 // STYLED COMPONENTS
 const StyledRoot = styled("div")(() => ({
@@ -18,7 +19,7 @@ const StyledRoot = styled("div")(() => ({
 
   ".img-wrapper": {
     display: "flex",
-    padding: "2rem",
+    // padding: "2rem",
     alignItems: "center",
     justifyContent: "center"
   }
@@ -31,7 +32,7 @@ const ContentBox = styled("div")(({ theme }) => ({
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("admin@example.com");
+  const [email, setEmail] = useState("");
 
   const handleFormSubmit = () => {
     console.log(email);
@@ -43,7 +44,7 @@ export default function ForgotPassword() {
         <Grid container>
           <Grid item xs={12}>
             <div className="img-wrapper">
-              <img width="300" src="/assets/images/illustrations/dreamer.svg" alt="" />
+              <img width="300" src={img1} alt="" />
             </div>
 
             <ContentBox>
@@ -68,7 +69,7 @@ export default function ForgotPassword() {
                   color="primary"
                   variant="outlined"
                   onClick={() => navigate(-1)}
-                  sx={{ mt: 2 }}>
+                  sx={{ mt: 3 }}>
                   Go Back
                 </Button>
               </form>

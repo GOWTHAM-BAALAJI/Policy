@@ -7,16 +7,16 @@ import MatxLayout from "./components/MatxLayout/MatxLayout";
 import sessionRoutes from "./views/sessions/session-routes";
 import materialRoutes from "app/views/material-kit/MaterialRoutes";
 import PrivateRoute from "./views/sessions/login/PrivateRoute";
+import { element } from "prop-types";
 
-// E-CHART PAGE
-const AppEchart = Loadable(lazy(() => import("app/views/charts/echarts/AppEchart")));
-// DASHBOARD PAGE
 const Analytics = Loadable(lazy(() => import("app/views/dashboard/Analytics")));
+const JwtLogin = Loadable(lazy(() => import("./views/sessions/login/JwtLogin")));
+const Profile = Loadable(lazy(() => import("./views/profile/Profile")));
 
 const routes = [
   {
     path: "/",
-    element: <Navigate to="session/signin" />
+    element: <JwtLogin />
   },
   {
     element: <MatxLayout />,
@@ -24,14 +24,13 @@ const routes = [
       ...materialRoutes,
       // dashboard route
       {
-        path: "/dashboard/default",
+        path: "/dashboard",
         element: <PrivateRoute element={<Analytics />} />
       },
-      // e-chart route
       {
-        path: "/charts/echarts",
-        element: <PrivateRoute element={<AppEchart />} />
-      }
+        path: "/profile",
+        element: < Profile/>
+      },
     ]
   },
 

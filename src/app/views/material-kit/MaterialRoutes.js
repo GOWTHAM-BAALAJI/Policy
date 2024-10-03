@@ -3,38 +3,28 @@ import Loadable from "app/components/Loadable";
 import PrivateRoute from "../sessions/login/PrivateRoute";
 import { Apps } from "@mui/icons-material";
 
-const AppForm = Loadable(lazy(() => import("./forms/AppForm")));
-const AppMenu = Loadable(lazy(() => import("./menu/AppMenu")));
-const AppIcon = Loadable(lazy(() => import("./icons/AppIcon")));
-const AppProgress = Loadable(lazy(() => import("./AppProgress")));
-const AppRadio = Loadable(lazy(() => import("./radio/AppRadio")));
-const AppTable = Loadable(lazy(() => import("./tables/AppTable")));
-const AppSwitch = Loadable(lazy(() => import("./switch/AppSwitch")));
-const AppSlider = Loadable(lazy(() => import("./slider/AppSlider")));
-const AppDialog = Loadable(lazy(() => import("./dialog/AppDialog")));
-const AppButton = Loadable(lazy(() => import("./buttons/AppButton")));
-const AppCheckbox = Loadable(lazy(() => import("./checkbox/AppCheckbox")));
-const AppSnackbar = Loadable(lazy(() => import("./snackbar/AppSnackbar")));
-const AppAutoComplete = Loadable(lazy(() => import("./auto-complete/AppAutoComplete")));
-const AppExpansionPanel = Loadable(lazy(() => import("./expansion-panel/AppExpansionPanel")));
 const InitiatePSG = Loadable(lazy(() => import("./initiate/InitiatePSG")));
+const ListPSG = Loadable(lazy(() => import("./list/ListPSG")));
+const InitiateCA = Loadable(lazy(() => import("./initiate/InitiateCA")));
+const ListCA = Loadable(lazy(() => import("./list/ListCA")));
+const ListApproved = Loadable(lazy(() => import("../dashboard/Approved")));
+const ListRejected = Loadable(lazy(() => import("../dashboard/Rejected")));
+const ListApprovalPending = Loadable(lazy(() => import("../dashboard/Approvalpending")));
+const ListReviewraised = Loadable(lazy(() => import("../dashboard/Reviewraised")));
+const ListDataTables = Loadable(lazy(() => import("./list/ListDataTables")));
+const ListUsers = Loadable(lazy(() => import("./list/ListUsers")));
 
 const materialRoutes = [
-  { path: "/material/table", element: <PrivateRoute element={<AppTable />} /> },
-  { path: "/material/form", element: <PrivateRoute element={<AppForm />} /> },
-  { path: "/material/buttons", element: <PrivateRoute element={<AppButton />} /> },
-  { path: "/material/icons", element: <PrivateRoute element={<AppIcon />} /> },
-  { path: "/material/progress", element: <PrivateRoute element={<AppProgress />} /> },
-  { path: "/material/menu", element: <PrivateRoute element={<AppMenu />} /> },
-  { path: "/material/checkbox", element: <PrivateRoute element={<AppCheckbox />} /> },
-  { path: "/material/switch", element: <PrivateRoute element={<AppSwitch />} /> },
-  { path: "/material/radio", element: <PrivateRoute element={<AppRadio />} /> },
-  { path: "/material/slider", element: <PrivateRoute element={<AppSlider />} /> },
-  { path: "/material/autocomplete", element: <PrivateRoute element={<AppAutoComplete />} /> },
-  { path: "/material/expansion-panel", element: <PrivateRoute element={<AppExpansionPanel />} /> },
-  { path: "/material/dialog", element: <PrivateRoute element={<AppDialog />} /> },
-  { path: "/material/snackbar", element: <PrivateRoute element={<AppSnackbar />} /> },
+  { path: "/list/dt", element: <PrivateRoute element={<ListDataTables />} /> },
+  { path: "/list/users", element: <PrivateRoute element={<ListUsers />} /> },
   { path: "/initiate/psg", element: <PrivateRoute element={<InitiatePSG />} /> },
+  { path: "/list/psg", element: <PrivateRoute element={<ListPSG />} /> },
+  { path: "/initiate/ca", element: <PrivateRoute element={<InitiateCA />} /> },
+  { path: "/list/ca", element: <PrivateRoute element={<ListCA />} /> },
+  { path: "/list/approved", element: <PrivateRoute element={<ListApproved />} /> },
+  { path: "/list/rejected", element: <PrivateRoute element={<ListRejected />} /> },
+  { path: "/list/approvalpending", element: <PrivateRoute element={<ListApprovalPending />} /> },
+  { path: "/list/reviewraised", element: <PrivateRoute element={<ListReviewraised />} /> },
 ];
 
 export default materialRoutes;

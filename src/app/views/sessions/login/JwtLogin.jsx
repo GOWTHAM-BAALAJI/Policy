@@ -539,36 +539,30 @@ const FlexBox = styled(Box)(() => ({
   display: "flex"
 }));
 
-const ContentBox = styled("div")(() => ({
-  height: "100%",
-  padding: "32px",
-  position: "relative",
-  background: "rgba(0, 0, 0, 0.01)"
-}));
-
 const StyledRoot = styled("div")(() => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   backgroundColor: "#1A2038",
-  minHeight: 599,
+  minHeight: "100vh !important",
+
   "& .card": {
     maxWidth: 800,
-    minHeight: 400,
     margin: "1rem",
-    display: "flex",
-    borderRadius: 12,
-    alignItems: "center"
+    borderRadius: 12
   },
 
   ".img-wrapper": {
-    height: 300,
-    minWidth: 320,
     display: "flex",
-    padding: "2rem",
+    // padding: "2rem",
     alignItems: "center",
     justifyContent: "center"
   }
+}));
+
+const ContentBox = styled("div")(({ theme }) => ({
+  padding: 32,
+  background: theme.palette.background.default
 }));
 
 // initial login credentials
@@ -710,7 +704,7 @@ export default function Login() {
           await dispatch(setJwtToken(token));
           await dispatch(setUserData(loggedUser));
           // Navigate to the dashboard after setting the token
-          navigate('/dashboard/default');
+          navigate('/dashboard');
         } else {
           setPasswordError("Token not found.");
         }
@@ -745,13 +739,10 @@ const handleMouseDownPassword = (event) => {
       <StyledRoot>
         <Card className="card">
           <Grid container>
-            <Grid item sm={6} xs={12}>
+            <Grid item sm={12} xs={12}>
               <div className="img-wrapper">
-                <img src={img1} width="100%" alt="" />
+                <img src={img1} width="300" alt="" />
               </div>
-            </Grid>
-
-            <Grid item sm={6} xs={12} sx={{ mt: 1, p:2 }}>
               <ContentBox>
                 <Formik
                   onSubmit={handleFormSubmit}
@@ -833,6 +824,7 @@ const handleMouseDownPassword = (event) => {
                       <LoadingButton
                         type="submit"
                         color="primary"
+                        fullWidth
                         loading={loading}
                         variant="contained"
                         sx={{ my: 2 }}>
@@ -853,13 +845,10 @@ const handleMouseDownPassword = (event) => {
     <StyledRoot>
         <Card className="card">
           <Grid container>
-            <Grid item sm={6} xs={12}>
+            <Grid item sm={12} xs={12}>
               <div className="img-wrapper">
-                <img src={img1} width="100%" alt="" />
+                <img src={img1} width="300" alt="" />
               </div>
-            </Grid>
-
-            <Grid item sm={6} xs={12} sx={{ mt: 4 }}>
               <ContentBox>
                 <Formik
                   onSubmit={chkOTP}
@@ -881,6 +870,15 @@ const handleMouseDownPassword = (event) => {
                         helperText={emailIdError || (touched.emailId && errors.emailId)}
                         error={Boolean(emailIdError || (errors.emailId && touched.emailId))}
                         sx={{ mb: 2 }}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton edge="end">
+                                <PersonOutlineIcon />
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
                       />
 
                       <TextField
