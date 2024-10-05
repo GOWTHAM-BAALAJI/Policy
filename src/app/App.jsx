@@ -18,12 +18,12 @@
 //   const rootElement = document.getElementById('root');
 //   const root = createRoot(rootElement);
 //   root.render(
-//     <React.StrictMode>
+//     // <React.StrictMode>
 //         <Provider store={store}>
 //             <RouterProvider router={routes} />
 //             <IdleTimeoutHandler />
 //         </Provider>
-//     </React.StrictMode>,
+//     // </React.StrictMode>,
 //   )
 
 

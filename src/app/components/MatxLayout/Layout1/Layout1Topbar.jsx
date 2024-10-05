@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Link } from "react-router-dom";
 import { clearJwtToken } from '../../../../redux/actions/authActions';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate  } from 'react-router-dom';
 import {
   Box,
@@ -102,6 +102,7 @@ const Layout1Topbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { settings, updateSettings } = useSettings();
+  const userDetails = useSelector((state) => state.userData);
   // Remove useAuth hook
   // const { logout, user } = useAuth();
   const isMdScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -142,7 +143,7 @@ const Layout1Topbar = () => {
               <UserMenu>
                 <Hidden xsDown>
                   <Span>
-                    Hi <strong>Guest</strong>
+                    Hi <strong>{userDetails.emp_name || 'Guest'}</strong>
                   </Span>
                 </Hidden>
                 <Avatar src="" sx={{ cursor: "pointer" }} />

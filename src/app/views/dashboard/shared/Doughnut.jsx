@@ -17,10 +17,10 @@ export default function DoughnutChart({ height = '100%', color = [] }) {
       case "Rejected":
         navigate("/list/rejected");
         break;
-      case "Approval pending":
+      case "Pending":
         navigate("/list/approvalpending");
         break;
-      case "Review raised":
+      case "Waiting for Action":
         navigate("/list/reviewraised");
         break;
       default:
@@ -69,8 +69,8 @@ export default function DoughnutChart({ height = '100%', color = [] }) {
         data: [
           { value: 7, name: "Approved" },
           { value: 1, name: "Rejected" },
-          { value: 4, name: "Approval pending" },
-          { value: 2, name: "Review raised" }
+          { value: 4, name: "Pending" },
+          { value: 2, name: "Waiting for Action" }
         ],
         itemStyle: {
           color: function (params) {

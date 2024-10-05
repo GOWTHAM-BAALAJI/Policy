@@ -1,19 +1,19 @@
 export const SET_USER_DATA = 'SET_USER_DATA';
 
 const initialUserState = JSON.parse(localStorage.getItem('userData')) || {
-    EMPLOYEE_NUMBER: '',
-    LEGAL_NAME: '',
-    ZONE: '',
-    STATE: '',
-    REGION: '',
-    AREA: '',
-    CLUSTER: '',
-    BRANCH_CODE: '',
-    BRANCH_NAME: '',
-    REPORTING_MANAGER: '',
-    WORK_EMAILID: '',
-    WORK_MOBILE_NUMBER: '',
-    emp_designation: '',
+    user_id: '',
+    emp_id: '',
+    emp_name: '',
+    emp_email: '',
+    emp_password: '',
+    emp_mobile: '',
+    profile_pic: '',
+    role_id: '',
+    designation: '',
+    cluster_id: '',
+    state: '',
+    status: '',
+    user_group: '',
 };
 
 export const userDataReducer = (state = initialUserState, action) => {

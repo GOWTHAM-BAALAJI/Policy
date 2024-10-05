@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { useForm, Controller } from 'react-hook-form';
 import { NavLink, useNavigate } from "react-router-dom";
 import { Autocomplete, Button, Chip, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, ListItemText, MenuItem, FormControl, Grid, IconButton, InputLabel, styled, Select, Typography, TextField } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
+import { useDispatch, useSelector } from 'react-redux';
 
 const StyledSelect = styled(Select)(() => ({
     width: '100%',
@@ -110,39 +112,37 @@ const InitiatePSG = () => {
     const [uploadedFiles, setUploadedFiles] = useState([]); // Store multiple file objects
     const [employeeOptions, setEmployeeOptions] = useState([]);
     const [selectedReviewer, setSelectedReviewer] = useState("");
+    const [reviewerId, setReviewerId] = useState("");
     const [selectedApprovalMembers, setSelectedApprovalMembers] = useState([]);
     const [priorityOrder, setPriorityOrder] = useState([]);
-    const [selectedUserGroup, setSelectedUserGroup] = useState([]);
+    const [selectedUserGroup, setSelectedUserGroup] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogtitle, setDialogTitle] = useState("");
     const [dialogMessage, setDialogMessage] = useState("");
 
+    const reviewers = [
+        { value:'572', label: 'testUser2' }
+    ]
+
     const approvalMembersOptions = [
-        { value: 'SF0064296', label: 'Shalabh Saxena - Chief Executive Officer & Managing director' },
-        { value: 'SF0064297', label: 'Ashish Damani - Chief Financial Officer' },
-        { value: 'SF0070235', label: 'Vishal Sharma - Chief Operating Officer' },
-        { value: 'SF0072729', label: 'Prashant Rai - Chief People Officer' },
-        { value: 'CFL0003193', label: 'Sushanta Tripathy - Chief Business Officer' },
-        { value: 'SF0065999', label: 'Amit Anand - Chief Risk Officer' },
-        { value: 'SF0067776', label: 'Dharmvir kumar Singh - Chief Information Officer' },
-        { value: 'SF0051604', label: 'Ramesh Periasamy - Company Secretary' },
-        { value: 'SF0066397', label: 'Subhrangsu Chakravarty - Financial Controller' },
-        { value: 'SF0067851', label: 'Shilpa Jain - Head Financial reporting' },
-        { value: 'SF0071659', label: 'Divaker Jha - Head of Product & Organizational Excellence Dept.' },
+        { value: '573', label: 'testUser3' },
+        { value: '574', label: 'testUser4' },
+        { value: '575', label: 'testUser5' },
+        // { value: 'SF0072729', label: 'Prashant Rai - Chief People Officer' },
+        // { value: 'CFL0003193', label: 'Sushanta Tripathy - Chief Business Officer' },
+        // { value: 'SF0065999', label: 'Amit Anand - Chief Risk Officer' },
+        // { value: 'SF0067776', label: 'Dharmvir kumar Singh - Chief Information Officer' },
+        // { value: 'SF0051604', label: 'Ramesh Periasamy - Company Secretary' },
+        // { value: 'SF0066397', label: 'Subhrangsu Chakravarty - Financial Controller' },
+        // { value: 'SF0067851', label: 'Shilpa Jain - Head Financial reporting' },
+        // { value: 'SF0071659', label: 'Divaker Jha - Head of Product & Organizational Excellence Dept.' },
     ];
 
     const userGroupOptions = [
-        { value: 1, label: 'Field Staff' },
-        { value: 2, label: 'HO Staff' },
-        { value: 3, label: 'CBOs' },
-        { value: 4, label: 'SVPs' },
-        { value: 5, label: 'VPs' },
-        { value: 6, label: 'AVPs' },
-        { value: 7, label: 'CMs' },
-        { value: 8, label: 'BMs' },
-        { value: 9, label: 'BQMs' },
-        { value: 10, label: 'LOs' },
+        { value: '1', label: 'Field Staff' },
+        { value: '2', label: 'HO Staff' },
     ]
     
     const handleSelectChangeApprovalMembers = (event) => {
@@ -175,6 +175,8 @@ const InitiatePSG = () => {
             setUploadFilenames(prev => [...prev, file.name]); // Store the filenames in state
             setUploadedFiles(prev => [...prev, file]); // Store the file objects
         });
+        // setUploadedFiles(prev => [...prev, ...files]);
+        // setUploadFilenames(prev => [...prev, files.name]);
     };
     
     const openUploadedFile = (index) => {
@@ -191,24 +193,182 @@ const InitiatePSG = () => {
         setDialogOpen(false);
     };
 
-    const handleSubmit = (event) => {
+    const customHeaders = {
+        "Content-Type": "application/json",
+    };
+
+    const userToken = useSelector((state)=>{
+        return state.token;//.data;
+      });
+    console.log("UserToken:",userToken);
+     
+    const headers = {
+    'Accept': 'application/json',
+    'Content-Type': 'multipart/form-data',
+    'Authorization': 'Bearer ' + userToken // Ensure userToken is defined
+    };
+      console.log(headers);
+      const headerData = {
+                headers: headers
+            };
+
+    // const userToken = useSelector((state)=>{
+    //     return state.token;//.data;
+    //   });
+    // const userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NzEsImVtcF9pZCI6InNmMDAwMDAwMSIsImVtcF9uYW1lIjoidGVzdFVzZXIxIiwiZW1wX2VtYWlsIjoidGVzdHVzZXIxQHNwYW5kYW5hc3Bob29ydHkuY29tIiwicm9sZV9pZCI6MSwiaWF0IjoxNzI3OTU1NzMxLCJleHAiOjE3Mjc5NTkzMzF9.xTwc_7a9ZPjAMRkSBiTkwPcoS4H0uIfwD96rhV0m7rc";
+    
+    //   const headers = {
+    //     "Content-Type": "application/json",
+    //     "Authorization": `Bearer ${userToken}`, // Add this if required
+    //   };
+
+    // const handleSubmit = () => {
+    //     const formData = new FormData(); // Create a FormData object
+    
+    //     // Append files to FormData
+    //     uploadedFiles.forEach(file => {
+    //         formData.append("files[]", file); // Name the file array appropriately
+    //     });
+    
+    //     // Append other data to FormData
+    //     formData.append("title", title);
+    //     formData.append("description", description);
+    //     formData.append("reviewer_id", selectedReviewer || null);
+    //     formData.append("approver_ids", JSON.stringify(selectedApprovalMembers || [])); // Convert array to string
+    //     formData.append("user_group", selectedUserGroup || null);
+    
+    //     console.log("Request Data:", formData);
+
+    //     const url = "http://localhost:3000/policy/";
+    
+    //     fetch(url, {
+    //         method: "POST",
+    //         headers: headers,
+    //         body: formData, // Send the FormData object
+    //     })
+    //     .then(response => response.json())
+    //     .then(data => {
+    //         console.log("Server Response:", data);
+    //         if (data.status) {
+    //             console.log("Successfully submitted");
+    //         } else {
+    //             console.log("Error");
+    //         }
+    //         setLoading(false); // Reset loading state
+    //     })
+    //     .catch(error => {
+    //         console.error("Submission error:", error);
+    //         setLoading(false); // Reset loading state
+    //     });
+    // };
+
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        if (!documentType || !title || !description || !uploadFilename || !selectedReviewer || selectedApprovalMembers.length === 0 || selectedUserGroup.length === 0) {
+        setLoading(true);
+        if (!title || !description || !uploadFilenames || !selectedReviewer || selectedApprovalMembers.length === 0 || selectedUserGroup.length === 0) {
             setDialogTitle("Warning");
             setDialogMessage("Please fill in all the required fields");
             setDialogOpen(true);
             return;
         }
-        setDialogTitle("Success");
-        setDialogMessage("Form submitted successfully");
-        setDialogOpen(true);
-        setTimeout(() => {
-            navigate('/list/psg');
-        }, 2000);
+        // setDialogTitle("Success");
+        // setDialogMessage("Form submitted successfully");
+        // setDialogOpen(true);
+        // setTimeout(() => {
+        //     navigate('/list/psg');
+        // }, 2000);
+
+        const url = "http://localhost:3000/policy/";
+        const formData = new FormData(); // Create a FormData object
+    
+        // Append files to FormData
+        uploadedFiles.forEach(file => {
+            formData.append("files[]", file); // Name the file array appropriately
+        });
+    
+        // Append other data to FormData
+        formData.append("title", title);
+        formData.append("description", description);
+        formData.append("reviewer_id", selectedReviewer || null);
+        formData.append("approver_ids", JSON.stringify(selectedApprovalMembers || [])); // Convert array to string
+        formData.append("user_group", selectedUserGroup || null);
+    
+        fetch(url, {
+            method: "POST",
+            headers: {
+                'Authorization': `Bearer ${userToken}`, // Example header for token authentication
+                // Note: Do not include 'Content-Type: application/json' when sending FormData
+            },
+            body: formData,
+        })
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            console.log("Server Response: ", data);
+            if (data.status) {
+                console.log("Successfully submitted");
+                setTimeout(() => {
+                    navigate('/list/psg');
+                }, 2000);
+            } else {
+                console.log("Error");
+            }
+            setLoading(false); // Reset loading state
+        })
+        .catch((error) => {
+            console.error("Submission error:", error);
+            setLoading(false); // Reset loading state
+        });
+        // console.log("Result:",result);
+        // if (response.ok && result?.status) {
+        //     console.log("Successfully submitted");
+        // } else {
+        //     // setPasswordError("Invalid employee ID or password");
+        // }
+        // } catch (error) {
+        // console.error(error);
+        // // setPasswordError("Failed to load, please try again later.");
+        // }
     }
+    // const userToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NzEsImVtcF9pZCI6InNmMDAwMDAwMSIsImVtcF9uYW1lIjoidGVzdFVzZXIxIiwiZW1wX2VtYWlsIjoidGVzdHVzZXIxQHNwYW5kYW5hc3Bob29ydHkuY29tIiwicm9sZV9pZCI6MSwiaWF0IjoxNzI3OTY5NjQwLCJleHAiOjE3Mjc5NzMyNDB9.uI74ktmWkddM8N7j0_HI36TgAbrjHHElMQeYU2S49UU';
+
+//     const handleSubmit = async (e) => {
+//   e.preventDefault();
+
+//   const payload = {
+//     title: title,
+//     description: description,
+//     files: uploadFilenames || [],
+//     reviewer_id: selectedReviewer || null,
+//     approver_ids: selectedApprovalMembers || [],
+//     user_group: selectedUserGroup || null,
+//   };
+
+//   try {
+//     const response = await fetch('http://localhost:3000/policy', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${userToken}`, // Ensure userToken is defined
+//       },
+//       body: JSON.stringify(payload),
+//     });
+
+//     if (!response.ok) {
+//       throw new Error(`HTTP error! status: ${response.status}`);
+//     }
+
+//     const data = await response.json();
+//     console.log('Success:', data);
+//   } catch (error) {
+//     console.error('Error during submission:', error);
+//   }
+// };
+
     
     return(
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
             <Grid container spacing={2}>
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <Typography variant="h5" sx={{fontFamily: 'sans-serif', fontSize: '1.4rem', marginLeft: {sm: 2, xs: 2}, marginTop: {sm: 2, xs: 2}, marginRight: {sm: 2, xs: 2}}}>
@@ -346,6 +506,7 @@ const InitiatePSG = () => {
                                                 <input
                                                     type="file"
                                                     hidden
+                                                    accept=".doc, .docx"
                                                     multiple // Allow multiple file selection
                                                     onChange={(e) => handleFileUpload(e)} // Handle file upload
                                                 />
@@ -406,12 +567,12 @@ const InitiatePSG = () => {
                                 setSelectedReviewer(e.target.value);
                             }}
                             >
-                            <MenuItem value="">
-                            <em>None</em>
-                            </MenuItem>
-                            <MenuItem value={1}>A</MenuItem>
-                            <MenuItem value={2}>B</MenuItem>
-                            <MenuItem value={3}>C</MenuItem>
+                            <option value="">Select a reviewer</option>
+                            {reviewers.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>
+                                    <ListItemText primary={option.label} />
+                                    </MenuItem>
+                                ))}
                             </StyledSelect>
                         )}
                     />
@@ -442,17 +603,17 @@ const InitiatePSG = () => {
                                                     multiple
                                                     value={selectedApprovalMembers}
                                                     onChange={(e) => {
-                                                        handleSelectChangeApprovalMembers(e);
+                                                        handleSelectChangeApprovalMembers(e); // Update local state
                                                         field.onChange(e); // Update react-hook-form state
                                                     }}
-                                                    renderValue={renderPriorityValue} // Use the function to render the value
-                                                >
-                                                    {approvalMembersOptions.map((option) => (
-                                                        <MenuItem key={option.value} value={option.value}>
-                                                            <Checkbox checked={selectedApprovalMembers.indexOf(option.value) > -1} />
-                                                            <ListItemText
-                                                                primary={`${priorityOrder.indexOf(option.value) > -1 ? `${priorityOrder.indexOf(option.value) + 1}. ` : ''}${option.label}`}
-                                                            />
+                                                    renderValue={renderPriorityValue} // Function to render the value
+                                                    >
+                                                    {approvalMembersOptions.map((member) => (
+                                                        <MenuItem key={member.value} value={member.value}>
+                                                        <Checkbox checked={selectedApprovalMembers.indexOf(member.value) > -1} />
+                                                        <ListItemText
+                                                            primary={`${priorityOrder.indexOf(member.value) > -1 ? `${priorityOrder.indexOf(member.value) + 1}. ` : ''}${member.label}`}
+                                                        />
                                                         </MenuItem>
                                                     ))}
                                                 </StyledSelect>
@@ -478,7 +639,7 @@ const InitiatePSG = () => {
                     <Grid container alignItems="center" spacing={2}>
                         <Grid item xs>
                             <FormControl variant="outlined" fullWidth sx={{ position: 'relative' }}>
-                            <Controller
+                            {/* <Controller
                             name="userGroups"
                             control={control}
                             render={({ field }) => (
@@ -502,6 +663,28 @@ const InitiatePSG = () => {
                                 ))}
                                 </StyledSelect>
                             )}
+                            /> */}
+                            <Controller
+                                name="userGroups"
+                                control={control}
+                                render={({ field }) => (
+                                    <StyledSelect
+                                    labelId="user-groups-label"
+                                    id="userGroups"
+                                    value={selectedUserGroup}
+                                    // required
+                                    onChange={(e) => {
+                                        setSelectedUserGroup(e.target.value);
+                                    }}
+                                    >
+                                    <option value="">Select a user group</option>
+                                    {userGroupOptions.map((option) => (
+                                            <MenuItem key={option.value} value={option.value}>
+                                            <ListItemText primary={option.label} />
+                                            </MenuItem>
+                                        ))}
+                                    </StyledSelect>
+                                )}
                             />
                             </FormControl>
                         </Grid>

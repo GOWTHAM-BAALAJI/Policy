@@ -524,8 +524,8 @@ import { LoadingButton } from "@mui/lab";
 import { Paragraph } from "../../../../app/components/Typography";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { useDispatch } from 'react-redux';
-import { setUserData } from "../../../../redux/actions/userActions";
+import { useDispatch, useSelector } from 'react-redux';
+// import { setUserData } from "../../../../redux/actions/userActions";
 import { setJwtToken } from "../../../../redux/actions/authActions";
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import {IconButton, InputAdornment } from '@mui/material';
@@ -534,6 +534,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 // import { StyledTextField,CustomDialog,CustomDialogTitle,CustomDialogContent,CustomDialogActions } from "./StyledComponentsLogin";
 // import {Container,ContentBox,Logo,HeaderText} from './StyledComponentsLogin';
 import img1 from '../../../assets/spandana_logo.png';
+// import { setPermissionData } from "../../../../redux/actions/permissionActions";
 
 const FlexBox = styled(Box)(() => ({
   display: "flex"
@@ -588,11 +589,27 @@ export default function Login() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState(false);
+  const [userId, setUserId] = useState(null);
   const [passwordError, setPasswordError] = useState("");
   const [emailIdError, setEmailIdError] = useState("");
+  const [userIdError, setUserIdError] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
+
+  const userToken = useSelector((state)=>{
+    return state.token;//.data;
+  });
+
+  const headers = {
+    'Accept': 'application/json',
+    'Content-Type': 'multipart/form-data',
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer '+userToken
+  };
+  const customHeaders = {
+    headers: headers
+  };
 
   // Cooldown timer effect
   useEffect(() => {
@@ -607,32 +624,24 @@ export default function Login() {
 
   const handleFormSubmit = async (values) => {
     setLoading(true);
-    const url = "https://damuat.spandanasphoorty.com/policy_api/users/login";
+    const url = "http://localhost:3000/auth/";
     const requestData = {
-      user_id: values.emailId,
-      pwd: values.password
+      empRef: values.emailId,
+      password: values.password
     };
   
     try {
       const response = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: headers,
         body: JSON.stringify(requestData),
       });
-  
+
       const result = await response.json();
-  
-      if (response.ok && result.status === true) {
-        const { user_id, pwd } = result.data;
-  
-        if (user_id === values.emailId && pwd === values.password) {
-          setUsername(user_id);
-          setPasswordError("");
-        } else {
-          setPasswordError("Invalid employee ID or password");
-        }
+      if (response.ok && result?.status) {
+        setUsername(values.emailId);
+        setUserId(result.user_id);
+        setPasswordError(""); // Clear error if login is successful
       } else {
         setPasswordError("Invalid employee ID or password");
       }
@@ -682,31 +691,39 @@ export default function Login() {
 
   const chkOTP = async (values) => {
     setLoading(true);
-  
-    // Hardcoded OTP
-    const hardcodedOTP = 1234;
-  
+    const url = "http://localhost:3000/auth/verifyOTP";
+    const data = {
+      "user_id": userId,
+      "otp": 1234,
+    };
+    const customHeaders = {
+      "Content-Type": "application/json",
+    };
+
     try {
-      // Check if the entered OTP matches the hardcoded OTP
-      if (parseInt(values.otp, 10) === hardcodedOTP) {
-        // Simulated JWT token and the real user data from login step
-        const token = "sampleJwtToken";
-  
-        // Assuming username is the email entered during the login step
-        const loggedUser = {
-          email: values.emailId,   // Using the email provided in the login step
-        };
-  
-        console.log("Dispatching setJwtToken with token:", token);
-  
-        // Dispatch the token and user data
+      const response = await fetch(url, {
+        method: "POST",
+        headers: customHeaders,
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+      console.log("OTP Verification Result:", result);
+
+      if (result?.status) {
+        const token           = result.jwt;
+        // const loggedUser      = result.user_data;
+        // const permissionList  = result.permissionList;
+
         if (token) {
           await dispatch(setJwtToken(token));
-          await dispatch(setUserData(loggedUser));
-          // Navigate to the dashboard after setting the token
+          // await dispatch(setUserData(loggedUser));
+          // await dispatch(setPermissionData(permissionList));
+          //await dispatch(setPermissionData(permissionList));
+          // Navigate to dashboard after setting the token
           navigate('/dashboard');
         } else {
-          setPasswordError("Token not found.");
+          setPasswordError("Token not found in response.");
         }
       } else {
         setPasswordError("Invalid OTP");
@@ -717,7 +734,7 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   const handleDialogClose = () => {
     setDialogOpen(false);
@@ -860,15 +877,15 @@ const handleMouseDownPassword = (event) => {
                       <TextField
                         fullWidth
                         size="small"
-                        name="emailId"
+                        name="userID"
                         type="text"
-                        label="Email ID"
+                        label="User ID"
                         variant="outlined"
                         onBlur={handleBlur}
-                        value={values.emailId}
+                        value={userId}
                         onChange={handleChange}
-                        helperText={emailIdError || (touched.emailId && errors.emailId)}
-                        error={Boolean(emailIdError || (errors.emailId && touched.emailId))}
+                        helperText={userIdError || (touched.userId && errors.userId)}
+                        error={Boolean(userIdError || (errors.userId && touched.userId))}
                         sx={{ mb: 2 }}
                         InputProps={{
                           endAdornment: (
