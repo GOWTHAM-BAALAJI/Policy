@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, Card, CardContent, Dialog, DialogActions, DialogTitle, DialogContent, Grid, Icon, MenuItem, Select, Table, styled, TableRow, TableBody, TableCell, TableHead, TextField, IconButton, TablePagination, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, Checkbox, Dialog, DialogActions, DialogTitle, DialogContent, Grid, Icon, MenuItem, ListItemText, Select, Table, styled, TableRow, TableBody, TableCell, TableHead, TextField, IconButton, TablePagination, Typography } from "@mui/material";
 import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 import CloseIcon from '@mui/icons-material/Close';
 import { jwtDecode } from "jwt-decode";
+import InitiatePSG from "../initiate/InitiatePSG";
 
 // STYLED COMPONENT
 const StyledTable = styled(Table)(() => ({
@@ -79,64 +80,12 @@ const customSort = (data, column, direction) => {
   });
 };
 
-// const psgList = [
-//   {
-//     sno: "1",
-//     title: "Policy 1",
-//     type: "Policy",
-//     status: "Approval pending",
-//     lastupdated: "01/01/2024",
-//   },
-//   {
-//     sno: "2",
-//     title: "Policy 2",
-//     type: "Policy",
-//     status: "Approved",
-//     lastupdated: "02/01/2024",
-//   },
-//   {
-//     sno: "3",
-//     title: "SOP 1",
-//     type: "SOP",
-//     status: "Pending",
-//     lastupdated: "03/01/2024",
-//   },
-//   {
-//     sno: "4",
-//     title: "Policy 3",
-//     type: "Policy",
-//     status: "Approval pending",
-//     lastupdated: "04/01/2024",
-//   },
-//   {
-//     sno: "5",
-//     title: "Guidance Note 1",
-//     type: "Guidance Note",
-//     status: "Approval pending",
-//     lastupdated: "05/01/2024",
-//   },
-//   {
-//     sno: "6",
-//     title: "Policy 4",
-//     type: "Policy",
-//     status: "Pending",
-//     lastupdated: "06/01/2024",
-//   },
-//   {
-//     sno: "7",
-//     title: "SOP 2",
-//     type: "SOP",
-//     status: "Review raised",
-//     lastupdated: "07/01/2024",
-//   },
-//   {
-//     sno: "8",
-//     title: "SOP 3",
-//     type: "SOP",
-//     status: "Rejected",
-//     lastupdated: "08/01/2024",
-//   }
-// ];
+let policyCounts = {
+  approvedCount: 0,
+  rejectedCount: 0,
+  pendingCount: 0,
+  waitingForActionCount: 0,
+};
 
 export default function PSGTable() {
   const { control } = useForm();
@@ -157,6 +106,91 @@ export default function PSGTable() {
   const [openModal, setOpenModal] = useState(false);
   const [error, setError] = useState(null);
 
+  const [approvedCount, setApprovedCount] = useState(0);
+  const [rejectedCount, setRejectedCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [waitingForActionCount, setWaitingForActionCount] = useState(0);
+
+
+
+
+
+  const reviewersOptions = [
+    { value:'572', label: 'testUser2' }
+  ]
+
+  const approvalMembersOptions = [
+    { value: '573', label: 'testUser3' },
+    { value: '574', label: 'testUser4' },
+    { value: '575', label: 'testUser5' },
+  ];
+
+  const userGroupOptions = [
+    { value: '1', label: 'Field Staff' },
+    { value: '2', label: 'HO Staff' },
+  ]; 
+
+  const renderPriorityValue = (selected) => {
+      return selected
+          .map((val) => {
+              const priority = priorityOrder.indexOf(val) + 1; // Get the priority based on the current order
+              return `${priority}. ${approvalMembersOptions.find((opt) => opt.value === val)?.label}`;
+          })
+          .join(', ');
+  };
+
+  const [documentID, setDocumentID] = useState(selectedDocument?.id || '');
+  const [documentTitle, setDocumentTitle] = useState(selectedDocument?.title || '');
+  const [documentDescription, setDocumentDescription] = useState(selectedDocument?.description || '');
+  const [selectedReviewer, setSelectedReviewer] = useState(selectedDocument?.reviewer_id || '');
+  const [approvalMembersWithPriority, setApprovalMembersWithPriority] = useState([]);
+  const [selectedApprovalMembers, setSelectedApprovalMembers] = useState([]);
+  const [priorityOrder, setPriorityOrder] = useState([]);
+  const [selectedUserGroup, setSelectedUserGroup] = useState(selectedDocument?.user_group || '');
+
+  const handleSelectChangeApprovalMembers = (event) => {
+    const { value } = event.target;
+    setSelectedApprovalMembers(value); // Update selected approval members
+    setPriorityOrder(value); // Update the priority order based on current selection
+  };
+
+useEffect(() => {
+  if (selectedDocument) {
+    setDocumentID(selectedDocument.id || '');
+    setDocumentTitle(selectedDocument.title);
+    setDocumentDescription(selectedDocument.description);
+    setSelectedReviewer(selectedDocument.reviewer || '');
+    setSelectedUserGroup(selectedDocument.userGroups || '');
+    if (Array.isArray(selectedDocument.Policy_status)) {
+      const approvalMembers = selectedDocument.Policy_status
+        .filter(member => member.priority > 2) // Check for priority greater than 2
+        .map(member => ({
+          value: member.approver_details.emp_id, // Assuming emp_id is the value you want to store
+          priority: member.priority, // Store the priority as well
+          label: member.approver_details.emp_name // You may want to display the name
+        }));
+
+      // Sort members by priority in ascending order
+      const sortedMembers = approvalMembers.sort((a, b) => a.priority - b.priority);
+
+      setApprovalMembersWithPriority(sortedMembers);
+
+      const initiallySelected = sortedMembers.filter(member => 
+        selectedDocument.approvers && selectedDocument.approvers.includes(member.value)
+      ).map(member => member.value);
+
+      setSelectedApprovalMembers(initiallySelected);
+      setPriorityOrder(initiallySelected);
+    } else {
+      // Handle the case when Policy_status is not an array
+      console.error("Policy_status is not defined or not an array", selectedDocument.Policy_status);
+    }
+  }
+}, [selectedDocument]);
+
+
+
+
   const [decision, setDecision] = useState('');
   const [remarks, setRemarks] = useState('');
   const [uploadedFile, setUploadedFile] = useState([]);
@@ -167,9 +201,9 @@ export default function PSGTable() {
       case 'approved':
         return 1;
       case 'rejected':
-        return 2;
-      case 'reviewraised':
         return 3;
+      case 'reviewraised':
+        return 2;
       default:
         return '';
     }
@@ -194,6 +228,8 @@ export default function PSGTable() {
   // Check if the pendingApprover exists before accessing its properties
   const pendingApproverName = pendingApprover ? pendingApprover.approver_details?.emp_name : 'No pending approver';
   console.log("Pending approver name:",pendingApproverName);
+
+  console.log("Selected Document:", selectedDocument);
 
   const latestPolicyStatus = selectedDocument?.Policy_status?.filter(status => status.decision !== 0)
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
@@ -285,6 +321,12 @@ export default function PSGTable() {
         // console.log("Role ID:",roleId);
 
         if (data && data.status) {
+          policyCounts = {
+            approvedCount: data.approved.length || 0,
+            rejectedCount: data.rejected.length || 0,
+            pendingCount: data.pending.length || 0,
+            waitingForActionCount: data.waitingForAction.length || 0,
+          };
           // Combine approved, rejected, and pending data into a single array
           const combinedData = [
             ...data.approved.map(item => ({ ...item, status: 'Approved' })),
@@ -294,6 +336,10 @@ export default function PSGTable() {
           ];
           console.log("Combined Data:",combinedData);
           setPsgList(combinedData);
+          setApprovedCount(approvedCount);
+          setRejectedCount(rejectedCount);
+          setPendingCount(pendingCount);
+          setWaitingForActionCount(waitingForActionCount);
         }
 
         // setPsgList(formattedData);
@@ -489,7 +535,7 @@ export default function PSGTable() {
         if (data.status) {
             console.log("Successfully submitted");
             setTimeout(() => {
-                navigate('/list/psg');
+                navigate('/dashboard');
             }, 2000);
         } else {
             console.log("Error");
@@ -634,9 +680,9 @@ export default function PSGTable() {
                 <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                   <b>Version:</b> {selectedDocument.version}
                 </Typography>
-                <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
+                {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                   <b>Status:</b> {selectedDocument.status}
-                </Typography>
+                </Typography> */}
                 {selectedDocument.pending_at_id !== userId && (
                 <>
                   <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
@@ -672,7 +718,7 @@ export default function PSGTable() {
                   <Typography>No files uploaded.</Typography>
                 )}
                 {/* Display Latest Policy Status */}
-                {selectedDocument.pending_at_id === userId && latestPolicyStatus && (
+                {(selectedDocument.pending_at_id === userId || selectedDocument.pending_at_id === null) && latestPolicyStatus && (
                   <Box sx={{ mt: 2 }}>
                     <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                       <b>Latest Policy Status:</b>
@@ -687,16 +733,61 @@ export default function PSGTable() {
                       <b>Approver Name:</b> {latestPolicyStatus.approver_details.emp_name}
                     </Typography>
                     <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, ml: 2 }}>
-                      <b>Decision:</b> {latestPolicyStatus.decision === 2 ? 'Sent for review' : 'Rejected'}
+                      <b>Decision:</b> 
+                      {latestPolicyStatus.decision === 1
+                        ? 'Approved'
+                        : latestPolicyStatus.decision === 2
+                        ? 'Sent for review'
+                        : latestPolicyStatus.decision === 3
+                        ? 'Rejected'
+                        : 'Pending'}
                     </Typography>
                     {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, ml: 2 }}>
                       <b>Approver Email:</b> {latestPolicyStatus.approver_details.emp_email}
                     </Typography> */}
                   </Box>
                 )}
-                {/* File Upload Field */}
-                {selectedDocument.pending_at_id === selectedDocument.initiator_id && roleId === 1 && (
+                {/* {selectedDocument.pending_at_id === selectedDocument.initiator_id && roleId === 1 && (
                 <>
+                  <InitiatePSG />
+                </>
+                )} */}
+
+
+
+                
+                {selectedDocument.pending_at_id === userId && roleId === 1 && (
+                <>
+                  <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+                    <b>Policy ID:</b>
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    value={documentID}  // Use the state as the value (editable)
+                    onChange={(e) => setDocumentID(e.target.value)}  // Update the state when changed
+                    sx={{ mt: 1 }}
+                    InputProps={{
+                      readOnly: true,  // Make the field read-only
+                    }}
+                  />
+                  <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+                    <b>Document Title:</b>
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    value={documentTitle}  // Use the state as the value (editable)
+                    onChange={(e) => setDocumentTitle(e.target.value)}  // Update the state when changed
+                    sx={{ mt: 1 }}
+                  />
+                  <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+                    <b>Document Description:</b>
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    value={documentDescription}  // Use the state as the value (editable)
+                    onChange={(e) => setDocumentDescription(e.target.value)}  // Update the state when changed
+                    sx={{ mt: 1 }}
+                  />
                   <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                     <b>Upload the updated document:</b>
                   </Typography>
@@ -709,8 +800,121 @@ export default function PSGTable() {
                       onChange={handleFileUpload} // Function to handle the file upload
                       // value={uploadedFile}
                       sx={{ mt: 1 }}
-                    /></>
+                    />
+                    <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+                      <b>Select the Reviewer:</b>
+                    </Typography>
+                    <StyledSelect
+                      labelId="reviewer-label"
+                      id="reviewer"
+                      value={selectedReviewer || selectedDocument.reviewer_id || ''}
+                      onChange={(e) => setSelectedReviewer(e.target.value)}  // Update the state when a reviewer is selected
+                      fullWidth
+                      sx={{ mt: 1 }}
+                    >
+                      <MenuItem value="">Select a reviewer</MenuItem>
+                      {reviewersOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          <ListItemText primary={option.label} />
+                        </MenuItem>
+                      ))}
+                    </StyledSelect>
+
+
+
+
+                    <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+        <b>Select Approval Committee Members:</b>
+      </Typography>
+      <StyledSelect
+        labelId="approval-members-label"
+        id="approvalMembers"
+        multiple
+        value={approvalMembersWithPriority.map(member => member.value)} // Map to get selected values
+        onChange={handleSelectChangeApprovalMembers}
+        fullWidth
+        sx={{ mt: 1 }}
+        renderValue={(selected) => selected.map(value => {
+          const member = approvalMembersWithPriority.find(m => m.value === value);
+          return member ? `${member.priority-2} - ${member.label}` : ''; // Display value with priority
+        }).join(', ')}
+      >
+        {approvalMembersWithPriority.map((member) => (
+          <MenuItem key={member.value} value={member.value}>
+          <Checkbox checked={selectedApprovalMembers.indexOf(member.value) > -1} />
+          <ListItemText
+              primary={`${priorityOrder.indexOf(member.value) > -1 ? `${priorityOrder.indexOf(member.value) + 1}. ` : ''}${member.label}`}
+          />
+          </MenuItem>
+        ))}
+      </StyledSelect>
+
+
+
+
+
+
+
+
+                    {/* Approval Committee Members Field */}
+                    {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+                      <b>Select Approval Committee Members:</b>
+                    </Typography>
+                    <StyledSelect
+                      labelId="approval-members-label"
+                      id="approvalMembers"
+                      multiple
+                      value={selectedApprovalMembers}
+                      onChange={(e) => {
+                        handleSelectChangeApprovalMembers(e); // Handle changes in local state
+                      }}
+                      fullWidth
+                      sx={{ mt: 1 }}
+                      renderValue={renderPriorityValue}  // Display selected members
+                    >
+                      {approvalMembersOptions.map((member) => (
+                        <MenuItem key={member.value} value={member.value}>
+                          <Checkbox checked={selectedApprovalMembers.indexOf(member.value) > -1} />
+                          <ListItemText
+                            primary={`${priorityOrder.indexOf(member.value) > -1 ? `${priorityOrder.indexOf(member.value) + 1}. ` : ''}${member.label}`}
+                          />
+                        </MenuItem>
+                      ))}
+                    </StyledSelect> */}
+
+                    {/* User Groups Field */}
+                    <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+                      <b>Select User Groups for Publishing:</b>
+                    </Typography>
+                    <StyledSelect
+                      labelId="user-groups-label"
+                      id="userGroups"
+                      value={selectedUserGroup || selectedDocument.user_group || ''}
+                      onChange={(e) => setSelectedUserGroup(e.target.value)}  // Handle change in selected user group
+                      fullWidth
+                      sx={{ mt: 1 }}
+                    >
+                      <MenuItem value="">Select a user group</MenuItem>
+                      {userGroupOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          <ListItemText primary={option.label} />
+                        </MenuItem>
+                      ))}
+                    </StyledSelect>
+                </>
                 )}
+
+
+
+
+
+
+
+
+
+
+
+
                 {/* Decision dropdown */}
                 {(roleId === 2 || roleId === 3) && (selectedDocument.pending_at_id === userId) && (
                 <Box sx={{ mt: 2 }}>
@@ -804,4 +1008,8 @@ export default function PSGTable() {
       </Dialog>
     </Grid>
   );
-}
+};
+
+export const getPolicyCounts = () => {
+  return policyCounts;
+};

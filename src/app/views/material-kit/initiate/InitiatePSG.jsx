@@ -130,14 +130,6 @@ const InitiatePSG = () => {
         { value: '573', label: 'testUser3' },
         { value: '574', label: 'testUser4' },
         { value: '575', label: 'testUser5' },
-        // { value: 'SF0072729', label: 'Prashant Rai - Chief People Officer' },
-        // { value: 'CFL0003193', label: 'Sushanta Tripathy - Chief Business Officer' },
-        // { value: 'SF0065999', label: 'Amit Anand - Chief Risk Officer' },
-        // { value: 'SF0067776', label: 'Dharmvir kumar Singh - Chief Information Officer' },
-        // { value: 'SF0051604', label: 'Ramesh Periasamy - Company Secretary' },
-        // { value: 'SF0066397', label: 'Subhrangsu Chakravarty - Financial Controller' },
-        // { value: 'SF0067851', label: 'Shilpa Jain - Head Financial reporting' },
-        // { value: 'SF0071659', label: 'Divaker Jha - Head of Product & Organizational Excellence Dept.' },
     ];
 
     const userGroupOptions = [

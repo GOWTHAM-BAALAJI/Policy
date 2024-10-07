@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
-import { Box, Card, CardContent, Dialog, DialogTitle, DialogContent, Grid, Icon, MenuItem, Select, Table, styled, TableRow, TableBody, TableCell, TableHead, IconButton, TablePagination, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, Dialog, DialogActions, DialogTitle, DialogContent, Grid, Icon, MenuItem, Select, Table, styled, TableRow, TableBody, TableCell, TableHead, TextField, IconButton, TablePagination, Typography } from "@mui/material";
 import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import CloseIcon from '@mui/icons-material/Close';
 import DataTable from 'react-data-table-component';
+import { jwtDecode } from "jwt-decode";
 
 // STYLED COMPONENT
 const StyledTable = styled(Table)(() => ({
@@ -39,6 +40,27 @@ const StyledSelect = styled(Select)(() => ({
     '& .MuiInputLabel-shrink': {
       top: '-6px', // Move the label when focused or with content
     },
+}));
+
+const CustomDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiPaper-root': {
+    backgroundColor: 'rgb(27,28,54)',
+    color: 'white',
+  },
+}));
+
+const CustomDialogTitle = styled(DialogTitle)(({ theme }) => ({
+  color: 'white',
+}));
+
+const CustomDialogContent = styled(DialogContent)(({ theme }) => ({
+  color: 'white',
+}));
+
+const CustomDialogActions = styled(DialogActions)(({ theme }) => ({
+  '& .MuiButton-root': {
+    color: 'white',
+  },
 }));
 
 // const psgList = [
@@ -109,6 +131,8 @@ const customSort = (data, column, direction) => {
 export default function PendingTable() {
   const { control } = useForm();
   const [psgList, setPsgList] = useState([]);
+  const [userId, setUserId] = useState(null);
+  const [roleId, setRoleId] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
@@ -116,11 +140,58 @@ export default function PendingTable() {
   const [sortColumn, setSortColumn] = useState(''); // Column being sorted
   const [sortDirection, setSortDirection] = useState('asc');
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [selectedDocumentTitle, setSelectedDocumentTitle] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleSort = (column, sortDirection) => {
     setSortColumn(column.selector); // Store column to be sorted
     setSortDirection(sortDirection); // Store sort direction
+  };
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogtitle, setDialogTitle] = useState("");
+  const [dialogMessage, setDialogMessage] = useState("");
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
+
+  const pendingApprover = selectedDocument?.Policy_status?.find(
+    status => {
+      return status.approver_id === selectedDocument?.pending_at_id;
+    }
+  );
+  console.log("Pending approver:",pendingApprover);
+  
+  // Check if the pendingApprover exists before accessing its properties
+  const pendingApproverName = pendingApprover ? pendingApprover.approver_details?.emp_name : 'No pending approver';
+  console.log("Pending approver name:",pendingApproverName);
+
+  console.log("Selected Document:", selectedDocument);
+
+  const latestPolicyStatus = selectedDocument?.Policy_status?.filter(status => status.decision !== 0)
+    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
+  console.log("Policy Status latest:",latestPolicyStatus);
+
+  const initiators = [
+    { id: 571, name: 'testUser1' },
+  ];
+  
+  // Function to get the reviewer name by ID
+  const getInitiatorName = (id) => {
+    const initiator = initiators.find(initiator => initiator.id === id);
+    return initiator ? initiator.name : 'Unknown Initiator'; // Return a default value if not found
+  };
+
+  const reviewers = [
+    { id: 572, name: 'testUser2' },
+  ];
+  
+  // Function to get the reviewer name by ID
+  const getReviewerName = (id) => {
+    const reviewer = reviewers.find(reviewer => reviewer.id === id);
+    return reviewer ? reviewer.name : 'Unknown Reviewer'; // Return a default value if not found
   };
 
   const userToken = useSelector((state)=>{
@@ -151,6 +222,14 @@ export default function PendingTable() {
         //   ...waitingForAction.map(item => ({ ...item, status: 'Waiting for Action' })),
         // ];
         // console.log("Formatted Data:",formattedData);
+        const decodedToken = jwtDecode(userToken);
+        console.log('Decoded Token:', decodedToken.role_id);
+        if (decodedToken.role_id) {
+          setRoleId(decodedToken.role_id);
+        }
+        if (decodedToken.user_id) {
+          setUserId(decodedToken.user_id);
+        }
 
         if (data && data.status) {
           // Combine approved, rejected, and pending data into a single array
@@ -172,6 +251,11 @@ export default function PendingTable() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    console.log('Current roleId:', roleId); // Log the roleId
+    console.log('Current userId:', userId); // Log the roleId
+  }, [roleId, userId]);
+
   const sortedData = sortColumn ? customSort(psgList, sortColumn, sortDirection) : psgList;
 
   const startIndex = page * rowsPerPage;
@@ -181,7 +265,7 @@ export default function PendingTable() {
   const columns = [
     {
       name: 'S.No.',
-      selector: (row, index) => index + 1 + page * rowsPerPage,
+      selector: row => row.id || 'N/A',
       sortable: true,
       center: true,
       width: '10%',
@@ -218,6 +302,35 @@ export default function PendingTable() {
     },
   ];
 
+  useEffect(() => {
+    if (selectedDocumentTitle) {
+      fetchDocumentDetails(selectedDocumentTitle);
+    }
+  }, [selectedDocumentTitle]);
+  
+  const fetchDocumentDetails = async (documentId) => {
+    setLoading(true); // Start loading
+    setError(null); // Reset error
+
+    try {
+      // Replace with your actual API URL
+      const response = await fetch(`http://localhost:3000/policy/${documentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
+        },
+      });
+      const data = await response.json();
+      console.log("Response:",data);
+      setSelectedDocument(data.data); // Set the document data
+    } catch (err) {
+      setError("Failed to fetch document details.");
+    } finally {
+      setLoading(false); // End loading
+    }
+  };
+
   const handlePageChange = (newPage) => {
     setPage(newPage - 1);
   };
@@ -232,12 +345,17 @@ export default function PendingTable() {
   };
 
   const handleRowClick = (row) => {
-    setSelectedDocument(row); // Set the clicked document as selected
+    fetchDocumentDetails(row.id); // Set the clicked document as selected
+    setSelectedDocument(row.title);
     setOpenModal(true);
+    // setDecision('');
+    // setRemarks('');
+    // setUploadedFile(null);
   };
 
   const handleClose = () => {
     setOpenModal(false); // Close modal
+    setSelectedDocument(null);
   };
 
   return (
@@ -289,7 +407,7 @@ export default function PendingTable() {
     </Box>
     </Grid>
     {/* Modal for the selected document */}
-    <Dialog open={openModal} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open={openModal} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle>
           <Typography variant="h6">Document Details</Typography>
           <IconButton
@@ -301,16 +419,119 @@ export default function PendingTable() {
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          {selectedDocument && (
+          {selectedDocument ? (
             <Card>
               <CardContent>
-                <Typography variant="h6" sx={{ fontFamily: 'sans-serif' }}>
-                  Document Title: {selectedDocument.title}
+                <Typography variant="h8" sx={{ fontFamily: 'sans-serif' }}>
+                  <b>Document Title:</b> {selectedDocument.title}
                 </Typography>
+                <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
+                  <b>Document Description:</b> {selectedDocument.description}
+                </Typography>
+                <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
+                  <b>Initiator Name:</b> {getInitiatorName(selectedDocument.initiator_id)}
+                </Typography>
+                <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
+                  <b>Reviewer Name:</b> {getReviewerName(selectedDocument.reviewer_id)}
+                </Typography>
+                
+                <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
+                  <b>Version:</b> {selectedDocument.version}
+                </Typography>
+                {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
+                  <b>Status:</b> {selectedDocument.status}
+                </Typography> */}
+                {selectedDocument.pending_at_id !== userId && (
+                <>
+                  <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
+                    <b>Pending at:</b> {pendingApproverName}
+                  </Typography>
+                </>
+                )}
+                {/* Files section to display uploaded files */}
+                <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, mb: -1 }}>
+                  <b>Files:</b>
+                </Typography>
+                {selectedDocument.policy_files && Array.isArray(selectedDocument.policy_files) && selectedDocument.policy_files.length > 0 ? (
+                  <ul>
+                    {selectedDocument.policy_files.map((file, index) => (
+                      <li key={index}>
+                        <a
+                          href={`http://localhost:3000/policy_document/${file.file_name}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download
+                          style={{
+                            color: 'blue',
+                            textDecoration: 'underline',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {file.file_name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <Typography>No files uploaded.</Typography>
+                )}
+                {/* Display Latest Policy Status */}
+                {(selectedDocument.pending_at_id === userId || selectedDocument.pending_at_id === null) && latestPolicyStatus && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
+                      <b>Latest Policy Status:</b>
+                    </Typography>
+                    {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, ml: 2 }}>
+                      <b>Approver ID:</b> {latestPolicyStatus.approver_id}
+                    </Typography>
+                    <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, ml: 2 }}>
+                      <b>Priority:</b> {latestPolicyStatus.priority}
+                    </Typography> */}
+                    <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, ml: 2 }}>
+                      <b>Approver Name:</b> {latestPolicyStatus.approver_details.emp_name}
+                    </Typography>
+                    <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, ml: 2 }}>
+                      <b>Decision:</b> 
+                      {latestPolicyStatus.decision === 1
+                        ? 'Approved'
+                        : latestPolicyStatus.decision === 2
+                        ? 'Sent for review'
+                        : latestPolicyStatus.decision === 3
+                        ? 'Rejected'
+                        : 'Pending'}
+                    </Typography>
+                    {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, ml: 2 }}>
+                      <b>Approver Email:</b> {latestPolicyStatus.approver_details.emp_email}
+                    </Typography> */}
+                  </Box>
+                )}                
               </CardContent>
             </Card>
-          )}
+          ) : (
+            <Typography>Loading...</Typography>
+          )
+        }
         </DialogContent>
+        <CustomDialog
+            open={dialogOpen}
+            onClose={handleDialogClose}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+        >
+            <CustomDialogTitle id="alert-dialog-title">
+            {dialogtitle}
+            </CustomDialogTitle>
+            <CustomDialogContent>
+            <Typography id="alert-dialog-description">
+                {dialogMessage}
+            </Typography>
+            </CustomDialogContent>
+            <CustomDialogActions>
+            <Button onClick={handleDialogClose} color="primary">
+                OK
+            </Button>
+            </CustomDialogActions>
+        </CustomDialog>
       </Dialog>
     </Grid>
   );
