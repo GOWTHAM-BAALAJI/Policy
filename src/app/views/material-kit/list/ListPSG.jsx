@@ -99,6 +99,7 @@ export default function PSGTable() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [selectedRow, setSelectedRow] = useState(null);
   const [sortColumn, setSortColumn] = useState(''); // Column being sorted
   const [sortDirection, setSortDirection] = useState('asc');
   const [selectedDocument, setSelectedDocument] = useState(null);
@@ -145,13 +146,47 @@ export default function PSGTable() {
   const [selectedReviewer, setSelectedReviewer] = useState(selectedDocument?.reviewer_id || '');
   const [approvalMembersWithPriority, setApprovalMembersWithPriority] = useState([]);
   const [selectedApprovalMembers, setSelectedApprovalMembers] = useState([]);
+  const [useDefaultValue, setUseDefaultValue] = useState(true);
   const [priorityOrder, setPriorityOrder] = useState([]);
   const [selectedUserGroup, setSelectedUserGroup] = useState(selectedDocument?.user_group || '');
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleDropdownOpen = () => {
+    setIsDropdownOpen(true);
+    // Load fresh approvalMembersOptions here if needed
+  };
+
+  const handleDropdownClose = () => {
+    setIsDropdownOpen(false);
+  };
+
   const handleSelectChangeApprovalMembers = (event) => {
     const { value } = event.target;
-    setSelectedApprovalMembers(value); // Update selected approval members
-    setPriorityOrder(value); // Update the priority order based on current selection
+  
+    // Ensure that we merge the existing selected members with the new selection
+    const updatedSelection = Array.isArray(value) ? [...value] : [];
+  
+    // Filter only valid selected values from options to prevent unknowns
+    const validatedSelection = updatedSelection
+      .map(selectedValue => {
+        const member = approvalMembersOptions.find(m => m.value === selectedValue);
+        return member ? { value: selectedValue, label: member.label } : null; // Handle unknowns
+      })
+      .filter(Boolean); // Remove null (unknown) values
+  
+    // Recalculate priority order starting from 1 after update
+    const newPriorityOrder = validatedSelection.map((member, index) => ({
+      value: member.value,
+      priority: index + 1, // Reset priority starting from 1
+      label: member.label
+    }));
+  
+    // Update state: priority, selected members, and approval members with priority
+    setSelectedApprovalMembers(validatedSelection.map(member => member.value)); // Update for dropdown and value tracking
+    setApprovalMembersWithPriority(newPriorityOrder); // Update for rendering in the field
+    setPriorityOrder(newPriorityOrder.map(member => member.value)); // Set priority order list
+    setUseDefaultValue(false); // Disable default value tracking once updated
   };
 
 useEffect(() => {
@@ -159,31 +194,29 @@ useEffect(() => {
     setDocumentID(selectedDocument.id || '');
     setDocumentTitle(selectedDocument.title);
     setDocumentDescription(selectedDocument.description);
-    setSelectedReviewer(selectedDocument.reviewer || '');
-    setSelectedUserGroup(selectedDocument.userGroups || '');
+    setSelectedReviewer(selectedDocument.reviewer_id || '');
+    setSelectedUserGroup(selectedDocument.user_group || '');
     if (Array.isArray(selectedDocument.Policy_status)) {
       const approvalMembers = selectedDocument.Policy_status
-        .filter(member => member.priority > 2) // Check for priority greater than 2
+        .filter(member => member.priority > 2)
         .map(member => ({
-          value: member.approver_details.emp_id, // Assuming emp_id is the value you want to store
-          priority: member.priority, // Store the priority as well
-          label: member.approver_details.emp_name // You may want to display the name
+          value: member.approver_id,
+          priority: member.priority - 2,
+          label: member.approver_details.emp_name,
         }));
 
-      // Sort members by priority in ascending order
       const sortedMembers = approvalMembers.sort((a, b) => a.priority - b.priority);
 
       setApprovalMembersWithPriority(sortedMembers);
 
-      const initiallySelected = sortedMembers.filter(member => 
-        selectedDocument.approvers && selectedDocument.approvers.includes(member.value)
-      ).map(member => member.value);
+      const initiallySelected = sortedMembers
+        .filter(member => selectedDocument.approvers && selectedDocument.approvers.includes(member.value))
+        .map(member => member.value);
 
       setSelectedApprovalMembers(initiallySelected);
       setPriorityOrder(initiallySelected);
     } else {
-      // Handle the case when Policy_status is not an array
-      console.error("Policy_status is not defined or not an array", selectedDocument.Policy_status);
+      console.error('Policy_status is not defined or not an array', selectedDocument.Policy_status);
     }
   }
 }, [selectedDocument]);
@@ -200,10 +233,10 @@ useEffect(() => {
     switch (decision) {
       case 'approved':
         return 1;
-      case 'rejected':
-        return 3;
       case 'reviewraised':
         return 2;
+      case 'rejected':
+        return 3;
       default:
         return '';
     }
@@ -404,6 +437,10 @@ useEffect(() => {
     },
   ];
 
+  const isRejected = selectedRow && selectedRow.status === 'Rejected';
+  const isPending = selectedRow && selectedRow.status === 'Pending';
+  const isWaitingForAction = selectedRow && selectedRow.status === 'Waiting for Action';
+
   useEffect(() => {
     if (selectedDocumentTitle) {
       fetchDocumentDetails(selectedDocumentTitle);
@@ -453,6 +490,7 @@ useEffect(() => {
     fetchDocumentDetails(row.id); // Set the clicked document as selected
     setSelectedDocument(row.title);
     setOpenModal(true);
+    setSelectedRow(row);
     // setDecision('');
     // setRemarks('');
     // setUploadedFile(null);
@@ -468,6 +506,7 @@ useEffect(() => {
   const handleClose = () => {
     setOpenModal(false); // Close modal
     setSelectedDocument(null);
+    setSelectedRow(null);
   };
 
   const handleFileUpload = (event) => {
@@ -519,6 +558,17 @@ useEffect(() => {
     formData.append("decision", mappedDecision);
     formData.append("remarks", remarks);
     formData.append("files", uploadedFile1);
+    formData.append("title", documentTitle);
+    formData.append("description", documentDescription);
+    formData.append("files", uploadedFile);
+    // const file1 = uploadedFile.files[0];
+    // console.log("File1: ",file1);
+    console.log("Success!");
+    console.log("File: ",uploadedFile);
+    formData.append("reviewer_id", selectedReviewer);
+    formData.append("approver_ids", JSON.stringify(approvalMembersWithPriority.map(member => member.value.toString())));
+    console.log("Approval members with priority: ", approvalMembersWithPriority.map(member => member.value.toString()));
+    formData.append("user_group", selectedUserGroup);
 
     fetch(url, {
         method: "POST",
@@ -546,7 +596,7 @@ useEffect(() => {
         console.error("Submission error:", error);
         setLoading(false); // Reset loading state
     });
-}
+  };
 
 
 
@@ -683,7 +733,7 @@ useEffect(() => {
                 {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                   <b>Status:</b> {selectedDocument.status}
                 </Typography> */}
-                {selectedDocument.pending_at_id !== userId && (
+                {!isWaitingForAction && !isRejected && !(selectedDocument.pending_at_id === userId) && (
                 <>
                   <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                     <b>Pending at:</b> {pendingApproverName}
@@ -718,7 +768,7 @@ useEffect(() => {
                   <Typography>No files uploaded.</Typography>
                 )}
                 {/* Display Latest Policy Status */}
-                {(selectedDocument.pending_at_id === userId || selectedDocument.pending_at_id === null) && latestPolicyStatus && (
+                {!isPending && (selectedDocument.pending_at_id === selectedDocument.initiator_id || selectedDocument.pending_at_id === null) && latestPolicyStatus && (
                   <Box sx={{ mt: 2 }}>
                     <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                       <b>Latest Policy Status:</b>
@@ -756,7 +806,7 @@ useEffect(() => {
 
 
                 
-                {selectedDocument.pending_at_id === userId && roleId === 1 && (
+                {isWaitingForAction && selectedDocument.pending_at_id === userId && roleId === 1 && (
                 <>
                   <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
                     <b>Policy ID:</b>
@@ -820,41 +870,32 @@ useEffect(() => {
                       ))}
                     </StyledSelect>
 
-
-
-
                     <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
-        <b>Select Approval Committee Members:</b>
-      </Typography>
-      <StyledSelect
-        labelId="approval-members-label"
-        id="approvalMembers"
-        multiple
-        value={approvalMembersWithPriority.map(member => member.value)} // Map to get selected values
-        onChange={handleSelectChangeApprovalMembers}
-        fullWidth
-        sx={{ mt: 1 }}
-        renderValue={(selected) => selected.map(value => {
-          const member = approvalMembersWithPriority.find(m => m.value === value);
-          return member ? `${member.priority-2} - ${member.label}` : ''; // Display value with priority
-        }).join(', ')}
-      >
-        {approvalMembersWithPriority.map((member) => (
-          <MenuItem key={member.value} value={member.value}>
-          <Checkbox checked={selectedApprovalMembers.indexOf(member.value) > -1} />
-          <ListItemText
-              primary={`${priorityOrder.indexOf(member.value) > -1 ? `${priorityOrder.indexOf(member.value) + 1}. ` : ''}${member.label}`}
-          />
-          </MenuItem>
-        ))}
-      </StyledSelect>
-
-
-
-
-
-
-
+                      <b>Select Approval Committee Members:</b>
+                    </Typography>
+                    <StyledSelect
+                      labelId="approval-members-label"
+                      id="approvalMembers"
+                      multiple
+                      value={useDefaultValue ? approvalMembersWithPriority.map(member => member.value) : selectedApprovalMembers}
+                      onChange={handleSelectChangeApprovalMembers}
+                      fullWidth
+                      onOpen={handleDropdownOpen}   // Track when dropdown is opened
+                      onClose={handleDropdownClose} // Track when dropdown is closed
+                      renderValue={(selected) =>
+                        selected.map(value => {
+                          const member = approvalMembersWithPriority.find(m => m.value === value);
+                          return member ? `${member.priority} - ${member.label}` : '';
+                        }).join(', ')
+                      }
+                    >
+                      {approvalMembersOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          <Checkbox checked={selectedApprovalMembers.includes(option.value)} />
+                          <ListItemText primary={option.label} />
+                        </MenuItem>
+                      ))}
+                    </StyledSelect>
 
                     {/* Approval Committee Members Field */}
                     {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
@@ -916,7 +957,7 @@ useEffect(() => {
 
 
                 {/* Decision dropdown */}
-                {(roleId === 2 || roleId === 3) && (selectedDocument.pending_at_id === userId) && (
+                {(roleId === 2 || roleId === 3) && (selectedDocument.pending_at_id === userId) && isWaitingForAction && (
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block' }}>
                     <b>Decision:</b>
@@ -933,8 +974,8 @@ useEffect(() => {
                       <em>None</em>
                     </MenuItem>
                     <MenuItem value="approved">Approve</MenuItem>
-                    <MenuItem value="rejected">Reject</MenuItem>
                     <MenuItem value="reviewraised">Review raised</MenuItem>
+                    <MenuItem value="rejected">Reject</MenuItem>
                   </Select>
                 </Box>
                 )}
@@ -972,7 +1013,7 @@ useEffect(() => {
                       sx={{ mt: 1 }}
                     /></>
                 )}
-                {selectedDocument.pending_at_id === userId && (
+                {selectedDocument.pending_at_id === userId && isWaitingForAction && (
                   <Button type="submit" variant="contained" color="primary" sx={{ mt: 2, padding: '6px 16px', fontSize: '0.875rem', minHeight: '24px', lineHeight: 1 }}>
                     Submit
                   </Button>

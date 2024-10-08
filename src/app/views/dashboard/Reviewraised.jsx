@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
-import { Box, Button, Card, CardContent, Dialog, DialogActions, DialogTitle, DialogContent, Grid, Icon, MenuItem, Select, Table, styled, TableRow, TableBody, TableCell, TableHead, TextField, IconButton, TablePagination, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, Checkbox, Dialog, DialogActions, DialogTitle, DialogContent, Grid, Icon, ListItemText, MenuItem, Select, Table, styled, TableRow, TableBody, TableCell, TableHead, TextField, IconButton, TablePagination, Typography } from "@mui/material";
 import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -64,57 +64,6 @@ const CustomDialogActions = styled(DialogActions)(({ theme }) => ({
   },
 }));
 
-// const psgList = [
-//   {
-//     sno: "1",
-//     title: "Policy 1",
-//     lastupdated: "01/01/2024",
-//     remarks: "wsretdfygijopugydtrsetdgui"
-//   },
-//   {
-//     sno: "2",
-//     title: "Policy 2",
-//     lastupdated: "02/01/2024",
-//     remarks: "wsretdfygijopugydtrsetdgui"
-//   },
-//   {
-//     sno: "3",
-//     title: "SOP 1",
-//     lastupdated: "03/01/2024",
-//     remarks: "wsretdfygijopugydtrsetdgui"
-//   },
-//   {
-//     sno: "4",
-//     title: "Policy 3",
-//     lastupdated: "04/01/2024",
-//     remarks: "wsretdfygijopugydtrsetdgui"
-//   },
-//   {
-//     sno: "5",
-//     title: "Guidance Note 1",
-//     lastupdated: "05/01/2024",
-//     remarks: "wsretdfygijopugydtrsetdgui"
-//   },
-//   {
-//     sno: "6",
-//     title: "Policy 4",
-//     lastupdated: "06/01/2024",
-//     remarks: "wsretdfygijopugydtrsetdgui"
-//   },
-//   {
-//     sno: "7",
-//     title: "SOP 2",
-//     lastupdated: "07/01/2024",
-//     remarks: "wsretdfygijopugydtrsetdgui"
-//   },
-//   {
-//     sno: "8",
-//     title: "SOP 3",
-//     lastupdated: "08/01/2024",
-//     remarks: "wsretdfygijopugydtrsetdgui"
-//   }
-// ];
-
 const customSort = (data, column, direction) => {
   return [...data].sort((a, b) => {
     const aValue = a[column] || ''; // Handle undefined values
@@ -156,14 +105,123 @@ export default function WaitingForActionTable() {
   const [dialogtitle, setDialogTitle] = useState("");
   const [dialogMessage, setDialogMessage] = useState("");
 
+
+
+  const reviewersOptions = [
+    { value:'572', label: 'testUser2' }
+  ]
+
+  const approvalMembersOptions = [
+    { value: '573', label: 'testUser3' },
+    { value: '574', label: 'testUser4' },
+    { value: '575', label: 'testUser5' },
+  ];
+
+  const userGroupOptions = [
+    { value: '1', label: 'Field Staff' },
+    { value: '2', label: 'HO Staff' },
+  ]; 
+
+
+  const [documentID, setDocumentID] = useState(selectedDocument?.id || '');
+  const [documentTitle, setDocumentTitle] = useState(selectedDocument?.title || '');
+  const [documentDescription, setDocumentDescription] = useState(selectedDocument?.description || '');
+  const [selectedReviewer, setSelectedReviewer] = useState(selectedDocument?.reviewer_id || '');
+  const [approvalMembersWithPriority, setApprovalMembersWithPriority] = useState([]);
+  const [selectedApprovalMembers, setSelectedApprovalMembers] = useState([]);
+  const [useDefaultValue, setUseDefaultValue] = useState(true);
+  const [priorityOrder, setPriorityOrder] = useState([]);
+  const [selectedUserGroup, setSelectedUserGroup] = useState(selectedDocument?.user_group || '');
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleDropdownOpen = () => {
+    setIsDropdownOpen(true);
+    // Load fresh approvalMembersOptions here if needed
+  };
+
+  const handleDropdownClose = () => {
+    setIsDropdownOpen(false);
+  };
+
+  const handleSelectChangeApprovalMembers = (event) => {
+    const { value } = event.target;
+  
+    // Ensure that we merge the existing selected members with the new selection
+    const updatedSelection = Array.isArray(value) ? [...value] : [];
+  
+    // Filter only valid selected values from options to prevent unknowns
+    const validatedSelection = updatedSelection
+      .map(selectedValue => {
+        const member = approvalMembersOptions.find(m => m.value === selectedValue);
+        return member ? { value: selectedValue, label: member.label } : null; // Handle unknowns
+      })
+      .filter(Boolean); // Remove null (unknown) values
+  
+    // Recalculate priority order starting from 1 after update
+    const newPriorityOrder = validatedSelection.map((member, index) => ({
+      value: member.value,
+      priority: index + 1, // Reset priority starting from 1
+      label: member.label
+    }));
+  
+    // Update state: priority, selected members, and approval members with priority
+    setSelectedApprovalMembers(validatedSelection.map(member => member.value)); // Update for dropdown and value tracking
+    setApprovalMembersWithPriority(newPriorityOrder); // Update for rendering in the field
+    setPriorityOrder(newPriorityOrder.map(member => member.value)); // Set priority order list
+    setUseDefaultValue(false); // Disable default value tracking once updated
+  };
+
+
+  useEffect(() => {
+    if (selectedDocument) {
+      setDocumentID(selectedDocument.id || '');
+      setDocumentTitle(selectedDocument.title);
+      setDocumentDescription(selectedDocument.description);
+      setSelectedReviewer(selectedDocument.reviewer_id || '');
+      setSelectedUserGroup(selectedDocument.user_group || '');
+      if (Array.isArray(selectedDocument.Policy_status)) {
+        const approvalMembers = selectedDocument.Policy_status
+          .filter(member => member.priority > 2)
+          .map(member => ({
+            value: member.approver_id,
+            priority: member.priority - 2,
+            label: member.approver_details.emp_name,
+          }));
+  
+        const sortedMembers = approvalMembers.sort((a, b) => a.priority - b.priority);
+  
+        setApprovalMembersWithPriority(sortedMembers);
+  
+        const initiallySelected = sortedMembers
+          .filter(member => selectedDocument.approvers && selectedDocument.approvers.includes(member.value))
+          .map(member => member.value);
+  
+        setSelectedApprovalMembers(initiallySelected);
+        setPriorityOrder(initiallySelected);
+      } else {
+        console.error('Policy_status is not defined or not an array', selectedDocument.Policy_status);
+      }
+    }
+  }, [selectedDocument]);
+
+
+
+
+
+
+
+
+
+
   const mapDecisionToNumber = (decision) => {
     switch (decision) {
       case 'approved':
         return 1;
       case 'rejected':
-        return 2;
-      case 'reviewraised':
         return 3;
+      case 'reviewraised':
+        return 2;
       default:
         return '';
     }
@@ -449,6 +507,17 @@ export default function WaitingForActionTable() {
     formData.append("decision", mappedDecision);
     formData.append("remarks", remarks);
     formData.append("files", uploadedFile1);
+    formData.append("title", documentTitle);
+    formData.append("description", documentDescription);
+    formData.append("files", uploadedFile);
+    // const file1 = uploadedFile.files[0];
+    // console.log("File1: ",file1);
+    console.log("Success!");
+    console.log("File: ",uploadedFile);
+    formData.append("reviewer_id", selectedReviewer);
+    formData.append("approver_ids", JSON.stringify(approvalMembersWithPriority.map(member => member.value.toString())));
+    console.log("Approval members with priority: ", approvalMembersWithPriority.map(member => member.value.toString()));
+    formData.append("user_group", selectedUserGroup);
 
     fetch(url, {
         method: "POST",
@@ -476,7 +545,7 @@ export default function WaitingForActionTable() {
         console.error("Submission error:", error);
         setLoading(false); // Reset loading state
     });
-  }
+  };
 
   return (
     <Grid container spacing={2}>
@@ -626,9 +695,39 @@ export default function WaitingForActionTable() {
                     </Typography> */}
                   </Box>
                 )}
-                {/* File Upload Field */}
-                {selectedDocument.pending_at_id === selectedDocument.initiator_id && roleId === 1 && (
+                
+                {selectedDocument.pending_at_id === userId && roleId === 1 && (
                 <>
+                  <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+                    <b>Policy ID:</b>
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    value={documentID}  // Use the state as the value (editable)
+                    onChange={(e) => setDocumentID(e.target.value)}  // Update the state when changed
+                    sx={{ mt: 1 }}
+                    InputProps={{
+                      readOnly: true,  // Make the field read-only
+                    }}
+                  />
+                  <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+                    <b>Document Title:</b>
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    value={documentTitle}  // Use the state as the value (editable)
+                    onChange={(e) => setDocumentTitle(e.target.value)}  // Update the state when changed
+                    sx={{ mt: 1 }}
+                  />
+                  <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+                    <b>Document Description:</b>
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    value={documentDescription}  // Use the state as the value (editable)
+                    onChange={(e) => setDocumentDescription(e.target.value)}  // Update the state when changed
+                    sx={{ mt: 1 }}
+                  />
                   <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                     <b>Upload the updated document:</b>
                   </Typography>
@@ -641,8 +740,101 @@ export default function WaitingForActionTable() {
                       onChange={handleFileUpload} // Function to handle the file upload
                       // value={uploadedFile}
                       sx={{ mt: 1 }}
-                    /></>
+                    />
+                    <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+                      <b>Select the Reviewer:</b>
+                    </Typography>
+                    <StyledSelect
+                      labelId="reviewer-label"
+                      id="reviewer"
+                      value={selectedReviewer || selectedDocument.reviewer_id || ''}
+                      onChange={(e) => setSelectedReviewer(e.target.value)}  // Update the state when a reviewer is selected
+                      fullWidth
+                      sx={{ mt: 1 }}
+                    >
+                      <MenuItem value="">Select a reviewer</MenuItem>
+                      {reviewersOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          <ListItemText primary={option.label} />
+                        </MenuItem>
+                      ))}
+                    </StyledSelect>
+
+                    <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+                      <b>Select Approval Committee Members:</b>
+                    </Typography>
+                    <StyledSelect
+                      labelId="approval-members-label"
+                      id="approvalMembers"
+                      multiple
+                      value={useDefaultValue ? approvalMembersWithPriority.map(member => member.value) : selectedApprovalMembers}
+                      onChange={handleSelectChangeApprovalMembers}
+                      fullWidth
+                      onOpen={handleDropdownOpen}   // Track when dropdown is opened
+                      onClose={handleDropdownClose} // Track when dropdown is closed
+                      renderValue={(selected) =>
+                        selected.map(value => {
+                          const member = approvalMembersWithPriority.find(m => m.value === value);
+                          return member ? `${member.priority} - ${member.label}` : '';
+                        }).join(', ')
+                      }
+                    >
+                      {approvalMembersOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          <Checkbox checked={selectedApprovalMembers.includes(option.value)} />
+                          <ListItemText primary={option.label} />
+                        </MenuItem>
+                      ))}
+                    </StyledSelect>
+
+                    {/* Approval Committee Members Field */}
+                    {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+                      <b>Select Approval Committee Members:</b>
+                    </Typography>
+                    <StyledSelect
+                      labelId="approval-members-label"
+                      id="approvalMembers"
+                      multiple
+                      value={selectedApprovalMembers}
+                      onChange={(e) => {
+                        handleSelectChangeApprovalMembers(e); // Handle changes in local state
+                      }}
+                      fullWidth
+                      sx={{ mt: 1 }}
+                      renderValue={renderPriorityValue}  // Display selected members
+                    >
+                      {approvalMembersOptions.map((member) => (
+                        <MenuItem key={member.value} value={member.value}>
+                          <Checkbox checked={selectedApprovalMembers.indexOf(member.value) > -1} />
+                          <ListItemText
+                            primary={`${priorityOrder.indexOf(member.value) > -1 ? `${priorityOrder.indexOf(member.value) + 1}. ` : ''}${member.label}`}
+                          />
+                        </MenuItem>
+                      ))}
+                    </StyledSelect> */}
+
+                    {/* User Groups Field */}
+                    <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
+                      <b>Select User Groups for Publishing:</b>
+                    </Typography>
+                    <StyledSelect
+                      labelId="user-groups-label"
+                      id="userGroups"
+                      value={selectedUserGroup || selectedDocument.user_group || ''}
+                      onChange={(e) => setSelectedUserGroup(e.target.value)}  // Handle change in selected user group
+                      fullWidth
+                      sx={{ mt: 1 }}
+                    >
+                      <MenuItem value="">Select a user group</MenuItem>
+                      {userGroupOptions.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          <ListItemText primary={option.label} />
+                        </MenuItem>
+                      ))}
+                    </StyledSelect>
+                </>
                 )}
+
                 {/* Decision dropdown */}
                 {(roleId === 2 || roleId === 3) && (selectedDocument.pending_at_id === userId) && (
                 <Box sx={{ mt: 2 }}>
