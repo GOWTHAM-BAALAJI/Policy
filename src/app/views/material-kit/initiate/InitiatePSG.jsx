@@ -5,6 +5,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { Autocomplete, Button, Chip, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, ListItemText, MenuItem, FormControl, Grid, IconButton, InputLabel, styled, Select, Typography, TextField } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
+import toast from "react-hot-toast";
 
 const StyledSelect = styled(Select)(() => ({
     width: '100%',
@@ -258,9 +259,10 @@ const InitiatePSG = () => {
         event.preventDefault();
         setLoading(true);
         if (!title || !description || !uploadFilenames || !selectedReviewer || selectedApprovalMembers.length === 0 || selectedUserGroup.length === 0) {
-            setDialogTitle("Warning");
-            setDialogMessage("Please fill in all the required fields");
-            setDialogOpen(true);
+            if (!title || !description || !uploadFilename || selectedUserGroup.length === 0) {
+                toast.error("Please fill in all the required fields");
+                return;
+            }
             return;
         }
         // setDialogTitle("Success");
@@ -285,7 +287,7 @@ const InitiatePSG = () => {
         formData.append("approver_ids", JSON.stringify(selectedApprovalMembers || [])); // Convert array to string
         formData.append("user_group", selectedUserGroup || null);
     
-        fetch(url, {
+        const submitPromise=fetch(url, {
             method: "POST",
             headers: {
                 'Authorization': `Bearer ${userToken}`, // Example header for token authentication
@@ -312,6 +314,13 @@ const InitiatePSG = () => {
             console.error("Submission error:", error);
             setLoading(false); // Reset loading state
         });
+
+
+        toast.promise(submitPromise, {
+            loading: 'Submitting...',
+            success: (data) => `Policy Initiated Successfully`, // Adjust based on your API response
+            error: (err) => `Error while Initiating`,
+          });
         // console.log("Result:",result);
         // if (response.ok && result?.status) {
         //     console.log("Successfully submitted");

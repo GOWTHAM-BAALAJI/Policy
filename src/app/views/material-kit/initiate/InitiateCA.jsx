@@ -3,6 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { NavLink, useNavigate } from "react-router-dom";
 import { Autocomplete, Button, Chip, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, ListItemText, MenuItem, FormControl, Grid, IconButton, InputLabel, styled, Select, Typography, TextField } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
+import toast from "react-hot-toast";
 
 const StyledSelect = styled(Select)(() => ({
     width: '100%',
@@ -156,9 +157,7 @@ const InitiateCA = () => {
     const handleSubmit = (event) => {
         event.preventDefault();
         if (!title || !description || !uploadFilename || selectedUserGroup.length === 0) {
-            setDialogTitle("Warning");
-            setDialogMessage("Please fill in all the required fields");
-            setDialogOpen(true);
+            toast.error("Please fill in all the required fields");
             return;
         }
         setDialogTitle("Success");
