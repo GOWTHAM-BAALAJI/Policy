@@ -60,17 +60,26 @@ const Layout1 = () => {
   } = layout1Settings;
 
   const getSidenavWidth = () => {
-    switch (sidenavMode) {
-      case "full":
-        return sideNavWidth;
-
-      case "compact":
-        return sidenavCompactWidth;
-
-      default:
-        return "0px";
-    }
+    return sidenavMode === "close" ? "0px" : (sidenavMode === "full" ? sideNavWidth : sidenavCompactWidth);
   };
+
+  // const getSidenavWidth = () => {
+  //   // Ensure that the width is set to 0 if the sidebar is not shown
+  //   if (!layout1Settings.leftSidebar.show) {
+  //     return "0px"; 
+  //   }
+
+  //   switch (sidenavMode) {
+  //     case "full":
+  //       return sideNavWidth;
+
+  //     case "compact":
+  //       return sidenavCompactWidth;
+
+  //     default:
+  //       return "0px";
+  //   }
+  // };
 
   const sidenavWidth = getSidenavWidth();
   const theme = useTheme();
@@ -79,15 +88,25 @@ const Layout1 = () => {
   const ref = useRef({ isMdScreen, settings });
   const layoutClasses = `theme-${theme.palette.type}`;
 
+  // useEffect(() => {
+  //   let { settings } = ref.current;
+  //   let sidebarMode = settings.layout1Settings.leftSidebar.mode;
+  //   if (settings.layout1Settings.leftSidebar.show) {
+  //     let mode = "close";
+  //     updateSettings({ layout1Settings: { leftSidebar: { mode } } });
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
+
   useEffect(() => {
     let { settings } = ref.current;
     let sidebarMode = settings.layout1Settings.leftSidebar.mode;
-    if (settings.layout1Settings.leftSidebar.show) {
-      let mode = isMdScreen ? "close" : sidebarMode;
-      updateSettings({ layout1Settings: { leftSidebar: { mode } } });
+    // Immediately close the sidebar without showing it
+    if (sidebarMode !== "close") {
+      updateSettings({ layout1Settings: { leftSidebar: { mode: "close" } } });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMdScreen]);
+  }, []);
 
   return (
     <Layout1Root className={layoutClasses}>

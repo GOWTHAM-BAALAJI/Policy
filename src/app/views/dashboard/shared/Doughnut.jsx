@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getPolicyCounts, PSGTable } from "app/views/material-kit/list/ListPSG";
 // import PSGTable from "app/views/material-kit/list/ListPSG";
 
-export default function DoughnutChart({ height = '100%', color = [] }) {
+export default function DoughnutChart({ height = '100%', color = [], onClickSection }) {
   const theme = useTheme();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -82,28 +82,15 @@ export default function DoughnutChart({ height = '100%', color = [] }) {
 
   // Define your navigation function
   const navigateToPage = (name) => {
-    switch (name) {
-      case "Approved":
-        navigate("/list/approved");
-        break;
-      case "Rejected":
-        navigate("/list/rejected");
-        break;
-      case "Pending":
-        navigate("/list/approvalpending");
-        break;
-      case "Waiting for Action":
-        navigate("/list/reviewraised");
-        break;
-      default:
-        break;
+    if (onClickSection) {
+      onClickSection(name); // Pass the clicked section back to Analytics.jsx
     }
   };
 
   const option = {
     legend: {
       show: true,
-      itemGap: 20,
+      itemGap: 30,
       icon: "circle",
       bottom: 20,
       textStyle: { color: theme.palette.text.secondary, fontSize: 13, fontFamily: "roboto" },
@@ -154,10 +141,9 @@ export default function DoughnutChart({ height = '100%', color = [] }) {
     ]
   };
 
-  // Event handler for chart clicks
   const onChartClick = (params) => {
     if (params && params.data && params.data.name) {
-      navigateToPage(params.data.name);
+      navigateToPage(params.data.name); // Call navigateToPage to update state
     }
   };
 

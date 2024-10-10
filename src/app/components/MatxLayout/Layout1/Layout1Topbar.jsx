@@ -1,8 +1,9 @@
-import { memo } from "react";
+import { memo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { clearJwtToken } from '../../../../redux/actions/authActions';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate  } from 'react-router-dom';
+import { jwtDecode } from "jwt-decode";
 import {
   Box,
   styled,
@@ -102,7 +103,24 @@ const Layout1Topbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { settings, updateSettings } = useSettings();
-  const userDetails = useSelector((state) => state.userData);
+  const [userName, setUsername] = useState(null);
+  const userToken = useSelector((state)=>{
+    return state.token;//.data;
+    });
+  console.log("UserToken:",userToken);
+  useEffect(() => {
+    if (userToken) {
+      try {
+        const decodedToken = jwtDecode(userToken);
+        if (decodedToken.emp_name) {
+          setUsername(decodedToken.emp_name);
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        setUsername(null); // Reset roleId if decoding fails
+      }
+    }
+  }, [userToken]);
   // Remove useAuth hook
   // const { logout, user } = useAuth();
   const isMdScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -142,8 +160,8 @@ const Layout1Topbar = () => {
             menuButton={
               <UserMenu>
                 <Hidden xsDown>
-                  <Span>
-                    Hi <strong>{userDetails.emp_name || 'Guest'}</strong>
+                  <Span sx={{ fontSize: "16px", fontFamily: "sans-serif", fontWeight: "bold" }}>
+                    {userName || 'Guest'}
                   </Span>
                 </Hidden>
                 <Avatar src="" sx={{ cursor: "pointer" }} />

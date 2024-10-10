@@ -1,10 +1,12 @@
-import { Fragment } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import Scrollbar from "react-perfect-scrollbar";
+import { useDispatch, useSelector } from 'react-redux';
+import { jwtDecode } from "jwt-decode";
 
 import { MatxVerticalNav } from "app/components";
 import useSettings from "app/hooks/useSettings";
-import { navigations } from "app/navigations";
+import { navigations1, navigations2 } from "app/navigations";
 
 // STYLED COMPONENTS
 const StyledScrollBar = styled(Scrollbar)(() => ({
@@ -27,6 +29,7 @@ const SideNavMobile = styled("div")(({ theme }) => ({
 
 export default function Sidenav({ children }) {
   const { settings, updateSettings } = useSettings();
+  const [roleId, setRoleId] = useState(null);
 
   const updateSidebarMode = (sidebarSettings) => {
     let activeLayoutSettingsName = settings.activeLayout + "Settings";
@@ -44,11 +47,30 @@ export default function Sidenav({ children }) {
     });
   };
 
+  const userToken = useSelector((state)=>{
+    return state.token;//.data;
+    });
+  console.log("UserToken:",userToken);
+
+  useEffect(() => {
+    if (userToken) {
+      try {
+        const decodedToken = jwtDecode(userToken);
+        if (decodedToken.role_id) {
+          setRoleId(decodedToken.role_id);
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        setRoleId(null); // Reset roleId if decoding fails
+      }
+    }
+  }, [userToken]);
+
   return (
     <Fragment>
       <StyledScrollBar options={{ suppressScrollX: true }}>
         {children}
-        <MatxVerticalNav items={navigations} />
+        <MatxVerticalNav items={roleId === 4 ? navigations2 : navigations1} />
       </StyledScrollBar>
 
       <SideNavMobile onClick={() => updateSidebarMode({ mode: "close" })} />

@@ -133,8 +133,8 @@ const InitiatePSG = () => {
     ];
 
     const userGroupOptions = [
-        { value: '1', label: 'Field Staff' },
-        { value: '2', label: 'HO Staff' },
+        { value: '2', label: 'Field Staff' },
+        { value: '1', label: 'HO Staff' },
     ]
     
     const handleSelectChangeApprovalMembers = (event) => {

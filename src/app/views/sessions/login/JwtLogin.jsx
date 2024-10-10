@@ -694,7 +694,7 @@ export default function Login() {
     const url = "http://localhost:3000/auth/verifyOTP";
     const data = {
       "user_id": userId,
-      "otp": 1234,
+      "otp": values.otp,
     };
     const customHeaders = {
       "Content-Type": "application/json",
