@@ -269,10 +269,6 @@ export default function PolicyDetails() {
         });
     console.log("UserToken:",userToken);
 
-    const isRejected = selectedRow && selectedRow.status === 'Rejected';
-    const isPending = selectedRow && selectedRow.status === 'Pending';
-    const isWaitingForAction = selectedRow && selectedRow.status === 'Waiting for Action';
-
     useEffect(() => {
         fetchDocumentDetails(id);
     }, [id]);
@@ -283,6 +279,9 @@ export default function PolicyDetails() {
     
         try {
           // Replace with your actual API URL
+        //   console.log('isWaitingForAction:', isWaitingForAction);
+        //   console.log('isApproved:', isApproved);
+        //   console.log('isRejected:', isRejected);
             const response = await fetch(`http://localhost:3000/policy/${documentId}`, {
             method: 'GET',
             headers: {
@@ -430,7 +429,7 @@ export default function PolicyDetails() {
             </Typography>
             </>
             )}
-            {!isWaitingForAction && !isRejected && !(selectedDocument.pending_at_id === userId) && roleId !== 4 && (
+            {status === "Pending" && !(selectedDocument.pending_at_id === userId) && roleId !== 4 && (
             <>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                 <b>Pending at:</b> {pendingApproverName}
@@ -441,31 +440,148 @@ export default function PolicyDetails() {
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, mb: -1 }}>
             <b>Files:</b>
             </Typography>
+            {status === "Waiting for Action" && roleId === 1 ? (
+            <>
             {selectedDocument.policy_files && Array.isArray(selectedDocument.policy_files) && selectedDocument.policy_files.length > 0 ? (
-            <ul>
-                {selectedDocument.policy_files.map((file, index) => (
-                <li key={index}>
-                    <a
-                    href={`http://localhost:3000/policy_document/${file.file_name}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    download
-                    style={{
-                        color: 'blue',
-                        textDecoration: 'underline',
-                        cursor: 'pointer',
-                    }}
-                    >
-                    {file.file_name}
-                    </a>
-                </li>
-                ))}
-            </ul>
+            <Grid container spacing={2}>
+                <Grid item xs={5}>
+                <Typography variant="h10" sx={{ fontFamily: 'sans-serif', mt: 2, ml: 10 }}>
+                    <b>Received for Review</b>
+                </Typography>
+                <ul>
+                {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 2) ? (
+                    <li>
+                        <a
+                        href={`http://localhost:3000/policy_document/${selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 2).file_name}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        style={{
+                            color: 'blue',
+                            textDecoration: 'underline',
+                            cursor: 'pointer',
+                        }}
+                        >
+                        {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 2).file_name}
+                        </a>
+                        <span style={{ marginLeft: '16px' }}>
+                        Version: {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 2).version}
+                        </span>
+                    </li>
+                    ) : (
+                    <Typography>No file found for the selected version and type.</Typography>
+                    )}
+                </ul>
+                </Grid>
+
+                <Grid item xs={5}>
+                <Typography variant="h10" sx={{ fontFamily: 'sans-serif', mt: 2, ml: 10 }}>
+                    <b>Uploaded Files</b>
+                </Typography>
+                <ul>
+                {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1) ? (
+                        <li>
+                        <a
+                            href={`http://localhost:3000/policy_document/${selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).file_name}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download
+                            style={{
+                            color: 'blue',
+                            textDecoration: 'underline',
+                            cursor: 'pointer',
+                            }}
+                        >
+                            {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).file_name}
+                        </a>
+                        <span style={{ marginLeft: '16px' }}>
+                            Version: {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).version}
+                        </span>
+                        </li>
+                    ) : (
+                        <Typography>No file found for the selected version and type.</Typography>
+                    )}
+                </ul>
+                </Grid>
+            </Grid>
             ) : (
-            <Typography>No files uploaded.</Typography>
+                <Typography>No files uploaded</Typography>
+            )}
+            </>
+            ) : status === "Waiting for Action" && (roleId === 2 || roleId === 3) ? (
+                <>
+                {selectedDocument.policy_files && Array.isArray(selectedDocument.policy_files) && selectedDocument.policy_files.length > 0 ? (
+                    <Grid container spacing={2}>
+                        {/* First Column: Received for Review */}
+                        <Grid item xs={6}>
+                        <Typography variant="h10" sx={{ fontFamily: 'sans-serif', mt: 2, ml: 10 }}>
+                            <b>Received file</b>
+                        </Typography>
+                        <ul>
+                        {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1) ? (
+                            <li>
+                                <a
+                                href={`http://localhost:3000/policy_document/${selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).file_name}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                download
+                                style={{
+                                    color: 'blue',
+                                    textDecoration: 'underline',
+                                    cursor: 'pointer',
+                                }}
+                                >
+                                {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).file_name}
+                                </a>
+                                <span style={{ marginLeft: '16px' }}>
+                                Version: {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).version}
+                                </span>
+                            </li>
+                            ) : (
+                            <Typography>No file found for the selected version and type.</Typography>
+                            )}
+                        </ul>
+                        </Grid>
+                    </Grid>
+                    ) : (
+                        <Typography>No files uploaded</Typography>
+                    )}
+                    </>
+            ) : (
+                <ul>
+                {selectedDocument.policy_files.map((file, index) => (
+                    <li key={index} style={{ marginBottom: '8px' }}>
+                        <a
+                        href={`http://localhost:3000/policy_document/${file.file_name}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        style={{
+                            color: 'blue',
+                            textDecoration: 'underline',
+                            cursor: 'pointer',
+
+                        }}
+                        >
+                        {file.file_name}
+                        </a>
+                        <span style={{ marginLeft: '16px' }}>Version: {file.version}</span>
+                    </li>
+                ))}
+                </ul>
+            )}
+            {(status === "Approved") && selectedDocument.pending_at_id === null && roleId !== 4 && (
+                <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
+                    <b>Final Decision: </b> Approved
+                </Typography>
+            )}
+            {(status === "Rejected") && selectedDocument.pending_at_id === null && roleId !== 4 && (
+                <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
+                    <b>Final Decision: </b> Rejected
+                </Typography>
             )}
             {/* Display Latest Policy Status */}
-            {!isPending && (selectedDocument.pending_at_id === selectedDocument.initiator_id || selectedDocument.pending_at_id === null) && latestPolicyStatus && roleId !== 4 && (
+            {status === "Waiting for Action" && (selectedDocument.pending_at_id === selectedDocument.initiator_id || selectedDocument.pending_at_id === null) && latestPolicyStatus && roleId !== 4 && (
             <Box sx={{ mt: 2 }}>
                 <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                 <b>Latest Policy Status:</b>
