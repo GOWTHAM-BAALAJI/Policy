@@ -5,6 +5,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import toast from "react-hot-toast";
 
 const StyledTextField = styled(TextField)(() => ({
     width: "100%",
@@ -111,6 +112,9 @@ export default function PolicyDetails() {
 
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+    const approvalMembers = approvalMembersWithPriority.map(member => member.value.toString());
+    console.log("Approval members: ",approvalMembers);
+
     const handleDropdownOpen = () => {
         setIsDropdownOpen(true);
         // Load fresh approvalMembersOptions here if needed
@@ -186,7 +190,9 @@ export default function PolicyDetails() {
     const [decision, setDecision] = useState('');
     const [remarks, setRemarks] = useState('');
     const [uploadedFile, setUploadedFile] = useState([]);
+    const [uploadedFileName, setUploadedFileName] = useState([]);
     const [uploadedFile1, setUploadedFile1] = useState([]);
+    const [uploadedFile1Name, setUploadedFile1Name] = useState([]);
 
     const mapDecisionToNumber = (decision) => {
         switch (decision) {
@@ -233,6 +239,7 @@ export default function PolicyDetails() {
         const file = event.target.files[0];
         if (file) {
             setUploadedFile1(file);
+            setUploadedFile1Name(file.name);
             // event.target.value = '';
             console.log('Selected file:', file);
             // Perform necessary actions with the file, such as uploading to the server
@@ -312,42 +319,49 @@ export default function PolicyDetails() {
         const file = event.target.files[0];
         if (file) {
           console.log('Selected file:', file);
-          setUploadedFile(file); // Update the uploaded file state
+          setUploadedFile(file);
+          setUploadedFileName(file.name);
         }
     };
     
-    
+    const handleBackClick = () => {
+        navigate(-1); // Navigates to the previous page
+    };
     
     
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
-    
-        // if ((roleId === 2 || roleId === 3)){
-        //   if(decision === "approved"){
-        //     if(!decision)
-        //       setDialogTitle("Warning");
-        //       setDialogMessage("Please fill in all the required fields");
-        //       setDialogOpen(true);
-        //       return;
-        //   }
-        //   else if(decision === "rejected"){
-        //     if(!decision || !remarks)
-        //       setDialogTitle("Warning");
-        //       setDialogMessage("Please fill in all the required fields");
-        //       setDialogOpen(true);
-        //       return;
-        //   }
-        //   else if(decision === "reviewraised"){
-        //     if(!decision || !remarks || !uploadedFile1)
-        //       setDialogTitle("Warning");
-        //       setDialogMessage("Please fill in all the required fields");
-        //       setDialogOpen(true);
-        //       return;
-        //   }
-        // }
-    
+
         const mappedDecision = mapDecisionToNumber(decision);
+
+        if(roleId === 1 && status === "Waiting for Action"){
+            if (!documentTitle || !documentDescription || uploadedFile.length === 0 || !selectedReviewer || approvalMembers.length === 0 || selectedUserGroup.length === 0) {
+                toast.error("Please fill in all the required fields");
+                return;
+            }
+        }
+    
+        if ((roleId === 2 || roleId === 3) && status === "Waiting for Action"){
+            if(!mappedDecision){
+                toast.error("Please fill the decision");
+                return;
+            }
+            else{
+                if(mappedDecision === 2){
+                    if(!remarks || uploadedFile1.length === 0){
+                        toast.error("Please fill the remarks and upload a file");
+                        return;
+                    }
+                }
+                else if(mappedDecision === 3){
+                    if(!remarks){
+                        toast.error("Please fill the remarks")
+                        return;
+                    }
+                }
+            }
+        }
     
         const url = "http://localhost:3000/policy/update";
         const formData = new FormData(); // Create a FormData object
@@ -369,7 +383,7 @@ export default function PolicyDetails() {
         console.log("Approval members with priority: ", approvalMembersWithPriority.map(member => member.value.toString()));
         formData.append("user_group", selectedUserGroup);
     
-        fetch(url, {
+         const submitForm = fetch(url, {
             method: "POST",
             headers: {
                 'Authorization': `Bearer ${userToken}`, // Example header for token authentication
@@ -385,7 +399,7 @@ export default function PolicyDetails() {
                 console.log("Successfully submitted");
                 setTimeout(() => {
                     navigate('/list/psg');
-                }, 2000);
+                }, 1000);
             } else {
                 console.log("Error");
             }
@@ -395,15 +409,36 @@ export default function PolicyDetails() {
             console.error("Submission error:", error);
             setLoading(false); // Reset loading state
         });
+
+        toast.promise(submitForm, {
+            loading: 'Submitting...',
+            success: (data) => `Form submitted successfully`, // Adjust based on your API response
+            error: (err) => `Error while filling the form`,
+        });
     };
 
     return (
         <form onSubmit={handleSubmit} encType="multipart/form-data">
-        <Grid container spacing={2}>
-        <Grid item lg={12} md={12} sm={12} xs={12}>
-            <Typography variant="h5" sx={{fontFamily: 'sans-serif', fontSize: '1 rem', marginLeft: {sm: 2, xs: 2}, marginTop: {sm: 2, xs: 2}, marginRight: {sm: 2, xs: 2}}}>
+        <Grid container spacing={2} alignItems="center">
+        <Grid item lg={6} md={6} sm={6} xs={6}>
+            <Typography
+                variant="h5"
+                sx={{
+                    fontFamily: 'sans-serif',
+                    fontSize: '1.4rem',
+                    fontWeight: 'bold',
+                    marginLeft: 2,
+                    marginTop: 2,
+                    marginRight: 2,
+                }}
+            >
                 Document Details:
             </Typography>
+        </Grid>
+        <Grid item lg={6} md={6} sm={6} xs={6} display="flex" justifyContent="flex-end">
+            <Button variant="contained" onClick={handleBackClick} sx={{ marginLeft: 2, marginRight: 2, marginTop: 2, height: '28px' }}>
+                Back
+            </Button>
         </Grid>
         <Grid item lg={12} md={12} sm={12} xs={12} sx={{fontFamily: 'sans-serif', fontSize: '0.875 rem', marginLeft: {sm: 2, xs: 2}, marginTop: {sm: 2, xs: 2}, marginRight: {sm: 2, xs: 2}}}>
         {selectedDocument ? (

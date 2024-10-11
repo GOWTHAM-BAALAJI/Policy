@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "@mui/material/styles";
 import ReactEcharts from "echarts-for-react";
-import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
-import { getPolicyCounts, PSGTable } from "app/views/material-kit/list/ListPSG";
-// import PSGTable from "app/views/material-kit/list/ListPSG";
 
 export default function DoughnutChart({ height = '100%', color = [], onClickSection }) {
   const theme = useTheme();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
   const [approvedCount, setApprovedCount] = useState(0);
@@ -22,24 +18,6 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
   console.log("UserToken:",userToken);
 
   useEffect(() => {
-    // const fetchData =() => {
-    //   // Directly get the counts
-    //   const counts = getPolicyCounts();
-    //   setApprovedCount(counts.approvedCount || 0);
-    //   setRejectedCount(counts.rejectedCount || 0);
-    //   setPendingCount(counts.pendingCount || 0);
-    //   setWaitingForActionCount(counts.waitingForActionCount || 0);
-    //   console.log('Approved:', approvedCount);
-    //   console.log('Rejected:', rejectedCount);
-    //   console.log('Pending:', pendingCount);
-    //   console.log('Waiting for Action:', waitingForActionCount);
-    // };
-
-
-
-
-
-
     const fetchData = async () => {
       try {
         const response = await fetch('http://localhost:3000/policy/user', {

@@ -165,7 +165,7 @@ const InitiateCA = () => {
         setDialogOpen(true);
         setTimeout(() => {
             navigate('/list/ca');
-        }, 2000);
+        }, 1000);
     }
     
     return(

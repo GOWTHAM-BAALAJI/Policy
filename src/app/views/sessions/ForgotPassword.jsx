@@ -35,6 +35,7 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState("");
 
   const handleFormSubmit = () => {
+    
     console.log(email);
   };
 

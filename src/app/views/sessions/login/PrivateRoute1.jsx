@@ -25,7 +25,7 @@ const PrivateRoute1 = ({ element }) => {
         }
     }, [userToken]);
     
-    return roleId !== 4 ? element : <Navigate to="/list/psg" />;
+    return roleId !== 4 ? element : <Navigate to="/display/list" />;
 };
 
 export default PrivateRoute1;

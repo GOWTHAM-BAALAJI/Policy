@@ -45,21 +45,12 @@ const customSort = (data, column, direction) => {
   });
 };
 
-let policyCounts = {
-  approvedCount: 0,
-  rejectedCount: 0,
-  pendingCount: 0,
-  waitingForActionCount: 0,
-};
-
 export default function PSGTable() {
   const showRowsPerPageOptions = true;
   const { control } = useForm();
   const navigate = useNavigate();
 
   const [psgList, setPsgList] = useState([]);
-  const [psgList2, setPsgList2] = useState([]);
-  const [policyData, setPolicyData] = useState([]);
   const [userId, setUserId] = useState(null);
   const [roleId, setRoleId] = useState(null);
 
@@ -71,7 +62,6 @@ export default function PSGTable() {
   const [sortDirection, setSortDirection] = useState('asc');
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [selectedDocumentTitle, setSelectedDocumentTitle] = useState(null);
-  const [openModal, setOpenModal] = useState(false);
   const [error, setError] = useState(null);
 
   const [approvedCount, setApprovedCount] = useState(0);
@@ -123,21 +113,8 @@ export default function PSGTable() {
         }
         // console.log("Role ID:",roleId);
 
-        if (data.data) {
-          if (data && data.status){
-            const data1 = data.data;
-            console.log("Data1: ", data1);
-            setPsgList2(data1);
-          }
-        }
-        else if (data.approved || data.rejected || data.pending || data.waitingForAction) {
-          if (data && data.status) {
-            policyCounts = {
-              approvedCount: data.approved.length || 0,
-              rejectedCount: data.rejected.length || 0,
-              pendingCount: data.pending.length || 0,
-              waitingForActionCount: data.waitingForAction.length || 0,
-            };
+        if (data && data.status) {
+          if (data.approved || data.rejected || data.pending || data.waitingForAction) {
             // Combine approved, rejected, and pending data into a single array
             const combinedData = [
               ...data.waitingForAction.map(item => ({ ...item, status: 'Waiting for Action' })),
@@ -206,19 +183,24 @@ export default function PSGTable() {
       name: 'ID',
       selector: row => row.id || 'N/A',
       sortable: true,
-      center: true,
+      // center: true,
+      cell: (row) => (
+        <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
+          {row.id || 'N/A'}
+        </div>
+      ),
       width: '15%',
     },
     {
       name: 'Document Title',
       selector: row => row.title || 'N/A',
       sortable: true,
-      center: true,
+      // center: true,
       width: '40%',
       cell: (row) => (
         <Typography
           variant="body2"
-          sx={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
+          sx={{ textAlign: 'left', cursor: 'pointer', color: 'blue', textDecoration: 'underline', paddingLeft: '8px' }}
           onClick={() => handleRowClick(row)}
         >
           {row.title}
@@ -229,101 +211,30 @@ export default function PSGTable() {
       name: 'Status',
       selector: row => row.status || 'N/A',
       sortable: true,
-      center: true,
+      // center: true,
       width: '20%',
+      cell: (row) => (
+        <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
+          {row.status || 'N/A'}
+        </div>
+      ),
     },
     {
       name: 'Updated on',
       selector: row => new Date(row.updatedAt).toLocaleDateString() || 'N/A',
       sortable: true,
-      center: true,
+      // center: true,
+      cell: (row) => (
+        <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
+          {new Date(row.updatedAt).toLocaleDateString() || 'N/A'}
+        </div>
+      ),
       width: '25%',
     },
   ];
 
-  const columns2 = [
-    {
-      name: 'ID',
-      selector: row => row.id || 'N/A',
-      sortable: true,
-      center: true,
-      width: '10%',
-    },
-    {
-      name: 'Document Title',
-      selector: row => row.title || 'N/A',
-      sortable: true,
-      center: true,
-      width: '40%',
-      cell: (row) => (
-        <Typography
-          variant="body2"
-          sx={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
-          onClick={() => handleRowClick(row)}
-        >
-          {row.title}
-        </Typography>
-      ),
-    },
-    {
-      name: 'Description',
-      selector: row => row.description || 'N/A',
-      sortable: true,
-      center: true,
-      width: '50%',
-      cell: (row) => (
-        <Typography
-          variant="body2"
-          sx={{
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            maxWidth: '600px',
-          }}
-          title={row.description} // Shows full text on hover
-        >
-          {row.description}
-        </Typography>
-      ),
-    },
-  ];
-
-  // const columns2 = [
-  //   {
-  //     name: 'S.No.',
-  //     selector: row => row.id || 'N/A',
-  //     sortable: true,
-  //     center: true,
-  //     width: '10%',
-  //   },
-  //   {
-  //     name: 'Document Title',
-  //     selector: row => row.title || 'N/A',
-  //     sortable: true,
-  //     center: true,
-  //     width: '50%',
-  //     cell: (row) => (
-  //       <Typography
-  //         variant="body2"
-  //         sx={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
-  //         onClick={() => handleRowClick(row)}
-  //       >
-  //         {row.title}
-  //       </Typography>
-  //     ),
-  //   },
-  //   {
-  //     name: 'Description',
-  //     selector: row => row.description || 'N/A',
-  //     sortable: true,
-  //     center: true,
-  //     width: '40%',
-  //   },
-  // ];
-
-  const columns = roleId === 4 ? columns2 : columns1;
-  const tabledata = roleId === 4 ? psgList2 : paginatedData;
-  console.log("PsgList2: ",psgList2);
+  const columns = columns1;
+  const tabledata = paginatedData;
 
   const handlePageChange = (newPage) => {
     setPage(newPage - 1);
@@ -453,8 +364,4 @@ export default function PSGTable() {
     </Grid>
     </Grid>
   );
-};
-
-export const getPolicyCounts = () => {
-  return policyCounts;
 };

@@ -258,8 +258,8 @@ const InitiatePSG = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
-        if (!title || !description || !uploadFilenames || !selectedReviewer || selectedApprovalMembers.length === 0 || selectedUserGroup.length === 0) {
-            if (!title || !description || !uploadFilename || selectedUserGroup.length === 0) {
+        if (!title || !description || uploadedFiles.length === 0 || !selectedReviewer || selectedApprovalMembers.length === 0 || selectedUserGroup.length === 0) {
+            if (!title || !description || uploadedFiles.length === 0 || selectedUserGroup.length === 0) {
                 toast.error("Please fill in all the required fields");
                 return;
             }
@@ -304,7 +304,7 @@ const InitiatePSG = () => {
                 console.log("Successfully submitted");
                 setTimeout(() => {
                     navigate('/list/psg');
-                }, 2000);
+                }, 1000);
             } else {
                 console.log("Error");
             }

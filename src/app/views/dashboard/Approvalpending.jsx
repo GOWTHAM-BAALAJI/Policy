@@ -144,19 +144,24 @@ export default function PendingTable() {
       name: 'ID',
       selector: row => row.id || 'N/A',
       sortable: true,
-      center: true,
+      // center: true,
+      cell: (row) => (
+        <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
+          {row.id || 'N/A'}
+        </div>
+      ),
       width: '15%',
     },
     {
       name: 'Document Title',
       selector: row => row.title || 'N/A',
       sortable: true,
-      center: true,
+      // center: true,
       width: '40%',
       cell: (row) => (
         <Typography
           variant="body2"
-          sx={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }}
+          sx={{ textAlign: 'left', cursor: 'pointer', color: 'blue', textDecoration: 'underline', paddingLeft: '8px' }}
           onClick={() => handleRowClick(row)}
         >
           {row.title}
@@ -167,14 +172,24 @@ export default function PendingTable() {
       name: 'Status',
       selector: row => row.status || 'N/A',
       sortable: true,
-      center: true,
+      // center: true,
+      cell: (row) => (
+        <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
+          {row.status || 'N/A'}
+        </div>
+      ),
       width: '20%',
     },
     {
       name: 'Updated on',
       selector: row => new Date(row.updatedAt).toLocaleDateString() || 'N/A',
       sortable: true,
-      center: true,
+      // center: true,
+      cell: (row) => (
+        <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
+          {new Date(row.updatedAt).toLocaleDateString() || 'N/A'}
+        </div>
+      ),
       width: '25%',
     },
   ];

@@ -4,6 +4,7 @@ import { clearJwtToken } from '../../../../redux/actions/authActions';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate  } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
+import toast from "react-hot-toast";
 import {
   Box,
   styled,
@@ -15,16 +16,13 @@ import {
   useMediaQuery
 } from "@mui/material";
 
-import { NotificationProvider } from "app/contexts/NotificationContext";
 
 // Remove useAuth import and related logic
 // import useAuth from "app/hooks/useAuth";
 import useSettings from "app/hooks/useSettings";
 
 import { Span } from "app/components/Typography";
-import ShoppingCart from "app/components/ShoppingCart";
 import { MatxMenu, MatxSearchBox } from "app/components";
-import { NotificationBar } from "app/components/NotificationBar";
 import { themeShadows } from "app/components/MatxTheme/themeColors";
 
 import { topBarHeight } from "app/utils/constant";
@@ -34,9 +32,6 @@ import {
   Menu,
   Person,
   Settings,
-  WebAsset,
-  MailOutline,
-  StarOutline
 } from "@mui/icons-material";
 
 // STYLED COMPONENTS
@@ -143,6 +138,7 @@ const Layout1Topbar = () => {
   const handleSignOut = () => {
     dispatch(clearJwtToken());
     navigate('/');
+    toast.success("Logged out successfully");
   };
 
   return (
