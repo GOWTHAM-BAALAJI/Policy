@@ -2,6 +2,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Grid, styled, TextField } from "@mui/material";
 import img1 from "../../assets/spandana_logo.png";
+import { Formik } from "formik";
+import * as Yup from "yup";
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import {IconButton, InputAdornment } from '@mui/material';
 
 // STYLED COMPONENTS
 const StyledRoot = styled("div")(() => ({
@@ -30,13 +34,54 @@ const ContentBox = styled("div")(({ theme }) => ({
   background: theme.palette.background.default
 }));
 
+const initialValues = {
+  emailId: "",
+};
+
+// form field validation schema
+const validationSchema = Yup.object().shape({
+  emailId: Yup.string()
+    .required("Email ID is required!"),
+});
+
 export default function ForgotPassword() {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
 
-  const handleFormSubmit = () => {
-    
-    console.log(email);
+  const headers = {
+    'Accept': 'application/json',
+    'Content-Type': 'multipart/form-data',
+    'Content-Type': 'application/json',
+  };
+
+  const handleFormSubmit = async (values) => {
+    setLoading(true);
+    const url = "http://localhost:3000/auth/forgetPassword";
+    const requestData = {
+      empRef: values.emailId,
+    };
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(requestData),
+      });
+
+      const result = await response.json();
+      if (response.ok && result.status === 200) {
+        navigate('/');
+        setEmailError("");
+      } else {
+        setEmailError("Invalid Employee ID or Email ID");
+      }
+    } catch (error) {
+      console.error(error);
+      setEmailError("Failed to load, please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -49,16 +94,38 @@ export default function ForgotPassword() {
             </div>
 
             <ContentBox>
-              <form onSubmit={handleFormSubmit}>
+            <Formik
+                  onSubmit={handleFormSubmit}
+                  initialValues={initialValues}
+                  validationSchema={validationSchema}
+                >
+                  {({ values, errors, touched, handleChange, handleBlur, handleSubmit }) => (
+              <form onSubmit={handleSubmit}>
                 <TextField
-                  type="email"
-                  name="email"
+                  fullWidth
                   size="small"
-                  label="Email"
-                  value={email}
+                  name="emailId"
+                  type="text"
+                  label="Email ID or Employee ID"
                   variant="outlined"
-                  onChange={(e) => setEmail(e.target.value)}
-                  sx={{ mb: 3, width: "100%" }}
+                  onBlur={handleBlur}
+                  value={values.emailId}
+                  onChange={(e) => {
+                    handleChange(e);
+                    setEmailError("");
+                  }}
+                  helperText={emailError || (touched.emailId && errors.emailId)}
+                  error={Boolean(emailError || (errors.emailId && touched.emailId))}
+                  sx={{ mb: 2 }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton edge="end">
+                          <PersonOutlineIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
 
                 <Button fullWidth variant="contained" color="primary" type="submit">
@@ -74,6 +141,8 @@ export default function ForgotPassword() {
                   Go Back
                 </Button>
               </form>
+              )}
+                </Formik>
             </ContentBox>
           </Grid>
         </Grid>
