@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Box, Card, Checkbox, Grid, styled, useTheme, Typography, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Button } from "@mui/material";
+import { Box, Card, Grid, styled, useTheme, Typography, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -69,7 +69,6 @@ export default function Login() {
   const [userId, setUserId] = useState(null);
   const [passwordError, setPasswordError] = useState("");
   const [emailIdError, setEmailIdError] = useState("");
-  const [userIdError, setUserIdError] = useState("");
   const [resendCooldown, setResendCooldown] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
@@ -83,9 +82,6 @@ export default function Login() {
     'Content-Type': 'multipart/form-data',
     'Content-Type': 'application/json',
     'Authorization': 'Bearer '+userToken
-  };
-  const customHeaders = {
-    headers: headers
   };
 
   // Cooldown timer effect
@@ -135,7 +131,7 @@ export default function Login() {
       return;
 
     setLoading(true);
-    const url = 'http://localhost:3000/auth/resendOTP';
+    const url = 'http://localhost:3000/auth/resendOtp';
     const data = {
       "user_id": userId
     };
@@ -213,11 +209,6 @@ export default function Login() {
       setLoading(false);
     }
   };
-
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-  };
-
 
   const [showPassword, setShowPassword] = useState(false);
 

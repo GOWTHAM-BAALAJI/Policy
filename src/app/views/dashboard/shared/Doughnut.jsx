@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 export default function DoughnutChart({ height = '100%', color = [], onClickSection }) {
   const theme = useTheme();
   const [loading, setLoading] = useState(true);
+  const [selectedSection, setSelectedSection] = useState(null);
 
   const [approvedCount, setApprovedCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
@@ -20,7 +21,7 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:3000/policy/user', {
+        const response = await fetch('http://localhost:3000/policy/user/count', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -32,10 +33,10 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
         console.log("Data:",data);
 
         if (data && data.status) {
-          const approvedCount = data.approved?.length ?? 0;
-          const rejectedCount = data.rejected?.length ?? 0;
-          const pendingCount = data.pending?.length ?? 0;
-          const waitingForActionCount = data.waitingForAction?.length ?? 0;
+          const approvedCount = data.approved;
+          const rejectedCount = data.rejected;
+          const pendingCount = data.pending;
+          const waitingForActionCount = data.waitingForAction;
           setApprovedCount(approvedCount || 0);
           setRejectedCount(rejectedCount || 0);
           setPendingCount(pendingCount || 0);
@@ -65,6 +66,30 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
     }
   };
 
+  const getSeriesData = () => {
+    const data = [
+      { value: approvedCount, name: "Approved" },
+      { value: rejectedCount, name: "Rejected" },
+      { value: pendingCount, name: "Pending" },
+      { value: waitingForActionCount, name: "Waiting for Action" },
+    ];
+  
+    return data.map((item, index) => ({
+      ...item,
+      itemStyle: {
+        // Keep the original color but apply shadow and pop-out effect for the selected section
+        color: colors[index],
+        shadowBlur: item.name === selectedSection ? 15 : 0, // Pop-out effect with shadow for the selected section
+        shadowOffsetX: 0,
+        shadowColor: item.name === selectedSection ? "rgba(0, 0, 0, 0.8)" : "none", // Shadow only for the selected
+        opacity: selectedSection && item.name !== selectedSection ? 0.6 : 1,  // Blur (reduce opacity) for unselected sections
+      },
+      // Add radius changes for the pop-out effect
+      selected: item.name === selectedSection,  // Mark the section as selected
+      selectedOffset: item.name === selectedSection ? 10 : 0,  // Pop out the selected section
+    }));
+  };
+
   const option = {
     legend: {
       show: true,
@@ -89,31 +114,31 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
         hoverOffset: 5,
         stillShowZeroSum: false,
         label: {
+          // This keeps the "Policy Dashboard" text always in the center
           normal: {
-            show: false,
+            show: true,
             position: 'center',
-            textStyle: { color: theme.palette.text.secondary, fontSize: 13, fontFamily: "roboto" },
-            formatter: "{a}"
+            textStyle: { color: theme.palette.text.secondary, fontSize: 14, fontFamily: "roboto" },
+            formatter: "Dashboard" // Keep this in the center
           },
           emphasis: {
             show: true,
-            textStyle: { fontSize: "14", fontWeight: "bold", color: 'black' },
             position: 'inside',
-            formatter: "{b} \n{c} ({d}%)"
-          }
+            formatter: "{b} \n{c} ({d}%)", // Show section details inside the slice when clicked
+            textStyle: { fontSize: "14", fontWeight: "bold", color: 'black' },
+          },
         },
         labelLine: { normal: { show: false } },
-        data: [
-          { value: approvedCount, name: "Approved" },
-          { value: rejectedCount, name: "Rejected" },
-          { value: pendingCount, name: "Pending" },
-          { value: waitingForActionCount, name: "Waiting for Action" }
-        ],
+        data: getSeriesData(),
         itemStyle: {
           color: function (params) {
             return colors[params.dataIndex];
           },
-          emphasis: { shadowBlur: 10, shadowOffsetX: 0, shadowColor: "rgba(0, 0, 0, 0.5)" }
+          emphasis: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: "rgba(0, 0, 0, 0.5)"
+          }
         }
       }
     ]
@@ -121,9 +146,28 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
 
   const onChartClick = (params) => {
     if (params && params.data && params.data.name) {
+      setSelectedSection(params.data.name);
       navigateToPage(params.data.name); // Call navigateToPage to update state
     }
   };
+
+  if (selectedSection) {
+    const selectedData = option.series[0].data.find(item => item.name === selectedSection);
+  
+    option.series[0].label.normal = {
+      show: true,
+      position: 'center',
+      formatter: "Policy Dashboard", // Keep "Policy Dashboard" always in the center
+      textStyle: { fontSize: 14, fontWeight: 'bold', color: theme.palette.text.secondary }
+    };
+  
+    option.series[0].label.emphasis = {
+      show: true,
+      position: 'inside',  // Keep the info inside the section when clicked (same as hover position)
+      formatter: "{b} \n{c} ({d}%)", // Show section's details on click (name, value, and percentage)
+      textStyle: { fontSize: "14", fontWeight: "bold", color: 'black' }
+    };
+  }
 
   return (
     <ReactEcharts

@@ -286,7 +286,7 @@ export default function RejectedTable() {
           pagination
           paginationServer
           paginationTotalRows={psgList.length}
-          paginationRowsPerPageOptions={[5, 10, 25]}
+          paginationRowsPerPageOptions={[5]}
           paginationPerPage={rowsPerPage}
           onChangePage={handlePageChange}
           onChangeRowsPerPage={handleRowsPerPageChange}

@@ -8,7 +8,7 @@ import ApprovedTable from "./Approved";
 import RejectedTable from "./Rejected";
 import PendingTable from "./Approvalpending";
 import WaitingForActionTable from "./Reviewraised";
-import PSGTable from "../material-kit/list/ListPSG";
+import PolicyList from "../material-kit/list/PolicyList";
 
 // STYLED COMPONENTS
 const ContentBox = styled("div")(({ theme }) => ({
@@ -66,7 +66,7 @@ export default function Analytics() {
       case 'Waiting for Action':
         return <WaitingForActionTable />;
       default:
-        return <PSGTable showRowsPerPageOptions={false} />;
+        return <PolicyList showRowsPerPageOptions={false} />;
     }
   };
 
@@ -75,7 +75,7 @@ export default function Analytics() {
       <ContentBox className="analytics">
         <Grid container spacing={2}>
 
-          <Grid item lg={6} md={6} sm={12} xs={12} style={{ height: 'calc(100vh - 120px)' }}>
+          <Grid item lg={6} md={6} sm={12} xs={12} style={{ height: 'calc(100vh - 80px)' }}>
             <Card sx={{ px: 3, py: 3, height: '100%', width: '100%' }}>
               <Title>Dashboard</Title>
               <SubTitle>Policy, SOP & Guidance Note</SubTitle>
@@ -86,7 +86,7 @@ export default function Analytics() {
             </Card>
           </Grid>
           {/* Dynamic table based on the clicked section of the chart */}
-          <Grid item lg={6} md={6} sm={12} xs={12} style={{ height: 'calc(100vh - 120px)' }}>
+          <Grid item lg={6} md={6} sm={12} xs={12} style={{ height: 'calc(100vh - 80px)' }}>
             <Card sx={{ height: '100%', width: '100%' }}>
               {renderTable()} {/* Conditionally render the table */}
             </Card>

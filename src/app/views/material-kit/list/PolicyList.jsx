@@ -504,7 +504,7 @@ export default function PSGTable() {
             pagination
             paginationServer
             paginationTotalRows={count} // Adjust to the total records returned by your API
-            paginationRowsPerPageOptions={[5, 10, 25]}
+            paginationRowsPerPageOptions={[5]}
             paginationPerPage={rowsPerPage}
             onChangePage={handlePageChange}
             onChangeRowsPerPage={handleRowsPerPageChange}

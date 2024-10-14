@@ -42,6 +42,7 @@ const ApplicableTable = () => {
 
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [selectedRow, setSelectedRow] = useState(null);
     const [sortColumn, setSortColumn] = useState(''); // Column being sorted
@@ -60,55 +61,36 @@ const ApplicableTable = () => {
     });
     console.log("UserToken:",userToken);
 
+    const fetchData = async (page, rows) => {
+      setLoading(true);
+      try {
+        const response = await fetch(`http://localhost:3000/policy/user?display=true&page=${page}&rows=${rows}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
+          },
+        });
+        const data = await response.json();
+        setPsgList2(data); // Adjust this based on your API response structure
+        const decodedToken = jwtDecode(userToken);
+        console.log('Decoded Token:', decodedToken.role_id);
+        if (decodedToken.role_id) {
+          setRoleId(decodedToken.role_id);
+        }
+        if (decodedToken.user_id) {
+          setUserId(decodedToken.user_id);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch('http://localhost:3000/policy/user?display=true', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
-                },
-                });
-                console.log(response);
-                const data = await response.json();
-                console.log("Data:",data);
-                // const { approved, rejected, pending, waitingForAction } = response.data;
-
-                // Flatten the data and add the status field
-                // const formattedData = [
-                //   ...approved.map(item => ({ ...item, status: 'Approved' })),
-                //   ...rejected.map(item => ({ ...item, status: 'Rejected' })),
-                //   ...pending.map(item => ({ ...item, status: 'Pending' })),
-                //   ...waitingForAction.map(item => ({ ...item, status: 'Waiting for Action' })),
-                // ];
-                // console.log("Formatted Data:",formattedData);
-
-                const decodedToken = jwtDecode(userToken);
-                console.log('Decoded Token:', decodedToken.role_id);
-                if (decodedToken.role_id) {
-                setRoleId(decodedToken.role_id);
-                }
-                if (decodedToken.user_id) {
-                setUserId(decodedToken.user_id);
-                }
-                // console.log("Role ID:",roleId);
-
-                if (data.status && data.data) {
-                    setPsgList2(data.data);
-                }
-                else {
-                    setError("There are no records to display");
-                }
-            // setPsgList(formattedData);
-            } catch (error) {
-                console.error('Error fetching data', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-    fetchData();
-    }, []);
+      fetchData(currentPage, rowsPerPage);
+    }, [currentPage, rowsPerPage]);
 
     useEffect(() => {
         console.log('Current roleId:', roleId); // Log the roleId
@@ -195,7 +177,7 @@ const ApplicableTable = () => {
   return (
     <Grid container spacing={2}>
     <Grid item lg={6} md={6} sm={6} xs={6}>
-        <Typography variant="h5" sx={{fontFamily: 'sans-serif', fontSize: '1.4rem', marginLeft: {sm: 2, xs: 2}, marginTop: {sm: 2, xs: 2}, marginRight: {sm: 2, xs: 2}}}>
+        <Typography variant="h5" sx={{fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1.4rem', marginLeft: {sm: 2, xs: 2}, marginTop: {sm: 2, xs: 2}, marginRight: {sm: 2, xs: 2}}}>
             List of Policies, SOPs and Guidance notes
         </Typography>
     </Grid>
