@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useForm, Controller } from 'react-hook-form';
 import { NavLink, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
 import { Autocomplete, Button, Chip, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, ListItemText, MenuItem, FormControl, Grid, IconButton, InputLabel, styled, Select, Typography, TextField } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import toast from "react-hot-toast";
@@ -111,18 +112,17 @@ const InitiateCA = () => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [dialogtitle, setDialogTitle] = useState("");
     const [dialogMessage, setDialogMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const userToken = useSelector((state)=>{
+        return state.token;//.data;
+      });
+    console.log("UserToken:",userToken);
 
     const userGroupOptions = [
-        { value: 1, label: 'Field Staff' },
-        { value: 2, label: 'HO Staff' },
-        { value: 3, label: 'CBOs' },
-        { value: 4, label: 'SVPs' },
-        { value: 5, label: 'VPs' },
-        { value: 6, label: 'AVPs' },
-        { value: 7, label: 'CMs' },
-        { value: 8, label: 'BMs' },
-        { value: 9, label: 'BQMs' },
-        { value: 10, label: 'LOs' },
+        { value: '2', label: 'Field Staff' },
+        { value: '1', label: 'HO Staff' },
+        { value: '3', label: 'Both' },
     ]
 
     const handleSelectChangeUserGroups = (event) => {
@@ -154,18 +154,78 @@ const InitiateCA = () => {
         setDialogOpen(false);
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
-        if (!title || !description || !uploadFilename || selectedUserGroup.length === 0) {
+        setLoading(true);
+        if (!title || !description || uploadedFile.length === 0 || selectedUserGroup.length === 0) {
             toast.error("Please fill in all the required fields");
             return;
         }
-        setDialogTitle("Success");
-        setDialogMessage("Form submitted successfully");
-        setDialogOpen(true);
-        setTimeout(() => {
-            navigate('/list/ca');
-        }, 1000);
+        // setDialogTitle("Success");
+        // setDialogMessage("Form submitted successfully");
+        // setDialogOpen(true);
+        // setTimeout(() => {
+        //     navigate('/list/psg');
+        // }, 2000);
+
+        const url = "http://localhost:3000/circular-advisories/";
+        const formData = new FormData(); // Create a FormData object
+    
+        // Append files to FormData
+        // uploadedFile.forEach(file => {
+        //     formData.append("files[]", file); // Name the file array appropriately
+        // });
+    
+        // Append other data to FormData
+        formData.append("title", title);
+        formData.append("description", description);
+        formData.append("files",uploadedFile);
+        formData.append("user_group", selectedUserGroup || null);
+    
+        const submitPromise=fetch(url, {
+            method: "POST",
+            headers: {
+                'Authorization': `Bearer ${userToken}`, // Example header for token authentication
+                // Note: Do not include 'Content-Type: application/json' when sending FormData
+            },
+            body: formData,
+        })
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            console.log("Server Response: ", data);
+            if (data.status) {
+                console.log("Successfully submitted");
+                setTimeout(() => {
+                    navigate('/list/ca');
+                }, 1000);
+            } else {
+                console.log("Error");
+            }
+            setLoading(false); // Reset loading state
+        })
+        .catch((error) => {
+            console.error("Submission error:", error);
+            setLoading(false); // Reset loading state
+        });
+
+
+        toast.promise(submitPromise, {
+            loading: 'Submitting...',
+            success: (data) => `Policy Initiated Successfully`, // Adjust based on your API response
+            error: (err) => `Error while Initiating`,
+          });
+        // console.log("Result:",result);
+        // if (response.ok && result?.status) {
+        //     console.log("Successfully submitted");
+        // } else {
+        //     // setPasswordError("Invalid employee ID or password");
+        // }
+        // } catch (error) {
+        // console.error(error);
+        // // setPasswordError("Failed to load, please try again later.");
+        // }
     }
     
     return(
@@ -322,29 +382,26 @@ const InitiateCA = () => {
                         <Grid item xs>
                             <FormControl variant="outlined" fullWidth sx={{ position: 'relative' }}>
                             <Controller
-                            name="userGroups"
-                            control={control}
-                            render={({ field }) => (
-                                <StyledSelect
-                                labelId="user-groups-label"
-                                id="userGroups"
-                                // required
-                                multiple
-                                value={selectedUserGroup}
-                                onChange={(e) => {
-                                    handleSelectChangeUserGroups(e);
-                                    setSelectedUserGroup(e.target.value);
-                                }}
-                                renderValue={(selected) => selected.map((val) => userGroupOptions.find(opt => opt.value === val)?.label).join(', ')}
-                                >
-                                {userGroupOptions.map((option) => (
-                                    <MenuItem key={option.value} value={option.value}>
-                                    <Checkbox checked={selectedUserGroup.indexOf(option.value) > -1} />
-                                    <ListItemText primary={option.label} />
-                                    </MenuItem>
-                                ))}
-                                </StyledSelect>
-                            )}
+                                name="userGroups"
+                                control={control}
+                                render={({ field }) => (
+                                    <StyledSelect
+                                    labelId="user-groups-label"
+                                    id="userGroups"
+                                    value={selectedUserGroup}
+                                    // required
+                                    onChange={(e) => {
+                                        setSelectedUserGroup(e.target.value);
+                                    }}
+                                    >
+                                    <option value="">Select a user group</option>
+                                    {userGroupOptions.map((option) => (
+                                            <MenuItem key={option.value} value={option.value}>
+                                            <ListItemText primary={option.label} />
+                                            </MenuItem>
+                                        ))}
+                                    </StyledSelect>
+                                )}
                             />
                             </FormControl>
                         </Grid>

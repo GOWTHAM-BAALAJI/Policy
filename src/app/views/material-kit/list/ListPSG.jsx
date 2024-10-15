@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, Grid, MenuItem, Select, styled, Tabs, Tab, Typography } from "@mui/material";
+import { Box, Button, Card, Grid, MenuItem, Select, styled, Tabs, Tab, Typography } from "@mui/material";
 import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 import { jwtDecode } from "jwt-decode";
+
+const ContentBox = styled("div")(({ theme }) => ({
+  margin: "20px",
+  [theme.breakpoints.down("sm")]: { margin: "16px" }
+}));
 
 const StyledSelect = styled(Select)(() => ({
     width: '100%',
@@ -354,16 +359,24 @@ export default function PSGTable() {
       ),
     },
     {
-      name: 'Status',
-      selector: row => row.status || 'N/A',
+      name: 'Type',
+      selector: row => row.type || 'N/A',
       sortable: true,
       // center: true,
       width: '20%',
-      cell: (row) => (
-        <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
-          {row.status || 'N/A'}
-        </div>
-      ),
+      cell: (row) => {
+        const typeMapping = {
+          1: 'Policy',
+          2: 'SOP',
+          3: 'Guidance Note'
+        };
+        const displayType = typeMapping[row.type] || 'N/A';
+        return (
+          <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
+            {displayType}
+          </div>
+        );
+      }
     },
     {
       name: 'Updated on',
@@ -427,13 +440,15 @@ export default function PSGTable() {
 
 
   return (
+    <ContentBox className="analytics">
+    <Card sx={{ px: 3, py: 3, height: '100%', width: '100%' }}>
     <Grid container spacing={2}>
       <Grid item lg={6} md={6} sm={6} xs={6}>
         <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1.4rem', marginLeft: { sm: 2, xs: 2 }, marginTop: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
-          List of Policies, SOPs and Guidance notes
+          Policies, SOPs and Guidance notes
         </Typography>
       </Grid>
-      {roleId === 1 && (
+      {(roleId === 1 || roleId === 3) && (
         <Grid item lg={3} md={3} sm={3} xs={3}>
           <Button
             variant="contained"
@@ -447,11 +462,11 @@ export default function PSGTable() {
             }}
             onClick={() => navigate('/initiate/psg')}
           >
-            New
+            Create New
           </Button>
         </Grid>
       )}
-      <Grid item lg={roleId === 1 ? 3 : 6} md={roleId === 1 ? 3 : 6} sm={roleId === 1 ? 3 : 6} xs={roleId === 1 ? 3 : 6}>
+      <Grid item lg={(roleId === 1 || roleId === 3) ? 3 : 6} md={(roleId === 1 || roleId === 3) ? 3 : 6} sm={(roleId === 1 || roleId === 3) ? 3 : 6} xs={(roleId === 1 || roleId === 3) ? 3 : 6}>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 2, mr: 2 }}>
           <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2, mt: 0.5 }}>
             Type
@@ -465,7 +480,7 @@ export default function PSGTable() {
                 id="documentType"
                 {...field}
                 sx={{
-                  width: '180px',
+                  width: '160px',
                 }}
                 onChange={(e) => {
                   field.onChange(e);
@@ -539,5 +554,7 @@ export default function PSGTable() {
         </Box>
       </Grid>
     </Grid>
+    </Card>
+    </ContentBox>
   );
 };

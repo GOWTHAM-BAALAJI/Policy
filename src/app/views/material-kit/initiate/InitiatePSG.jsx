@@ -123,6 +123,12 @@ const InitiatePSG = () => {
     const [dialogtitle, setDialogTitle] = useState("");
     const [dialogMessage, setDialogMessage] = useState("");
 
+    const types = [
+        { value: '1', label: '  Policy' },
+        { value: '2', label: '  SOP' },
+        { value: '3', label: '  Guidance Note' },
+    ]
+
     const reviewers = [
         { value:'572', label: 'testUser2' }
     ]
@@ -258,8 +264,8 @@ const InitiatePSG = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
-        if (!title || !description || uploadedFiles.length === 0 || !selectedReviewer || selectedApprovalMembers.length === 0 || selectedUserGroup.length === 0) {
-            if (!title || !description || uploadedFiles.length === 0 || selectedUserGroup.length === 0) {
+        if (!documentType || !title || !description || uploadedFiles.length === 0 || !selectedReviewer || selectedApprovalMembers.length === 0 || selectedUserGroup.length === 0) {
+            if (!documentType || !title || !description || uploadedFiles.length === 0 || selectedUserGroup.length === 0) {
                 toast.error("Please fill in all the required fields");
                 return;
             }
@@ -281,6 +287,7 @@ const InitiatePSG = () => {
         });
     
         // Append other data to FormData
+        formData.append("type",documentType);
         formData.append("title", title);
         formData.append("description", description);
         formData.append("reviewer_id", selectedReviewer || null);
@@ -397,12 +404,12 @@ const InitiatePSG = () => {
                                 setDocumentType(e.target.value);
                             }}
                             >
-                            <MenuItem value="">
-                            <em>None</em>
-                            </MenuItem>
-                            <MenuItem value={1}>Policy</MenuItem>
-                            <MenuItem value={3}>SOP</MenuItem>
-                            <MenuItem value={2}>Guidance Note</MenuItem>
+                            <option value="">Select a document type</option>
+                            {types.map((option) => (
+                                            <MenuItem key={option.value} value={option.value}>
+                                            <ListItemText primary={option.label} />
+                                            </MenuItem>
+                                        ))}
                             </StyledSelect>
                         )}
                     />

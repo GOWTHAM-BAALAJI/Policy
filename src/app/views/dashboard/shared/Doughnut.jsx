@@ -106,7 +106,7 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
     yAxis: [{ axisLine: { show: false }, splitLine: { show: false } }],
     series: [
       {
-        name: "Policy Dashboard",
+        name: "Dashboard",
         type: "pie",
         radius: ["40%", "72.55%"],
         center: ["50%", "42%"],
@@ -114,12 +114,11 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
         hoverOffset: 5,
         stillShowZeroSum: false,
         label: {
-          // This keeps the "Policy Dashboard" text always in the center
           normal: {
             show: true,
             position: 'center',
             textStyle: { color: theme.palette.text.secondary, fontSize: 14, fontFamily: "roboto" },
-            formatter: "Dashboard" // Keep this in the center
+            formatter: selectedSection ? `{b} \n{c} (${selectedSection})` : "Dashboard",
           },
           emphasis: {
             show: true,
@@ -147,27 +146,31 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
   const onChartClick = (params) => {
     if (params && params.data && params.data.name) {
       setSelectedSection(params.data.name);
-      navigateToPage(params.data.name); // Call navigateToPage to update state
+      const clickedSection = params.data.name;
+      onClickSection(clickedSection);
     }
-  };
+    const selectedData = option.series[0].data.find(item => item.name === params.data.name);
 
-  if (selectedSection) {
-    const selectedData = option.series[0].data.find(item => item.name === selectedSection);
-  
-    option.series[0].label.normal = {
-      show: true,
-      position: 'center',
-      formatter: "Policy Dashboard", // Keep "Policy Dashboard" always in the center
-      textStyle: { fontSize: 14, fontWeight: 'bold', color: theme.palette.text.secondary }
-    };
-  
-    option.series[0].label.emphasis = {
-      show: true,
-      position: 'inside',  // Keep the info inside the section when clicked (same as hover position)
-      formatter: "{b} \n{c} ({d}%)", // Show section's details on click (name, value, and percentage)
-      textStyle: { fontSize: "14", fontWeight: "bold", color: 'black' }
-    };
-  }
+    if (selectedData) {
+      option.series[0].label.normal = {
+        show: true,
+        position: 'center',
+        formatter: "Dashboard",
+        textStyle: { fontSize: 14, fontWeight: 'bold', color: theme.palette.text.secondary }
+      };
+
+      option.series[0].label.emphasis = {
+        show: true,
+        position: 'inside',  // Keep the info inside the section when clicked (same as hover position)
+        formatter: "{b} \n{c} ({d}%)", // Show section's details on click (name, value, and percentage)
+        textStyle: { fontSize: "14", fontWeight: "bold", color: 'black' }
+      };
+
+      // Ensure that emphasis remains on the clicked section (highlighting and shadow)
+      selectedData.selected = true;
+    }
+    option.series[0].data = getSeriesData();
+  };
 
   return (
     <ReactEcharts

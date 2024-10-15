@@ -335,14 +335,14 @@ export default function PolicyDetails() {
 
         const mappedDecision = mapDecisionToNumber(decision);
 
-        if(roleId === 1 && status === "Waiting for Action"){
+        if((roleId === 1 || roleId === 3) && status === "Waiting for Action"){
             if (!documentTitle || !documentDescription || uploadedFile.length === 0 || !selectedReviewer || approvalMembers.length === 0 || selectedUserGroup.length === 0) {
                 toast.error("Please fill in all the required fields");
                 return;
             }
         }
     
-        if ((roleId === 2 || roleId === 3) && status === "Waiting for Action"){
+        if ((roleId === 2 || roleId === 3 || roleId === 4 || roleId === 6) && status === "Waiting for Action"){
             if(!mappedDecision){
                 toast.error("Please fill the decision");
                 return;
@@ -451,7 +451,7 @@ export default function PolicyDetails() {
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                 <b>Document Description:</b> {selectedDocument.description}
             </Typography>
-            {roleId !== 4 && (
+            {roleId !== 8 && (
             <>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                 <b>Initiator Name:</b> {getInitiatorName(selectedDocument.initiator_id)}
@@ -464,7 +464,7 @@ export default function PolicyDetails() {
             </Typography>
             </>
             )}
-            {status === "Pending" && !(selectedDocument.pending_at_id === userId) && roleId !== 4 && (
+            {status === "Pending" && !(selectedDocument.pending_at_id === userId) && roleId !== 8 && (
             <>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                 <b>Pending at:</b> {pendingApproverName}
@@ -475,7 +475,7 @@ export default function PolicyDetails() {
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, mb: -1 }}>
             <b>Files:</b>
             </Typography>
-            {status === "Waiting for Action" && roleId === 1 ? (
+            {status === "Waiting for Action" && (roleId === 1 || roleId === 3) ? (
             <>
             {selectedDocument.policy_files && Array.isArray(selectedDocument.policy_files) && selectedDocument.policy_files.length > 0 ? (
             <Grid container spacing={2}>
@@ -543,7 +543,7 @@ export default function PolicyDetails() {
                 <Typography>No files uploaded</Typography>
             )}
             </>
-            ) : status === "Waiting for Action" && (roleId === 2 || roleId === 3) ? (
+            ) : status === "Waiting for Action" && (roleId === 2 || roleId === 3 || roleId === 4 || roleId === 6) ? (
                 <>
                 {selectedDocument.policy_files && Array.isArray(selectedDocument.policy_files) && selectedDocument.policy_files.length > 0 ? (
                     <Grid container spacing={2}>
@@ -605,18 +605,18 @@ export default function PolicyDetails() {
                 ))}
                 </ul>
             )}
-            {(status === "Approved") && selectedDocument.pending_at_id === null && roleId !== 4 && (
+            {(status === "Approved") && selectedDocument.pending_at_id === null && roleId !== 8 && (
                 <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                     <b>Final Decision: </b> Approved
                 </Typography>
             )}
-            {(status === "Rejected") && selectedDocument.pending_at_id === null && roleId !== 4 && (
+            {(status === "Rejected") && selectedDocument.pending_at_id === null && roleId !== 8 && (
                 <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                     <b>Final Decision: </b> Rejected
                 </Typography>
             )}
             {/* Display Latest Policy Status */}
-            {status === "Waiting for Action" && (selectedDocument.pending_at_id === selectedDocument.initiator_id || selectedDocument.pending_at_id === null) && latestPolicyStatus && roleId !== 4 && (
+            {status === "Waiting for Action" && (selectedDocument.pending_at_id === selectedDocument.initiator_id || selectedDocument.pending_at_id === null) && latestPolicyStatus && roleId !== 8 && (
             <Box sx={{ mt: 2 }}>
                 <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                 <b>Latest Policy Status:</b>
@@ -654,7 +654,7 @@ export default function PolicyDetails() {
 
 
         
-            {status === "Waiting for Action" && selectedDocument.pending_at_id === userId && roleId === 1 && (
+            {status === "Waiting for Action" && selectedDocument.pending_at_id === userId && (roleId === 1 || roleId === 3) && (
             <>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
                 <b>Policy ID:</b>
@@ -795,7 +795,7 @@ export default function PolicyDetails() {
             )}
 
             {/* Decision dropdown */}
-            {(roleId === 2 || roleId === 3) && (selectedDocument.pending_at_id === userId) && status === "Waiting for Action" && (
+            {(roleId === 2 || roleId === 3 || roleId === 4 || roleId === 6) && (selectedDocument.pending_at_id === userId) && status === "Waiting for Action" && (
             <Box sx={{ mt: 2 }}>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block' }}>
                 <b>Decision:</b>
@@ -818,7 +818,7 @@ export default function PolicyDetails() {
             </Box>
             )}
 
-            {(roleId === 2 || roleId === 3) && decision && decision !== "approved" && (
+            {(roleId === 2 || roleId === 3 || roleId === 4 || roleId === 6) && decision && decision !== "approved" && (
             <Box sx={{ mt: 2 }}>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block' }}>
                 <b>Remarks:</b>
@@ -838,7 +838,7 @@ export default function PolicyDetails() {
             )}
 
             {/* Conditional file upload field */}
-            {(roleId === 2 || roleId === 3) && decision && decision === "reviewraised" && (
+            {(roleId === 2 || roleId === 3 || roleId === 4 || roleId === 6) && decision && decision === "reviewraised" && (
             <><Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                 <b>Upload Document:</b>
             </Typography>

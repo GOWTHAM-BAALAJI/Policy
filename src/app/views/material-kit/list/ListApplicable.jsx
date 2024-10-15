@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, Dialog, DialogActions, DialogTitle, DialogContent, Grid, Icon, MenuItem, Select, Table, styled, Typography } from "@mui/material";
+import { Box, Button, Card, Grid, Icon, MenuItem, Select, Table, styled, Typography } from "@mui/material";
 import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 import { jwtDecode } from "jwt-decode";
+
+const ContentBox = styled("div")(({ theme }) => ({
+  margin: "20px",
+  [theme.breakpoints.down("sm")]: { margin: "16px" }
+}));
 
 const StyledSelect = styled(Select)(() => ({
     width: '100%',
@@ -175,61 +180,63 @@ const ApplicableTable = () => {
 
 
   return (
+    <ContentBox className="analytics">
+    <Card sx={{ px: 3, py: 3, height: '100%', width: '100%' }}>
     <Grid container spacing={2}>
     <Grid item lg={6} md={6} sm={6} xs={6}>
         <Typography variant="h5" sx={{fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1.4rem', marginLeft: {sm: 2, xs: 2}, marginTop: {sm: 2, xs: 2}, marginRight: {sm: 2, xs: 2}}}>
-            List of Policies, SOPs and Guidance notes
+            Policies, SOPs and Guidance notes
         </Typography>
     </Grid>
-    {roleId === 1 && (
-  <Grid item lg={3} md={3} sm={3} xs={3}>
-    <Button
-      variant="contained"
-      startIcon={<AddIcon />} // Adding the "+" icon
-      sx={{
-        fontFamily: 'sans-serif',
-        fontSize: '0.875rem',
-        textTransform: 'none',
-        marginTop: { sm: 2, xs: 2 },
-        height: '30px',
-      }}
-      onClick={() => navigate('/initiate/psg')} // Navigate to the desired path
-    >
-      New
-    </Button>
-  </Grid>
-)}
-    <Grid item lg={roleId === 1 ? 3 : 6} md={roleId === 1 ? 3 : 6} sm={roleId === 1 ? 3 : 6} xs={roleId === 1 ? 3 : 6}>
-  <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 2, mr: 2 }}>
-    <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2, mt: 0.5 }}>
-      Type
-    </Typography>
-    <Controller
-      name="documentType"
-      control={control}
-      render={({ field }) => (
-        <StyledSelect
-          labelId="document-type-label"
-          id="documentType"
-          {...field}
-          sx={{
-            width: '180px',
-          }}
-          onChange={(e) => {
-            field.onChange(e);
-          }}
-        >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          <MenuItem value={1}>Policy</MenuItem>
-          <MenuItem value={3}>SOP</MenuItem>
-          <MenuItem value={2}>Guidance Note</MenuItem>
-        </StyledSelect>
-      )}
-    />
-  </Grid>
-</Grid>
+    {/* {roleId === 1 && (
+    <Grid item lg={3} md={3} sm={3} xs={3}>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />} // Adding the "+" icon
+        sx={{
+          fontFamily: 'sans-serif',
+          fontSize: '0.875rem',
+          textTransform: 'none',
+          marginTop: { sm: 2, xs: 2 },
+          height: '30px',
+        }}
+        onClick={() => navigate('/initiate/psg')} // Navigate to the desired path
+      >
+        Create New
+      </Button>
+    </Grid>
+    )} */}
+    <Grid item lg={6} md={6} sm={6} xs={6}>
+    <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 2, mr: 2 }}>
+      <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2, mt: 0.5 }}>
+        Type
+      </Typography>
+      <Controller
+        name="documentType"
+        control={control}
+        render={({ field }) => (
+          <StyledSelect
+            labelId="document-type-label"
+            id="documentType"
+            {...field}
+            sx={{
+              width: '160px',
+            }}
+            onChange={(e) => {
+              field.onChange(e);
+            }}
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            <MenuItem value={1}>Policy</MenuItem>
+            <MenuItem value={3}>SOP</MenuItem>
+            <MenuItem value={2}>Guidance Note</MenuItem>
+          </StyledSelect>
+        )}
+      />
+    </Grid>
+    </Grid>
     <Grid item lg={12} md={12} sm={12} xs={12}>
       <Box width="100%" overflow="auto">
         <DataTable
@@ -278,6 +285,8 @@ const ApplicableTable = () => {
       </Box>
     </Grid>
     </Grid>
+    </Card>
+    </ContentBox>
   );
 };
 

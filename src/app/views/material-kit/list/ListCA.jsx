@@ -1,173 +1,247 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, Grid, Icon, MenuItem, Select, Table, styled, TableRow, TableBody, TableCell, TableHead, IconButton, TablePagination, Typography } from "@mui/material";
+import { Box, Button, Card, Grid, MenuItem, Select, styled, Tabs, Tab, Typography } from "@mui/material";
 import { useForm, Controller } from 'react-hook-form';
-import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useLocation } from 'react-router-dom';
+import DataTable from 'react-data-table-component';
+import { jwtDecode } from "jwt-decode";
 
-// STYLED COMPONENT
-const StyledTable = styled(Table)(() => ({
-  whiteSpace: "pre",
-  "& thead": {
-    "& tr": { "& th": { paddingLeft: 0, paddingRight: 0 } }
-  },
-  "& tbody": {
-    "& tr": { "& td": { paddingLeft: 0, textTransform: "capitalize" } }
-  }
+const ContentBox = styled("div")(({ theme }) => ({
+  margin: "20px",
+  [theme.breakpoints.down("sm")]: { margin: "16px" }
 }));
-
-const StyledSelect = styled(Select)(() => ({
-    width: '100%',
-    height: '30px', // Ensure the select component itself has a defined height
-    fontFamily: 'sans-serif',
-    fontSize: '0.875rem',
-    '& .MuiInputBase-root': {
-      height: '30px', // Apply the height to the input base
-      alignItems: 'center', // Align the content vertically
-      fontFamily: 'sans-serif',
-      fontSize: '1.10rem'
-    },
-    '& .MuiInputLabel-root': {
-      lineHeight: '30px', // Set the line height to match the height of the input
-      top: '40', // Align the label at the top of the input
-      transform: 'none', // Ensure there's no unwanted transformation
-      left: '20px', // Add padding for better spacing
-      fontFamily: 'sans-serif',
-      fontSize: '0.875rem'
-    },
-    '& .MuiInputLabel-shrink': {
-      top: '-6px', // Move the label when focused or with content
-    },
-}));
-
-const caList = [
-  {
-    sno: "1",
-    title: "Circular 1",
-    lastupdated: "01/05/2024",
-  },
-  {
-    sno: "2",
-    title: "Circular 2",
-    lastupdated: "02/05/2024",
-  },
-  {
-    sno: "3",
-    title: "Advisory 1",
-    lastupdated: "03/05/2024",
-  },
-  {
-    sno: "4",
-    title: "Circular 3",
-    lastupdated: "04/05/2024",
-  },
-  {
-    sno: "5",
-    title: "Advisory 2",
-    lastupdated: "05/05/2024",
-  },
-  {
-    sno: "6",
-    title: "Circular 4",
-    lastupdated: "06/05/2024",
-  },
-  {
-    sno: "7",
-    title: "Circular 5",
-    lastupdated: "07/05/2024",
-  },
-  {
-    sno: "8",
-    title: "Advisory 3",
-    lastupdated: "08/05/2024",
-  }
-];
 
 export default function CATable() {
+  const { control } = useForm();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [page, setPage] = useState(0);
+  const queryParams = new URLSearchParams(location.search);
+  const initialTab = queryParams.get('tab') || '4';
+
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [tabledata, setTableData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [psgList, setPsgList] = useState([]);
+  const [userId, setUserId] = useState(null);
+  const [roleId, setRoleId] = useState(null);
+
+  const [loading, setLoading] = useState(true);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedDocument, setSelectedDocument] = useState(null);
 
-  const handleChangePage = (_, newPage) => {
-    setPage(newPage);
+  const userToken = useSelector((state)=>{
+    return state.token;//.data;
+  });
+  console.log("UserToken:",userToken);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:3000/circular-advisories/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
+        },
+      });
+      const data = await response.json();
+      setPsgList(data.data); // Adjust this based on your API response structure
+      const decodedToken = jwtDecode(userToken);
+      console.log('Decoded Token:', decodedToken.role_id);
+      if (decodedToken.role_id) {
+        setRoleId(decodedToken.role_id);
+      }
+      if (decodedToken.user_id) {
+        setUserId(decodedToken.user_id);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
+  useEffect(() => {
+    console.log('Current roleId:', roleId); // Log the roleId
+    console.log('Current userId:', userId); // Log the roleId
+  }, [roleId, userId]);
+
+  const columns1 = [
+    {
+      name: 'ID',
+      selector: row => row.id || 'N/A',
+      sortable: true,
+      // center: true,
+      cell: (row) => (
+        <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
+          {row.id || 'N/A'}
+        </div>
+      ),
+      width: '10%',
+    },
+    {
+      name: 'Document Title',
+      selector: row => row.title || 'N/A',
+      sortable: true,
+      // center: true,
+      width: '30%',
+      cell: (row) => (
+        <Typography
+          variant="body2"
+          sx={{ textAlign: 'left', cursor: 'pointer', color: 'blue', textDecoration: 'underline', paddingLeft: '8px' }}
+          onClick={() => handleRowClick(row)}
+        >
+          {row.title}
+        </Typography>
+      ),
+    },
+    {
+      name: 'Document Description',
+      selector: row => row.description || 'N/A',
+      sortable: true,
+      // center: true,
+      width: '60%',
+      cell: (row) => (
+        <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
+          {row.description || 'N/A'}
+        </div>
+      ),
+    },
+  ];
+
+  const columns = columns1;
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    fetchData(activeTab, page, rowsPerPage);
   };
+
+  const handleRowsPerPageChange = (newRowsPerPage, page) => {
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
+    fetchData(activeTab, 1, newRowsPerPage);
+  };
+
+  useEffect(() => {
+    fetchData(activeTab, currentPage, rowsPerPage);
+  }, [activeTab, currentPage, rowsPerPage]);
+
+  const handleRowClick = async (row) => {
+    setSelectedDocument(row.title);
+    setSelectedRow(row);
+  
+    try {
+      const response = await fetch(`http://localhost:3000/circular-advisories/${row.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+  
+      const data = await response.json();
+  
+      if (data.status && data.data.file_name) {
+        const fileResponse = await fetch(`http://localhost:3000/CA_document/${data.data.file_name}`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        });
+        const blob = await fileResponse.blob();  
+        const url = window.URL.createObjectURL(new Blob([blob]));  
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', data.data.file_name);  
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);  
+        window.URL.revokeObjectURL(url);
+      } else {
+        console.error('File not found or invalid response');
+      }
+    } catch (error) {
+      console.error('Error fetching document:', error);
+    }
+  };    
+
 
   return (
+    <ContentBox className="analytics">
+    <Card sx={{ px: 3, py: 3, height: '100%', width: '100%' }}>
     <Grid container spacing={2}>
-    <Grid item lg={12} md={12} sm={12} xs={12}>
-    <Grid container alignItems="center" justifyContent="space-between">
-        <Typography variant="h5" sx={{fontFamily: 'sans-serif', fontSize: '1.4rem', marginLeft: {sm: 2, xs: 2}, marginTop: {sm: 2, xs: 2}, marginRight: {sm: 2, xs: 2}}}>
-            List of Circulars and Advisories
+      <Grid item lg={6} md={6} sm={6} xs={6}>
+        <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1.4rem', marginLeft: { sm: 2, xs: 2 }, marginTop: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
+          Circulars and Advisories
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />} // Adding the "+" icon
-          sx={{
-            fontFamily: 'sans-serif',
-            fontSize: '0.875rem',
-            textTransform: 'none',
-            marginTop: 2,
-            marginRight: 2,
-            height: '30px',
-          }}
-          onClick={() => navigate('/initiate/ca')} // Navigate to the desired path
-        >
-          Initiate New
-        </Button>
+      </Grid>
+      {(roleId === 1 || roleId === 3) && (
+        <Grid item lg={6} md={6} sm={6} xs={6} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{
+              fontFamily: 'sans-serif',
+              fontSize: '0.875rem',
+              textTransform: 'none',
+              marginTop: { sm: 2, xs: 2 },
+              height: '30px',
+            }}
+            onClick={() => navigate('/initiate/ca')}
+          >
+            Create New
+          </Button>
         </Grid>
+      )}
+      <Grid item lg={12} md={12} sm={12} xs={12}>
+        <Box width="100%" overflow="auto">
+          <DataTable
+            columns={columns}
+            data={psgList}
+            progressPending={loading}
+            pagination
+            paginationServer
+            paginationTotalRows={psgList.length} // Adjust to the total records returned by your API
+            paginationRowsPerPageOptions={[5, 10, 25]}
+            paginationPerPage={rowsPerPage}
+            onChangePage={handlePageChange}
+            onChangeRowsPerPage={handleRowsPerPageChange}
+            customStyles={{
+              table: {
+                style: {
+                  width: '100%',
+                  autowidth: false,
+                  scrollX: true,
+                  responsive: true,
+                  tableLayout: 'fixed',
+                },
+              },
+              headCells: {
+                style: {
+                  fontSize: '1rem',
+                  fontFamily: 'sans-serif',
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                },
+              },
+              cells: {
+                style: {
+                  fontFamily: 'sans-serif',
+                  fontSize: '0.875rem',
+                  textAlign: 'center',
+                  padding: '8px',
+                },
+              },
+            }}
+          />
+        </Box>
+      </Grid>
     </Grid>
-    <Grid item lg={12} md={12} sm={12} xs={12}>
-    <Box width="100%" overflow="auto">
-      <StyledTable>
-        <TableHead>
-          <TableRow sx={{ '& th': { fontSize: '1rem', fontFamily: 'sans-serif', fontWeight: 'bold' } }}>
-            <TableCell align="center" sx={{ width: '10%' }}>S.No.</TableCell>
-            <TableCell align="center" sx={{ width: '50%' }}>Document Title</TableCell>
-            <TableCell align="center" sx={{ width: '20%' }}>Last Updated on</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {caList
-            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            .map((subscriber, index) => (
-              <TableRow 
-                key={index}
-                sx={{
-                    '& td': {
-                    padding: '8px',       // Decrease padding to reduce gap between rows
-                    height: '10px',       // Adjust height if needed
-                    },
-                    fontFamily: 'sans-serif',
-                    fontSize: '0.875rem'
-                }}
-              >
-                <TableCell align="center" sx={{ width: '10%' }}>{subscriber.sno}</TableCell>
-                <TableCell align="center" sx={{ width: '50%' }}>{subscriber.title}</TableCell>
-                <TableCell align="center" sx={{ width: '20%' }}>{subscriber.lastupdated}</TableCell>
-              </TableRow>
-            ))}
-        </TableBody>
-      </StyledTable>
-
-      <TablePagination
-        sx={{ px: 2, marginRight: 6 }}
-        page={page}
-        component="div"
-        rowsPerPage={rowsPerPage}
-        count={caList.length}
-        onPageChange={handleChangePage}
-        rowsPerPageOptions={[5, 10, 25]}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        nextIconButtonProps={{ "aria-label": "Next Page" }}
-        backIconButtonProps={{ "aria-label": "Previous Page" }}
-      />
-    </Box>
-    </Grid>
-    </Grid>
+    </Card>
+    </ContentBox>
   );
-}
+};

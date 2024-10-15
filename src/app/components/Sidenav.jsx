@@ -70,7 +70,7 @@ export default function Sidenav({ children }) {
     <Fragment>
       <StyledScrollBar options={{ suppressScrollX: true }}>
         {children}
-        <MatxVerticalNav items={roleId === 4 ? navigations2 : navigations1} />
+        <MatxVerticalNav items={roleId === 8 ? navigations2 : navigations1} />
       </StyledScrollBar>
 
       <SideNavMobile onClick={() => updateSidebarMode({ mode: "close" })} />

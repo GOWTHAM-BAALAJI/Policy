@@ -12,7 +12,7 @@ import PolicyList from "../material-kit/list/PolicyList";
 
 // STYLED COMPONENTS
 const ContentBox = styled("div")(({ theme }) => ({
-  margin: "30px",
+  margin: "20px",
   [theme.breakpoints.down("sm")]: { margin: "16px" }
 }));
 
@@ -58,15 +58,15 @@ export default function Analytics() {
   const renderTable = () => {
     switch (selectedSection) {
       case 'Approved':
-        return <ApprovedTable />;
+        return <PolicyList initialTab={1}/>;
       case 'Rejected':
-        return <RejectedTable />;
+        return <PolicyList initialTab={2}/>;
       case 'Pending':
-        return <PendingTable />;
+        return <PolicyList initialTab={3}/>;
       case 'Waiting for Action':
-        return <WaitingForActionTable />;
+        return <PolicyList initialTab={4}/>;
       default:
-        return <PolicyList showRowsPerPageOptions={false} />;
+        return <PolicyList initialTab={4} />;
     }
   };
 

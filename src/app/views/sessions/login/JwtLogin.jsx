@@ -227,7 +227,7 @@ const handleMouseDownPassword = (event) => {
           <Grid container>
             <Grid item sm={12} xs={12}>
               <div className="img-wrapper">
-                <img src={img1} width="300" alt="" />
+                <img src={img1} width="40%" alt="" />
               </div>
               <ContentBox>
                 <Formik
@@ -316,6 +316,10 @@ const handleMouseDownPassword = (event) => {
                         sx={{ my: 2 }}>
                         Login
                       </LoadingButton>
+
+                      <Typography sx={{ fontSize: '12px', fontWeight: 10, fontFamily: 'sans-serif', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        © 2024. Policy by Spandana
+                      </Typography>
                     </form>
                   )}
                 </Formik>
