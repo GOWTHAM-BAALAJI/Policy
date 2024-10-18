@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Card, CardContent, Checkbox, Dialog, DialogActions, DialogTitle, DialogContent, Grid, Icon, MenuItem, ListItemText, Select, Table, styled, TableRow, TableBody, TableCell, TableHead, TextField, IconButton, TablePagination, Typography } from "@mui/material";
+import axios from "axios";
+import { Box, Button, Card, CardContent, Checkbox, Divider, Grid, Icon, MenuItem, ListItemText, Paper, Select, Table, styled, TableRow, TableBody, TableCell, TableHead, TableContainer, TextField, IconButton, TablePagination, Typography } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import { useLocation, useParams } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from "react-hot-toast";
+import img1 from "../../../assets/download_file_icon.png";
+
+const ContentBox = styled("div")(({ theme }) => ({
+    margin: "20px",
+    [theme.breakpoints.down("sm")]: { margin: "16px" }
+}));
 
 const StyledTextField = styled(TextField)(() => ({
     width: "100%",
@@ -71,18 +79,19 @@ export default function PolicyDetails() {
     const navigate = useNavigate();
     const { id } = useParams();
     const location = useLocation();
-    const { title, status } = location.state || {}; 
+    const { title, status, activeTab } = location.state || {}; 
     console.log("Document status: ", status);
+    console.log("Document tab: ", activeTab);
 
-    const reviewersOptions = [
-        { value:'572', label: 'testUser2' }
-    ]
+    // const reviewersOptions = [
+    //     { value:'572', label: 'testUser2' }
+    // ]
 
-    const approvalMembersOptions = [
-        { value: '573', label: 'testUser3' },
-        { value: '574', label: 'testUser4' },
-        { value: '575', label: 'testUser5' },
-    ];
+    // const approvalMembersOptions = [
+    //     { value: '573', label: 'testUser3' },
+    //     { value: '574', label: 'testUser4' },
+    //     { value: '575', label: 'testUser5' },
+    // ];
 
     const userGroupOptions = [
         { value: '1', label: 'Field Staff' },
@@ -91,6 +100,13 @@ export default function PolicyDetails() {
 
     const [userId, setUserId] = useState(null);
     const [roleId, setRoleId] = useState(null);
+
+    const [reviewersOptions, setReviewersOptions] = useState([]);
+    const [approvalMembersOptions, setApprovalMembersOptions] = useState([]);
+
+    
+    console.log("User id: ",userId);
+    console.log("Role id: ",roleId);
     const [sortColumn, setSortColumn] = useState(''); // Column being sorted
     const [sortDirection, setSortDirection] = useState('asc');
     const [loading, setLoading] = useState(true);
@@ -184,7 +200,49 @@ export default function PolicyDetails() {
     }
     }, [selectedDocument]);
 
+    useEffect(() => {
+        // Fetch reviewers from the API
+        axios.get('http://localhost:3000/auth/getReviewer', {
+            headers: {
+              Authorization: `Bearer ${userToken}`,  // Include the JWT token in the Authorization header
+            },
+          })
+          .then(response => {
+            if (response.data.status) {
+              // Map the API response to format for dropdown (using emp_name as label and user_id as value)
+              const fetchedReviewers = response.data.data.map(reviewer => ({
+                value: reviewer.user_id,
+                label: reviewer.emp_name,
+              }));
+              setReviewersOptions(fetchedReviewers);
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching reviewers:', error);
+          });
+    }, []);
 
+    useEffect(() => {
+        // Fetch reviewers from the API
+        axios.get('http://localhost:3000/auth/getApprover', {
+            headers: {
+              Authorization: `Bearer ${userToken}`,  // Include the JWT token in the Authorization header
+            },
+          })
+          .then(response => {
+            if (response.data.status) {
+              // Map the API response to format for dropdown (using emp_name as label and user_id as value)
+              const fetchedApprovalMembers = response.data.data.map(approvalmember => ({
+                value: approvalmember.user_id,
+                label: approvalmember.emp_name,
+              }));
+              setApprovalMembersOptions(fetchedApprovalMembers);
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching reviewers:', error);
+          });
+    }, []);
 
 
     const [decision, setDecision] = useState('');
@@ -208,15 +266,17 @@ export default function PolicyDetails() {
     };
 
     const pendingApprover = selectedDocument?.Policy_status?.find(
-        status => {
-          return status.approver_id === selectedDocument?.pending_at_id;
-        }
+        status => status.approver_id === selectedDocument?.pending_at_id
     );
-    console.log("Pending approver:",pendingApprover);
     
-    // Check if the pendingApprover exists before accessing its properties
-    const pendingApproverName = pendingApprover ? pendingApprover.approver_details?.emp_name : 'No pending approver';
-    console.log("Pending approver name:",pendingApproverName);
+    // If pendingApprover is not found and pending_at_id is equal to initiator_id, set name to initiator's name
+    const pendingApproverName = pendingApprover 
+        ? pendingApprover.approver_details?.emp_name 
+        : (selectedDocument?.pending_at_id === selectedDocument?.initiator_id 
+            ? 'Initiator' 
+            : 'No pending approver');
+    
+    console.log("Pending approver name:", pendingApproverName);
 
     console.log("Selected Document:", selectedDocument);
 
@@ -252,7 +312,14 @@ export default function PolicyDetails() {
     };
 
     const initiators = [
-        { id: 571, name: 'testUser1' },
+        { id: 583, name: 'Mukesh kumar' },
+        { id: 584, name: 'Prashant kumar' },
+        { id: 585, name: 'Surendra kumar Mishra' },
+        { id: 586, name: 'Jyoti Ranjan Behera' },
+        { id: 587, name: 'Saloni Agrawal' },
+        { id: 588, name: 'Bhavesh kukreja' },
+        { id: 589, name: 'Pamli Ganguly' },
+        { id: 590, name: 'Sarthak Nayak' },
     ];
     
     // Function to get the reviewer name by ID
@@ -262,7 +329,9 @@ export default function PolicyDetails() {
     };
 
     const reviewers = [
-        { id: 572, name: 'testUser2' },
+        { id: 581, name: 'Divaker Jha' },
+        { id: 582, name: 'Vikram Kumar' },
+        { id: 584, name: 'Prashant kumar' },
     ];
     
     // Function to get the reviewer name by ID
@@ -279,6 +348,12 @@ export default function PolicyDetails() {
     useEffect(() => {
         fetchDocumentDetails(id);
     }, [id]);
+
+    // useEffect(() => {
+    //     if (activeTab) {
+    //         fetchDocumentDetails(activeTab); // Replace with your API call to fetch data
+    //     }
+    // }, [activeTab]);
       
     const fetchDocumentDetails = async (documentId) => {
         setLoading(true); // Start loading
@@ -304,9 +379,11 @@ export default function PolicyDetails() {
             console.log('Decoded Token userid:', decodedToken.user_id);
             if (decodedToken.role_id) {
             setRoleId(decodedToken.role_id);
+            // console.log("Role id: ",roleId);
             }
             if (decodedToken.user_id) {
             setUserId(decodedToken.user_id);
+            // console.log("User id: ",userId);
             }
         } catch (err) {
           setError("Failed to fetch document details.");
@@ -335,14 +412,36 @@ export default function PolicyDetails() {
 
         const mappedDecision = mapDecisionToNumber(decision);
 
-        if((roleId === 1 || roleId === 3) && status === "Waiting for Action"){
-            if (!documentTitle || !documentDescription || uploadedFile.length === 0 || !selectedReviewer || approvalMembers.length === 0 || selectedUserGroup.length === 0) {
-                toast.error("Please fill in all the required fields");
-                return;
+        if((roleId === 1 || roleId === 3) && activeTab == 4){
+            if(selectedDocument.initiator_id === userId){
+                if (!documentTitle || !documentDescription || uploadedFile.length === 0 || !selectedReviewer || approvalMembers.length === 0 || selectedUserGroup.length === 0) {
+                    toast.error("Please fill in all the required fields");
+                    return;
+                }
+            }
+            else{
+                if(!mappedDecision){
+                    toast.error("Please fill the decision");
+                    return;
+                }
+                else{
+                    if(mappedDecision === 2){
+                        if(!remarks || uploadedFile1.length === 0){
+                            toast.error("Please fill the remarks and upload a file");
+                            return;
+                        }
+                    }
+                    else if(mappedDecision === 3){
+                        if(!remarks){
+                            toast.error("Please fill the remarks")
+                            return;
+                        }
+                    }
+                }
             }
         }
     
-        if ((roleId === 2 || roleId === 3 || roleId === 4 || roleId === 6) && status === "Waiting for Action"){
+        if ((roleId === 2 || roleId === 3 || roleId === 4 || roleId === 6) && activeTab == 4){
             if(!mappedDecision){
                 toast.error("Please fill the decision");
                 return;
@@ -418,7 +517,9 @@ export default function PolicyDetails() {
     };
 
     return (
-        <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <ContentBox className="analytics">
+        <Card sx={{ px: 3, py: 3, height: '100%', width: '100%' }}>
+        {/* <form onSubmit={handleSubmit} encType="multipart/form-data"> */}
         <Grid container spacing={2} alignItems="center">
         <Grid item lg={6} md={6} sm={6} xs={6}>
             <Typography
@@ -435,177 +536,340 @@ export default function PolicyDetails() {
                 Document Details:
             </Typography>
         </Grid>
-        <Grid item lg={6} md={6} sm={6} xs={6} display="flex" justifyContent="flex-end">
-            <Button variant="contained" onClick={handleBackClick} sx={{ marginLeft: 2, marginRight: 2, marginTop: 2, height: '28px' }}>
+        {activeTab == 4 && (
+        <Grid item lg={3} md={3} sm={3} xs={3} display="flex" justifyContent="flex-start">
+            <Typography
+                variant="h5"
+                sx={{
+                    fontFamily: 'sans-serif',
+                    fontSize: '1.4rem',
+                    fontWeight: 'bold',
+                    marginLeft: 6,
+                    marginTop: 2,
+                    marginRight: 2,
+                }}
+            >
+                Action:
+            </Typography>
+        </Grid>
+        )}
+        <Grid item lg={activeTab == 4 ? 3 : 6} md={activeTab == 4 ? 3 : 6} sm={activeTab == 4 ? 3 : 6} xs={activeTab == 4 ? 3 : 6} display="flex" justifyContent="flex-end">
+            <Button variant="contained" onClick={handleBackClick} sx={{ marginLeft: 2, marginRight: 2, marginTop: 2, height: '28px', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)' }, }}>
                 Back
             </Button>
         </Grid>
-        <Grid item lg={12} md={12} sm={12} xs={12} sx={{fontFamily: 'sans-serif', fontSize: '0.875 rem', marginLeft: {sm: 2, xs: 2}, marginTop: {sm: 2, xs: 2}, marginRight: {sm: 2, xs: 2}}}>
-        {selectedDocument ? (
-            <><Typography variant="h8" sx={{ fontFamily: 'sans-serif' }}>
+        </Grid>
+        <Grid container spacing={2} alignItems="center">
+        <Grid item lg={6} md={6} sm={12} xs={12} sx={{fontFamily: 'sans-serif', fontSize: '0.875 rem', marginLeft: 2, marginTop: 2, marginRight: 2, paddingRight: '16px'}}>
+        {selectedDocument && (
+            <>
+            {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif' }}>
                 <b>Document ID:</b> {selectedDocument.id}
-            </Typography>
-            <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
+            </Typography> */}
+            <TableContainer component={Paper} sx={{ marginLeft: '0', }}>
+                <Table aria-label="data table">
+                    <TableBody>
+                        <TableRow>
+                            <TableCell sx={{ pl: 2, width: '30%' }}><b>Document ID:</b></TableCell>
+                            <TableCell sx={{ pl: 2, width: '70%' }}>{selectedDocument.id}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell sx={{ pl: 2, }}><b>Document Title:</b></TableCell>
+                            <TableCell sx={{ pl: 2, }}>{selectedDocument.title}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                            <TableCell sx={{ pl: 2, }}><b>Document Description:</b></TableCell>
+                            <TableCell sx={{ pl: 2, }}>{selectedDocument.description}</TableCell>
+                        </TableRow>
+                        {roleId !== 8 && (
+                            <><TableRow>
+                                <TableCell sx={{ pl: 2, }}><b>Initiator Name:</b></TableCell>
+                                <TableCell sx={{ pl: 2, }}>{selectedDocument.initiator_details?.emp_name}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell sx={{ pl: 2, }}><b>Reviewer Name:</b></TableCell>
+                                <TableCell sx={{ pl: 2, }}>{selectedDocument.reviwer_details?.emp_name}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell sx={{ pl: 2, }}><b>Version:</b></TableCell>
+                                <TableCell sx={{ pl: 2, }}>{selectedDocument.version}</TableCell>
+                            </TableRow>
+                            </>
+                        )}
+                        {activeTab == 3 && roleId !== 8 && (
+                            <><TableRow>
+                                <TableCell sx={{ pl: 2 }}><b>Pending at:</b></TableCell>
+                                <TableCell sx={{ pl: 2 }}>{selectedDocument.pending_at_details?.emp_name}</TableCell>
+                            </TableRow>
+                            </>
+                        )}
+                        {activeTab == 1 && selectedDocument.pending_at_id === null && roleId !== 8 && (
+                            <><TableRow>
+                                <TableCell sx={{ pl: 2 }}><b>Final Decision: </b></TableCell>
+                                <TableCell sx={{ pl: 2 }}>Approved</TableCell>
+                            </TableRow>
+                            </>
+                        )}
+                        {activeTab == 2 && selectedDocument.pending_at_id === null && roleId !== 8 && (
+                            <><TableRow>
+                                <TableCell sx={{ pl: 2 }}><b>Final Decision: </b></TableCell>
+                                <TableCell sx={{ pl: 2 }}>Rejected</TableCell>
+                            </TableRow>
+                            </>
+                        )}
+                        {activeTab == 4 && (selectedDocument.pending_at_id === selectedDocument.initiator_id || selectedDocument.pending_at_id === null) && latestPolicyStatus && roleId !== 8 && (
+                            <><TableRow>
+                                <TableCell sx={{ pl: 2 }}><b>Latest policy status: </b></TableCell>
+                                <TableCell sx={{ pl: 2 }}>{latestPolicyStatus.decision === 1 ? 'Approved' : latestPolicyStatus.decision === 2 ? 'Sent for review' : latestPolicyStatus.decision === 3 ? 'Rejected' : 'Pending'} by {latestPolicyStatus.approver_details.emp_name}</TableCell>
+                            </TableRow></>
+                        )}
+                    {/* </TableBody>
+                </Table>
+            </TableContainer> */}
+            {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                 <b>Document Title:</b> {selectedDocument.title}
             </Typography>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                 <b>Document Description:</b> {selectedDocument.description}
-            </Typography>
-            {roleId !== 8 && (
+            </Typography> */}
+            {/* {roleId !== 8 && (
             <>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
-                <b>Initiator Name:</b> {getInitiatorName(selectedDocument.initiator_id)}
+                <b>Initiator Name:</b> {selectedDocument.initiator_details?.emp_name}
             </Typography>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
-                <b>Reviewer Name:</b> {getReviewerName(selectedDocument.reviewer_id)}
+                <b>Reviewer Name:</b> {selectedDocument.reviwer_details?.emp_name}
             </Typography>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                 <b>Version:</b> {selectedDocument.version}
             </Typography>
             </>
-            )}
-            {status === "Pending" && !(selectedDocument.pending_at_id === userId) && roleId !== 8 && (
+            )} */}
+            {/* {activeTab == 3 && roleId !== 8 && (
             <>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
-                <b>Pending at:</b> {pendingApproverName}
+                <b>Pending at:</b> {selectedDocument.pending_at_details?.emp_name}
             </Typography>
             </>
-            )}
+            )} */}
             {/* Files section to display uploaded files */}
-            <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, mb: -1 }}>
+            {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, mb: -1 }}>
             <b>Files:</b>
-            </Typography>
-            {status === "Waiting for Action" && (roleId === 1 || roleId === 3) ? (
+            </Typography> */}
+            {activeTab == 4 && (roleId === 1 || roleId === 3) ? (
             <>
             {selectedDocument.policy_files && Array.isArray(selectedDocument.policy_files) && selectedDocument.policy_files.length > 0 ? (
-            <Grid container spacing={2}>
-                <Grid item xs={5}>
-                <Typography variant="h10" sx={{ fontFamily: 'sans-serif', mt: 2, ml: 10 }}>
-                    <b>Received for Review</b>
-                </Typography>
+            
+            <><TableRow>
+                <TableCell sx={{ pl: 2 }}><b>Received for changes</b></TableCell>
+                {/* <Typography variant="h10" sx={{ fontFamily: 'sans-serif', mt: 2, ml: 10 }}>
+                    <b>Received for Changes</b>
+                </Typography> */}
+                <TableCell>
                 <ul>
                 {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 2) ? (
-                    <li>
+                    <li style={{ listStyleType: 'none' }}>
                         <a
                         href={`http://localhost:3000/policy_document/${selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 2).file_name}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         download
                         style={{
-                            color: 'blue',
-                            textDecoration: 'underline',
+                            // color: 'blue',
+                            // textDecoration: 'underline',
                             cursor: 'pointer',
                         }}
                         >
-                        {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 2).file_name}
+                        <div className="img-wrapper">
+                            <img src={img1} width="15%" alt="" />
+                        </div>
+                        {/* <InsertDriveFileIcon sx={{ fontSize: 44, color: 'yellow' }} /> */}
                         </a>
-                        <span style={{ marginLeft: '16px' }}>
-                        Version: {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 2).version}
+                            Version: {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 2).version}
+                            <span style={{ marginLeft: '16px' }}>
+                            Uploaded on: {(() => {
+                                const file = selectedDocument.policy_files.find(
+                                file => file.version === selectedDocument.version && file.type === 2
+                                );
+                                return file ? new Date(file.createdAt).toLocaleDateString('en-GB') : 'N/A';
+                            })()}
                         </span>
                     </li>
                     ) : (
                     <Typography>No file found for the selected version and type.</Typography>
                     )}
                 </ul>
-                </Grid>
+                </TableCell>
+            </TableRow>
 
-                <Grid item xs={5}>
-                <Typography variant="h10" sx={{ fontFamily: 'sans-serif', mt: 2, ml: 10 }}>
+            <TableRow>
+
+                {/* <Typography variant="h10" sx={{ fontFamily: 'sans-serif', mt: 2, ml: 10 }}>
                     <b>Uploaded Files</b>
-                </Typography>
+                </Typography> */}
+                <TableCell sx={{ pl: 2 }}><b>Uploaded files</b></TableCell>
+                <TableCell>
                 <ul>
                 {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1) ? (
-                        <li>
+                        <li style={{ listStyleType: 'none' }}>
                         <a
                             href={`http://localhost:3000/policy_document/${selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).file_name}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             download
                             style={{
-                            color: 'blue',
-                            textDecoration: 'underline',
+                            // color: 'blue',
+                            // textDecoration: 'underline',
                             cursor: 'pointer',
                             }}
                         >
-                            {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).file_name}
+                        <div className="img-wrapper">
+                            <img src={img1} width="15%" alt="" />
+                        </div>
                         </a>
-                        <span style={{ marginLeft: '16px' }}>
+                        <div>
                             Version: {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).version}
+                            <span style={{ marginLeft: '16px' }}>
+                            Uploaded on: {(() => {
+                                const file = selectedDocument.policy_files.find(
+                                file => file.version === selectedDocument.version && file.type === 1
+                                );
+                                return file ? new Date(file.createdAt).toLocaleDateString('en-GB') : 'N/A';
+                            })()}
                         </span>
+                        </div>
                         </li>
                     ) : (
                         <Typography>No file found for the selected version and type.</Typography>
                     )}
                 </ul>
-                </Grid>
-            </Grid>
+                </TableCell>
+            </TableRow></>
             ) : (
                 <Typography>No files uploaded</Typography>
             )}
             </>
-            ) : status === "Waiting for Action" && (roleId === 2 || roleId === 3 || roleId === 4 || roleId === 6) ? (
+            ) : activeTab == 4 && (roleId === 2 || roleId === 3 || roleId === 4 || roleId === 6) ? (
                 <>
                 {selectedDocument.policy_files && Array.isArray(selectedDocument.policy_files) && selectedDocument.policy_files.length > 0 ? (
-                    <Grid container spacing={2}>
-                        {/* First Column: Received for Review */}
-                        <Grid item xs={6}>
-                        <Typography variant="h10" sx={{ fontFamily: 'sans-serif', mt: 2, ml: 10 }}>
-                            <b>Received file</b>
-                        </Typography>
+                    <><TableRow>
+                        <TableCell sx={{ pl: 2 }}><b>Received file</b></TableCell>
+                        <TableCell>
                         <ul>
                         {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1) ? (
-                            <li>
+                            <li style={{ listStyleType: 'none' }}>
                                 <a
                                 href={`http://localhost:3000/policy_document/${selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).file_name}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 download
                                 style={{
-                                    color: 'blue',
-                                    textDecoration: 'underline',
+                                    // color: 'blue',
+                                    // textDecoration: 'underline',
                                     cursor: 'pointer',
                                 }}
                                 >
-                                {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).file_name}
+                                <div className="img-wrapper">
+                                    <img src={img1} width="15%" alt="" />
+                                </div>
                                 </a>
-                                <span style={{ marginLeft: '16px' }}>
-                                Version: {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).version}
-                                </span>
+                                <div>
+                                    Version: {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).version}
+                                    <span style={{ marginLeft: '16px' }}>
+                                    Uploaded on: {(() => {
+                                        const file = selectedDocument.policy_files.find(
+                                        file => file.version === selectedDocument.version && file.type === 1
+                                        );
+                                        return file ? new Date(file.createdAt).toLocaleDateString('en-GB') : 'N/A';
+                                    })()}
+                                    </span>
+                                </div>
                             </li>
                             ) : (
                             <Typography>No file found for the selected version and type.</Typography>
                             )}
                         </ul>
-                        </Grid>
-                    </Grid>
+                        </TableCell>
+                        </TableRow></>
                     ) : (
                         <Typography>No files uploaded</Typography>
                     )}
                     </>
-            ) : (
-                <ul>
-                {selectedDocument.policy_files.map((file, index) => (
-                    <li key={index} style={{ marginBottom: '8px' }}>
+            ) : activeTab == 3 && (roleId !== 8) ? (
+                <><TableRow>
+                    <TableCell sx={{ pl: 2 }}><b>Files</b></TableCell>
+                    <TableCell>
+                    <ul>
+                    {selectedDocument.policy_files.map((file, index) => (
+                    <li key={index} style={{ marginBottom: '8px', listStyleType: 'none' }}>
                         <a
                         href={`http://localhost:3000/policy_document/${file.file_name}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         download
                         style={{
-                            color: 'blue',
-                            textDecoration: 'underline',
+                            // color: 'blue',
+                            // textDecoration: 'underline',
                             cursor: 'pointer',
 
                         }}
                         >
-                        {file.file_name}
+                        <div className="img-wrapper">
+                            <img src={img1} width="15%" alt="" />
+                        </div>
                         </a>
-                        <span style={{ marginLeft: '16px' }}>Version: {file.version}</span>
+                        <div style={{ marginTop: '4px' }}>
+                            Version: {file.version}
+                            <span style={{ marginLeft: '16px' }}>Uploaded on: {new Date(file.createdAt).toLocaleDateString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
+                        </div>
                     </li>
                 ))}
                 </ul>
+                </TableCell>
+                </TableRow></>
+            ) : (
+                <><TableRow>
+                    <TableCell sx={{ pl: 2 }}><b>Final file</b></TableCell>
+                    <TableCell>
+                    <ul>
+                    {selectedDocument.policy_files.map((file, index) => (
+                    <li key={index} style={{ marginBottom: '8px', listStyleType: 'none' }}>
+                        <a
+                        href={`http://localhost:3000/policy_document/${file.file_name}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        style={{
+                            // color: 'blue',
+                            // textDecoration: 'underline',
+                            cursor: 'pointer',
+
+                        }}
+                        >
+                        <div className="img-wrapper">
+                            <img src={img1} width="15%" alt="" />
+                        </div>
+                        </a>
+                        <div style={{ marginTop: '4px' }}>
+                            Version: {file.version}
+                            <span style={{ marginLeft: '16px' }}>Uploaded on: {new Date(file.createdAt).toLocaleDateString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
+                        </div>
+                    </li>
+                ))}
+                </ul>
+                </TableCell>
+                </TableRow></>
             )}
-            {(status === "Approved") && selectedDocument.pending_at_id === null && roleId !== 8 && (
+            </TableBody>
+                </Table>
+            </TableContainer>
+            </>
+            )}
+            </Grid>
+            <Grid item lg={5} md={5} sm={12} xs={12} sx={{fontFamily: 'sans-serif', fontSize: '0.875 rem', marginLeft: 2, marginTop: 2, marginRight: 2}}>
+            {selectedDocument ? (
+            <>
+            {/* {(status === "Approved") && selectedDocument.pending_at_id === null && roleId !== 8 && (
                 <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                     <b>Final Decision: </b> Approved
                 </Typography>
@@ -614,19 +878,13 @@ export default function PolicyDetails() {
                 <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                     <b>Final Decision: </b> Rejected
                 </Typography>
-            )}
+            )} */}
             {/* Display Latest Policy Status */}
-            {status === "Waiting for Action" && (selectedDocument.pending_at_id === selectedDocument.initiator_id || selectedDocument.pending_at_id === null) && latestPolicyStatus && roleId !== 8 && (
+            {/* {activeTab == 4 && (selectedDocument.pending_at_id === selectedDocument.initiator_id || selectedDocument.pending_at_id === null) && latestPolicyStatus && roleId !== 8 && (
             <Box sx={{ mt: 2 }}>
                 <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                 <b>Latest Policy Status:</b>
                 </Typography>
-                {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, ml: 2 }}>
-                <b>Approver ID:</b> {latestPolicyStatus.approver_id}
-                </Typography>
-                <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, ml: 2 }}>
-                <b>Priority:</b> {latestPolicyStatus.priority}
-                </Typography> */}
                 <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, ml: 2 }}>
                 <b>Approver Name:</b> {latestPolicyStatus.approver_details.emp_name}
                 </Typography>
@@ -640,21 +898,16 @@ export default function PolicyDetails() {
                     ? 'Rejected'
                     : 'Pending'}
                 </Typography>
-                {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, ml: 2 }}>
-                <b>Approver Email:</b> {latestPolicyStatus.approver_details.emp_email}
-                </Typography> */}
             </Box>
-            )}
+            )} */}
             {/* {selectedDocument.pending_at_id === selectedDocument.initiator_id && roleId === 1 && (
             <>
             <InitiatePSG />
             </>
             )} */}
-
-
-
-        
-            {status === "Waiting for Action" && selectedDocument.pending_at_id === userId && (roleId === 1 || roleId === 3) && (
+            <form onSubmit={handleSubmit} encType="multipart/form-data">
+            {/* <Box sx={{ width: '600px', margin: '0 auto', padding: '16px',}}> */}
+            {activeTab == 4 && selectedDocument.pending_at_id === userId && (roleId === 1) && (
             <>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
                 <b>Policy ID:</b>
@@ -663,7 +916,7 @@ export default function PolicyDetails() {
                 fullWidth
                 value={documentID}  // Use the state as the value (editable)
                 onChange={(e) => setDocumentID(e.target.value)}  // Update the state when changed
-                sx={{ mt: 1 }}
+                sx={{ mt: 1, }}
                 InputProps={{
                 readOnly: true,  // Make the field read-only
                 }}
@@ -746,32 +999,6 @@ export default function PolicyDetails() {
                 ))}
             </StyledSelect>
 
-            {/* Approval Committee Members Field */}
-            {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
-            <b>Select Approval Committee Members:</b>
-            </Typography>
-            <StyledSelect
-            labelId="approval-members-label"
-            id="approvalMembers"
-            multiple
-            value={selectedApprovalMembers}
-            onChange={(e) => {
-                handleSelectChangeApprovalMembers(e); // Handle changes in local state
-            }}
-            fullWidth
-            sx={{ mt: 1 }}
-            renderValue={renderPriorityValue}  // Display selected members
-            >
-            {approvalMembersOptions.map((member) => (
-                <MenuItem key={member.value} value={member.value}>
-                <Checkbox checked={selectedApprovalMembers.indexOf(member.value) > -1} />
-                <ListItemText
-                    primary={`${priorityOrder.indexOf(member.value) > -1 ? `${priorityOrder.indexOf(member.value) + 1}. ` : ''}${member.label}`}
-                />
-                </MenuItem>
-            ))}
-            </StyledSelect> */}
-
             {/* User Groups Field */}
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
                 <b>Select User Groups for Publishing:</b>
@@ -793,9 +1020,11 @@ export default function PolicyDetails() {
             </StyledSelect>
             </>
             )}
+            {/* </Box> */}
 
             {/* Decision dropdown */}
-            {(roleId === 2 || roleId === 3 || roleId === 4 || roleId === 6) && (selectedDocument.pending_at_id === userId) && status === "Waiting for Action" && (
+            {/* <Box sx={{ width: '600px', margin: '0 auto',}}> */}
+            {(roleId === 2 || roleId === 3 || roleId === 4 || roleId === 6) && (selectedDocument.pending_at_id === userId) && activeTab == 4 && (
             <Box sx={{ mt: 2 }}>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block' }}>
                 <b>Decision:</b>
@@ -817,10 +1046,12 @@ export default function PolicyDetails() {
             </StyledSelect>
             </Box>
             )}
+            {/* </Box> */}
 
+            {/* <Box sx={{ width: '600px', margin: '0 auto', mt: 2 }}> */}
             {(roleId === 2 || roleId === 3 || roleId === 4 || roleId === 6) && decision && decision !== "approved" && (
-            <Box sx={{ mt: 2 }}>
-            <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block' }}>
+            <>
+            <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                 <b>Remarks:</b>
             </Typography>
             <TextField
@@ -833,11 +1064,12 @@ export default function PolicyDetails() {
                 onChange={handleRemarksChange}
                 // onBlur={handleBlur}
                 sx={{ mt: 1 }}
-            />
-            </Box>
+            /></>
             )}
+            {/* </Box> */}
 
             {/* Conditional file upload field */}
+            {/* <Box sx={{ width: '600px', margin: '0 auto',}}> */}
             {(roleId === 2 || roleId === 3 || roleId === 4 || roleId === 6) && decision && decision === "reviewraised" && (
             <><Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1 }}>
                 <b>Upload Document:</b>
@@ -854,71 +1086,26 @@ export default function PolicyDetails() {
                 sx={{ mt: 1 }}
                 /></>
             )}
-            {selectedDocument.pending_at_id === userId && status === "Waiting for Action" && (
+            {/* </Box> */}
+
+            {selectedDocument.pending_at_id === userId && activeTab == 4 && (
             <Grid container justifyContent="center" sx={{ mt: 2, mb: 2 }}>
                 <Grid item>
-                    <Button type="submit" variant="contained" color="primary" sx={{ padding: '6px 16px', fontSize: '0.875rem', minHeight: '24px', lineHeight: 1 }}>
+                    <Button type="submit" variant="contained" sx={{ padding: '6px 16px', fontSize: '0.875rem', minHeight: '24px', lineHeight: 1, backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)' } }}>
                         Submit
                     </Button>
                 </Grid>
             </Grid>
-            )}</>
+            )}</form></>
             ) : (
                 <Typography>Loading...</Typography>
             )
         }
         </Grid>
         </Grid>
-        </form>
+        </Card>
+        </ContentBox>
     );
 };
 
 
-
-// import React, { useEffect, useState } from 'react';
-// import { useDispatch, useSelector } from 'react-redux';
-// import { useParams } from 'react-router-dom';
-
-// const PolicyDetails = () => {
-//   const { id } = useParams(); // Get the id from the URL
-//   const [documentDetails, setDocumentDetails] = useState(null);
-//   console.log("Document details: ",documentDetails);
-
-//   useEffect(() => {
-//     // Fetch the document details based on the id
-//     fetchDocumentDetails(id);
-//   }, [id]);
-
-//   const userToken = useSelector((state)=>{
-//     return state.token;//.data;
-//   });
-
-//   const fetchDocumentDetails = (documentId) => {
-//     // Fetch your document details from an API or other source
-//     // Example:
-//     fetch(`http://localhost:3000/policy/${documentId}`, {
-//         method: 'GET',
-//         headers: {
-//           'Content-Type': 'application/json',
-//           Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
-//         },
-//       })
-//       .then(response => response.json())
-//       .then(data => setDocumentDetails(data.data))
-//       .catch(error => console.error('Error fetching document:', error));
-//   };
-
-//   if (!documentDetails) {
-//     return <div>Loading...</div>;
-//   }
-
-//   return (
-//     <div>
-//       <h1>{documentDetails.title}</h1>
-//       {/* Render other details of the document */}
-//       <p>{documentDetails.description}</p>
-//     </div>
-//   );
-// };
-
-// export default PolicyDetails;

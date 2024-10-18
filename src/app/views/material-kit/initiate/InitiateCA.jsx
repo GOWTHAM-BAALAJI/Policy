@@ -122,7 +122,7 @@ const InitiateCA = () => {
     const userGroupOptions = [
         { value: '2', label: 'Field Staff' },
         { value: '1', label: 'HO Staff' },
-        { value: '3', label: 'Both' },
+        // { value: '3', label: 'Both' },
     ]
 
     const handleSelectChangeUserGroups = (event) => {
@@ -171,7 +171,7 @@ const InitiateCA = () => {
         const url = "http://localhost:3000/circular-advisories/";
         const formData = new FormData(); // Create a FormData object
     
-        // Append files to FormData
+        //Append files to FormData
         // uploadedFile.forEach(file => {
         //     formData.append("files[]", file); // Name the file array appropriately
         // });
@@ -179,7 +179,7 @@ const InitiateCA = () => {
         // Append other data to FormData
         formData.append("title", title);
         formData.append("description", description);
-        formData.append("files",uploadedFile);
+        formData.append("files[]",uploadedFile);
         formData.append("user_group", selectedUserGroup || null);
     
         const submitPromise=fetch(url, {
@@ -213,7 +213,7 @@ const InitiateCA = () => {
 
         toast.promise(submitPromise, {
             loading: 'Submitting...',
-            success: (data) => `Policy Initiated Successfully`, // Adjust based on your API response
+            success: (data) => `Circular Initiated Successfully`, // Adjust based on your API response
             error: (err) => `Error while Initiating`,
           });
         // console.log("Result:",result);
@@ -359,6 +359,7 @@ const InitiateCA = () => {
                             <input
                                 type="file"
                                 hidden
+                                accept=".doc, .docx, .pdf"
                                 onChange={(e) => handleFileUpload(e)} // Handle file upload
                             />
                             </Button>

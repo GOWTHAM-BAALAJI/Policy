@@ -1,8 +1,11 @@
+import React, { useState, useEffect } from "react";
 import { Box, styled } from "@mui/material";
-
 import { Span } from "./Typography";
-import img1 from "app/assets/logo.png"
+import { Link } from 'react-router-dom';
+import img1 from "app/assets/spandana_logo_white.png"
 import useSettings from "app/hooks/useSettings";
+import { useDispatch, useSelector } from 'react-redux';
+import { jwtDecode } from "jwt-decode";
 
 // STYLED COMPONENTS
 const BrandRoot = styled(Box)(() => ({
@@ -25,8 +28,32 @@ export default function Brand({ children }) {
   const leftSidebar = settings.layout1Settings.leftSidebar;
   const { mode } = leftSidebar;
 
+  const [roleId, setRoleId] = useState(null);
+
+  const userToken = useSelector((state)=>{
+    return state.token;//.data;
+    });
+  console.log("UserToken:",userToken);
+
+  useEffect(() => {
+    if (userToken) {
+      try {
+        const decodedToken = jwtDecode(userToken);
+        console.log('Decoded Token role_id:', decodedToken.role_id);
+        if (decodedToken.role_id) {
+          setRoleId(decodedToken.role_id);
+        }
+      } catch (error) {
+        console.error('Invalid token:', error);
+      }
+    }
+  }, [userToken]);
+
+  const path = roleId === 8 ? "/display/list" : "/dashboard";
+
   return (
     <BrandRoot>
+    <Link to={path} style={{ textDecoration: 'none', color: 'inherit' }}>
       <Box display="flex" alignItems="center">
         <div className="img-wrapper">
           <img src={img1} width="40" alt="" />
@@ -35,6 +62,7 @@ export default function Brand({ children }) {
           SPANDANA
         </StyledSpan>
       </Box>
+    </Link>
     </BrandRoot>
   );
 }

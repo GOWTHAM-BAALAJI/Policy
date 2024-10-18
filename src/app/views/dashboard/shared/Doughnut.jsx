@@ -57,7 +57,7 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
     fetchData();
   }, []);
 
-  const colors = ["#02ad2d", "#ff0303", "#fffb03", "#ff6303"];
+  const colors = ["#ef5e59", "#c65284", "#855792", "#d99d96"];
 
   // Define your navigation function
   const navigateToPage = (name) => {
@@ -93,13 +93,27 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
   const option = {
     legend: {
       show: true,
-      itemGap: 30,
+      itemGap: 20,
       icon: "circle",
       bottom: 20,
-      textStyle: { color: theme.palette.text.secondary, fontSize: 13, fontFamily: "roboto" },
+      textStyle: {
+        color: "black",
+        fontSize: 13,
+        fontFamily: "roboto",
+      },
       formatter: function (name) {
-        return name.split(' ').join('\n');
-      }
+        // Define a mapping between section names and their counts
+        const counts = {
+          "Approved": approvedCount,
+          "Rejected": rejectedCount,
+          "Pending": pendingCount,
+          "Waiting for Action": waitingForActionCount,
+        };
+  
+        // Display the name along with the count in brackets
+        const count = counts[name] || 0;
+        return `${name} (${count})`;  // Return the name with the count in brackets
+      },
     },
     tooltip: { show: false, trigger: "item", formatter: "{a} <br/>{b}: {c} ({d}%)" },
     xAxis: [{ axisLine: { show: false }, splitLine: { show: false } }],
@@ -118,7 +132,7 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
             show: true,
             position: 'center',
             textStyle: { color: theme.palette.text.secondary, fontSize: 14, fontFamily: "roboto" },
-            formatter: selectedSection ? `{b} \n{c} (${selectedSection})` : "Dashboard",
+            formatter: "Dashboard",
           },
           emphasis: {
             show: true,

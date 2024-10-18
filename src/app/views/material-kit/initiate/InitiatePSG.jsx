@@ -1,11 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useForm, Controller } from 'react-hook-form';
 import { NavLink, useNavigate } from "react-router-dom";
-import { Autocomplete, Button, Chip, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, ListItemText, MenuItem, FormControl, Grid, IconButton, InputLabel, styled, Select, Typography, TextField } from "@mui/material";
+import { Autocomplete, Button, Card, Chip, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, ListItemText, MenuItem, FormControl, Grid, IconButton, InputLabel, styled, Select, Typography, TextField } from "@mui/material";
 import CloseIcon from '@mui/icons-material/Close';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from "react-hot-toast";
+
+const ContentBox = styled("div")(({ theme }) => ({
+    margin: "20px",
+    [theme.breakpoints.down("sm")]: { margin: "16px" }
+}));
 
 const StyledSelect = styled(Select)(() => ({
     width: '100%',
@@ -112,8 +117,10 @@ const InitiatePSG = () => {
     const [uploadFilenames, setUploadFilenames] = useState([]); // Store multiple filenames
     const [uploadedFiles, setUploadedFiles] = useState([]); // Store multiple file objects
     const [employeeOptions, setEmployeeOptions] = useState([]);
+    const [reviewers, setReviewers] = useState([]);
     const [selectedReviewer, setSelectedReviewer] = useState("");
     const [reviewerId, setReviewerId] = useState("");
+    const [approvalMembers, setApprovalMembers] = useState([]);
     const [selectedApprovalMembers, setSelectedApprovalMembers] = useState([]);
     const [priorityOrder, setPriorityOrder] = useState([]);
     const [selectedUserGroup, setSelectedUserGroup] = useState("");
@@ -129,19 +136,20 @@ const InitiatePSG = () => {
         { value: '3', label: '  Guidance Note' },
     ]
 
-    const reviewers = [
-        { value:'572', label: 'testUser2' }
-    ]
+    // const reviewers = [
+    //     { value:'572', label: 'testUser2' }
+    // ]
 
-    const approvalMembersOptions = [
-        { value: '573', label: 'testUser3' },
-        { value: '574', label: 'testUser4' },
-        { value: '575', label: 'testUser5' },
-    ];
+    // const approvalMembersOptions = [
+    //     { value: '573', label: 'testUser3' },
+    //     { value: '574', label: 'testUser4' },
+    //     { value: '575', label: 'testUser5' },
+    // ];
 
     const userGroupOptions = [
-        { value: '2', label: 'Field Staff' },
         { value: '1', label: 'HO Staff' },
+        { value: '2', label: 'Field Staff' },
+        // { value: '3', label: 'Both' },
     ]
     
     const handleSelectChangeApprovalMembers = (event) => {
@@ -158,7 +166,7 @@ const InitiatePSG = () => {
         return selected
             .map((val) => {
                 const priority = priorityOrder.indexOf(val) + 1; // Get the priority based on the current order
-                return `${priority}. ${approvalMembersOptions.find((opt) => opt.value === val)?.label}`;
+                return `${priority}. ${approvalMembers.find((opt) => opt.value === val)?.label}`;
             })
             .join(', ');
     };      
@@ -174,8 +182,8 @@ const InitiatePSG = () => {
             setUploadFilenames(prev => [...prev, file.name]); // Store the filenames in state
             setUploadedFiles(prev => [...prev, file]); // Store the file objects
         });
-        // setUploadedFiles(prev => [...prev, ...files]);
-        // setUploadFilenames(prev => [...prev, files.name]);
+        // setUploadedFiles(prev => [...prev, ...e]);
+        // setUploadFilenames(prev => [...prev, e.name]);
     };
     
     const openUploadedFile = (index) => {
@@ -190,10 +198,6 @@ const InitiatePSG = () => {
 
     const handleDialogClose = () => {
         setDialogOpen(false);
-    };
-
-    const customHeaders = {
-        "Content-Type": "application/json",
     };
 
     const userToken = useSelector((state)=>{
@@ -261,6 +265,50 @@ const InitiatePSG = () => {
     //     });
     // };
 
+    useEffect(() => {
+        // Fetch reviewers from the API
+        axios.get('http://localhost:3000/auth/getReviewer', {
+            headers: {
+              Authorization: `Bearer ${userToken}`,  // Include the JWT token in the Authorization header
+            },
+          })
+          .then(response => {
+            if (response.data.status) {
+              // Map the API response to format for dropdown (using emp_name as label and user_id as value)
+              const fetchedReviewers = response.data.data.map(reviewer => ({
+                value: reviewer.user_id,
+                label: reviewer.emp_name,
+              }));
+              setReviewers(fetchedReviewers);
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching reviewers:', error);
+          });
+    }, []);
+
+    useEffect(() => {
+        // Fetch reviewers from the API
+        axios.get('http://localhost:3000/auth/getApprover', {
+            headers: {
+              Authorization: `Bearer ${userToken}`,  // Include the JWT token in the Authorization header
+            },
+          })
+          .then(response => {
+            if (response.data.status) {
+              // Map the API response to format for dropdown (using emp_name as label and user_id as value)
+              const fetchedApprovalMembers = response.data.data.map(approvalmember => ({
+                value: approvalmember.user_id,
+                label: approvalmember.emp_name,
+              }));
+              setApprovalMembers(fetchedApprovalMembers);
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching reviewers:', error);
+          });
+    }, []);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
@@ -290,6 +338,7 @@ const InitiatePSG = () => {
         formData.append("type",documentType);
         formData.append("title", title);
         formData.append("description", description);
+        // formData.append("files",uploadedFiles);
         formData.append("reviewer_id", selectedReviewer || null);
         formData.append("approver_ids", JSON.stringify(selectedApprovalMembers || [])); // Convert array to string
         formData.append("user_group", selectedUserGroup || null);
@@ -376,6 +425,8 @@ const InitiatePSG = () => {
 
     
     return(
+        <ContentBox className="analytics">
+        <Card sx={{ px: 3, py: 3, height: '100%', width: '100%' }}>
         <form onSubmit={handleSubmit} encType="multipart/form-data">
             <Grid container spacing={2}>
                 <Grid item lg={12} md={12} sm={12} xs={12}>
@@ -398,18 +449,20 @@ const InitiatePSG = () => {
                             <StyledSelect
                             labelId="document-type-label"
                             id="documentType"
-                            value={documentType}
-                            // required
+                            value={documentType || ""}
+                            displayEmpty
                             onChange={(e) => {
                                 setDocumentType(e.target.value);
                             }}
                             >
-                            <option value="">Select a document type</option>
+                            <MenuItem value="" disabled>
+                                <ListItemText style={{ color: "#bdbdbd" }} primary="Select a document type" />
+                            </MenuItem>
                             {types.map((option) => (
-                                            <MenuItem key={option.value} value={option.value}>
-                                            <ListItemText primary={option.label} />
-                                            </MenuItem>
-                                        ))}
+                                <MenuItem key={option.value} value={option.value}>
+                                <ListItemText primary={option.label} />
+                                </MenuItem>
+                            ))}
                             </StyledSelect>
                         )}
                     />
@@ -515,7 +568,6 @@ const InitiatePSG = () => {
                                                     type="file"
                                                     hidden
                                                     accept=".doc, .docx"
-                                                    multiple // Allow multiple file selection
                                                     onChange={(e) => handleFileUpload(e)} // Handle file upload
                                                 />
                                             </Button>
@@ -571,11 +623,14 @@ const InitiatePSG = () => {
                             id="reviewer"
                             value={selectedReviewer}
                             // required
+                            displayEmpty
                             onChange={(e) => {
                                 setSelectedReviewer(e.target.value);
                             }}
                             >
-                            <option value="">Select a reviewer</option>
+                            <MenuItem value="" disabled>
+                                <ListItemText style={{ color: "#bdbdbd" }} primary="Select a reviewer" />
+                            </MenuItem>
                             {reviewers.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>
                                     <ListItemText primary={option.label} />
@@ -610,13 +665,22 @@ const InitiatePSG = () => {
                                                     id="approvalMembers"
                                                     multiple
                                                     value={selectedApprovalMembers}
+                                                    displayEmpty
                                                     onChange={(e) => {
                                                         handleSelectChangeApprovalMembers(e); // Update local state
                                                         field.onChange(e); // Update react-hook-form state
                                                     }}
-                                                    renderValue={renderPriorityValue} // Function to render the value
+                                                    renderValue={(selected) => {
+                                                        if (selected.length === 0) {
+                                                          return <span style={{ color: "#bdbdbd" }}>Select the approval members</span>; // Placeholder text
+                                                        }
+                                                        return renderPriorityValue(selected); // Render selected values
+                                                    }}
                                                     >
-                                                    {approvalMembersOptions.map((member) => (
+                                                    <MenuItem value="" disabled>
+                                                        <ListItemText style={{ color: "#bdbdbd" }} primary="Select the approval members" />
+                                                    </MenuItem>
+                                                    {approvalMembers.map((member) => (
                                                         <MenuItem key={member.value} value={member.value}>
                                                         <Checkbox checked={selectedApprovalMembers.indexOf(member.value) > -1} />
                                                         <ListItemText
@@ -647,31 +711,6 @@ const InitiatePSG = () => {
                     <Grid container alignItems="center" spacing={2}>
                         <Grid item xs>
                             <FormControl variant="outlined" fullWidth sx={{ position: 'relative' }}>
-                            {/* <Controller
-                            name="userGroups"
-                            control={control}
-                            render={({ field }) => (
-                                <StyledSelect
-                                labelId="user-groups-label"
-                                id="userGroups"
-                                // required
-                                multiple
-                                value={selectedUserGroup}
-                                onChange={(e) => {
-                                    handleSelectChangeUserGroups(e); // Limit selection to 3
-                                    setSelectedUserGroup(e.target.value);
-                                }}
-                                renderValue={(selected) => selected.map((val) => userGroupOptions.find(opt => opt.value === val)?.label).join(', ')}
-                                >
-                                {userGroupOptions.map((option) => (
-                                    <MenuItem key={option.value} value={option.value}>
-                                    <Checkbox checked={selectedUserGroup.indexOf(option.value) > -1} />
-                                    <ListItemText primary={option.label} />
-                                    </MenuItem>
-                                ))}
-                                </StyledSelect>
-                            )}
-                            /> */}
                             <Controller
                                 name="userGroups"
                                 control={control}
@@ -681,11 +720,14 @@ const InitiatePSG = () => {
                                     id="userGroups"
                                     value={selectedUserGroup}
                                     // required
+                                    displayEmpty
                                     onChange={(e) => {
                                         setSelectedUserGroup(e.target.value);
                                     }}
                                     >
-                                    <option value="">Select a user group</option>
+                                    <MenuItem value="" disabled>
+                                        <ListItemText style={{ color: "#bdbdbd" }} primary="Select a user group" />
+                                    </MenuItem>
                                     {userGroupOptions.map((option) => (
                                             <MenuItem key={option.value} value={option.value}>
                                             <ListItemText primary={option.label} />
@@ -727,6 +769,8 @@ const InitiatePSG = () => {
                 </CustomDialogActions>
             </CustomDialog>
         </form>
+        </Card>
+        </ContentBox>
     )
 }
 

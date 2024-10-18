@@ -1,22 +1,23 @@
 import React, { useState, useEffect }  from 'react';
+import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from 'react-hook-form';
 import * as Yup from 'yup';
 import { LoadingButton } from "@mui/lab";
 import { Formik } from "formik";
 import UpdatePassword from './UpdatePassword';
 import { useDispatch, useSelector } from 'react-redux';
+import toast from "react-hot-toast";
+import { jwtDecode } from "jwt-decode";
 
 import axios from 'axios';
 import {
   Box,
-  useTheme,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  useMediaQuery,
+  Table,
+  TableRow,
+  TableCell,
+  TableBody,
+  TableContainer,
   // Checkbox,
   // FormControlLabel,
   Grid,
@@ -46,7 +47,7 @@ const StyledTextField = styled(MuiTextField)(() => ({
     top: '-40%'
   },
   '& .MuiInputBase-root': {     
-  height: 30 // Adjust the height as needed 
+  height: 28 // Adjust the height as needed 
 },
 }));
 
@@ -55,53 +56,6 @@ const validationSchema = Yup.object().shape({
   newpw: Yup.string().required("New Password is required"),
   confirmnewpw: Yup.string().required("Confirm New Password is required"),
 });
-
-// const handleSubmit = async (values) => {
-//   setLoading(true);
-
-//   // console.log('--Alegation--', allegations);
-//   // console.log('--Here--', getValues());
-//   //return false;
-//   const url = process.env.REACT_APP_BACKEND+'complaint';
-//   const complainFrmData = {
-//     "emp_id": getValues('empId'),
-//     "raisedby_emp_id": getValues('byempId'),
-//     "case_type": getValues('caseType'),
-//     "case_nature": getValues('caseNature'),
-//     "misappropriationamount": getValues('misappropriationamount'),
-//     "amountrecovered": getValues('amountrecovered'),
-//     "misappropriationamountdue": getValues('misappropriationamountdue'),
-//     "allegations":allegations
-//   };
-
-
-
-//   const customHeaders = {
-//     "Content-Type": "application/json",
-//   };
-
-//   fetch(url, {
-//     method: "POST",
-//     headers: customHeaders,
-//     body: JSON.stringify(complainFrmData),
-//   })
-//     .then((response) => response.json())
-//     .then((data) => {
-      
-//       console.log(data);
-//       // setLoading(false);
-//       if (data?.status) {
-//         navigate('/list');
-//       } else {
-//         // Handle any error response or invalid status
-//         console.error("Error: Invalid response");
-//       }
-//     })
-//     .catch((error) => {
-//       console.error(error);
-//     });
-
-// };
 
 const Profile = () => {
 
@@ -115,119 +69,307 @@ const Profile = () => {
     getValues
   } = useForm({});
 
-  const [open, setOpen] = useState(false);
-  const [profileImage, setProfileImage] = useState(null);
+  const [showFields, setShowFields] = useState(false);
 
-  const userDetails = useSelector((state) => state.userData);
+  const handleUpdatePasswordClick = () => {
+    setShowFields((prev) => !prev);
+  };
+
+  const navigate = useNavigate();
+
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [profileImage, setProfileImage] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [newpassword, setNewPassword] = useState("");
+  const [confirmnewpassword, setConfirmNewPassword] = useState("");
+
+  const [empId, setEmpId] = useState(null);
+  const [empName, setEmpName] = useState(null);
+  const [empEmail, setEmpEmail] = useState(null);
+  const [empMobile, setEmpMobile] = useState(null);
+  const [empDesignation, setEmpDesignation] = useState(null);
+
+  const userToken = useSelector((state)=>{
+    return state.token;//.data;
+    });
+  console.log("UserToken:",userToken);
+
+  useEffect(() => {
+    if (userToken) {
+      try {
+        const decodedToken = jwtDecode(userToken);
+        if (decodedToken.emp_id) {
+          setEmpId(decodedToken.emp_id);
+        }
+        if (decodedToken.emp_name) {
+          setEmpName(decodedToken.emp_name);
+        }
+        if (decodedToken.emp_email) {
+          setEmpEmail(decodedToken.emp_email);
+        }
+        if (decodedToken.emp_mobile) {
+          setEmpMobile(decodedToken.emp_mobile);
+        }
+        if (decodedToken.designation) {
+          setEmpDesignation(decodedToken.designation);
+        }
+      } catch (error) {
+        console.error('Invalid token:', error);
+      }
+    }
+  }, [userToken]);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setProfileImage(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  const handleFileUpload = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+
+    if (!selectedFile) {
+      toast.error("Please fill in all the required fields");
+      return;
+    }
+
+    // Prepare the form data for the API call
+    const formData = new FormData();
+    formData.append('files[]', selectedFile);
+
+    const url = "http://localhost:3000/auth/updateProfile";
+
+    const submitPromise1=fetch(url, {
+      method: "POST",
+      headers: {
+          'Authorization': `Bearer ${userToken}`, // Example header for token authentication
+          // Note: Do not include 'Content-Type: application/json' when sending FormData
+      },
+      body: formData,
+    })
+    .then((response) => {
+        return response.json();
+    })
+    .then((data) => {
+        console.log("Server Response: ", data);
+        if (data.status) {
+            console.log("Successfully uploaded");
+            // setTimeout(() => {
+            //     navigate('/list/psg');
+            // }, 1000);
+        } else {
+            console.log("Error");
+        }
+        setLoading(false); // Reset loading state
+    })
+    .catch((error) => {
+        console.error("Submission error:", error);
+        setLoading(false); // Reset loading state
+    });
+
+    toast.promise(submitPromise1, {
+      loading: 'Uploading...',
+      success: (data) => `Profile Image Uploaded Successfully`, // Adjust based on your API response
+      error: (err) => `Error while Uploading`,
+    });
+  };
+
+  const handlePasswordUpdate = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    const url = "http://localhost:3000/auth/updatePassword";
+    const requestData = {
+      newPassword: event.target.newpassword.value,
+    };
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          'Authorization': `Bearer ${userToken}`, // Example header for token authentication
+          'Content-Type': 'application/json',
+          // Note: Do not include 'Content-Type: application/json' when sending FormData
+      },
+      body: JSON.stringify(requestData),
+      });
+
+      const result = await response.json();
+      if (response.ok && result.status === 200) {
+        console.log("Successfully updated");
+        navigate('/profile');
+      } else {
+        console.log("Error");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <>
     <Grid container sx={{ ml:1, p: 4 }}>
-    <Grid item xs={12}>
-      <Typography variant="h4" sx={{ pb: 3, ml:-2, mt:-1, fontFamily: 'sans-serif', fontSize: '1.25rem', fontWeight: 'bold' }}>
-        Profile
-      </Typography>
-    </Grid>
-    <Grid container spacing={2} sx={{ p: 1, boxSizing: 'border-box', border: '1px solid #e0e0e0', boxShadow: '0px 0px 8px 2px rgba(0, 0, 0, 0.1)' }}>
-      <Grid item lg={4} md={4} sm={12} xs={12}>
+    <Grid container
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        // minHeight: '100vh', // Center vertically
+      }}
+    >
       <Grid item xs={12}>
-        <Typography variant="h5" sx= {{ pb:1, fontFamily: 'sans-serif', fontSize: '0.875rem', fontWeight: 'bold', '& *': { fontFamily: 'sans-serif', fontSize: '0.875rem', fontWeight: 'bold'}}}>Employee ID:</Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="h5" sx= {{ pb:1, fontFamily: 'sans-serif', fontSize: '0.875rem', '& *': { fontFamily: 'sans-serif', fontSize: '0.875rem'}}}>{userDetails.EMPLOYEE_NUMBER}</Typography>
-      </Grid>
-      </Grid>
-      <Grid item lg={4} md={4} sm={12} xs={12}>
-      <Grid item xs={12}>
-        <Typography variant="h5" sx= {{ pb:1, fontFamily: 'sans-serif', fontSize: '0.875rem', fontWeight: 'bold', '& *': { fontFamily: 'sans-serif', fontSize: '0.875rem', fontWeight: 'bold'}}}>Name:</Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="h5" sx= {{ pb:1, fontFamily: 'sans-serif', fontSize: '0.875rem', '& *': { fontFamily: 'sans-serif', fontSize: '0.875rem'}}}>{userDetails.LEGAL_NAME}</Typography>
-      </Grid>
-      </Grid>
-      <Grid item lg={4} md={4} sm={12} xs={12}>
-      <Grid item xs={12}>
-        <Typography variant="h5" sx= {{ pb:1, fontFamily: 'sans-serif', fontSize: '0.875rem', fontWeight: 'bold', '& *': { fontFamily: 'sans-serif', fontSize: '0.875rem', fontWeight: 'bold'}}}>Designation:</Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="h5" sx= {{ pb:1, fontFamily: 'sans-serif', fontSize: '0.875rem', '& *': { fontFamily: 'sans-serif', fontSize: '0.875rem'}}}>{userDetails.emp_designation}</Typography>
-      </Grid>
-      </Grid>
-      <Grid item lg={4} md={4} sm={12} xs={12}>
-      <Grid item xs={12}>
-        <Typography variant="h5" sx= {{ pb:1, fontFamily: 'sans-serif', fontSize: '0.875rem', fontWeight: 'bold', '& *': { fontFamily: 'sans-serif', fontSize: '0.875rem', fontWeight: 'bold'}}}>Email:</Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="h5" sx= {{ pb:1, fontFamily: 'sans-serif', fontSize: '0.875rem', '& *': { fontFamily: 'sans-serif', fontSize: '0.875rem'}}}>{userDetails.WORK_EMAILID}</Typography>
-      </Grid>
-      </Grid>
-      <Grid item lg={4} md={4} sm={12} xs={12}>
-      <Grid item xs={12}>
-        <Typography variant="h5" sx= {{ pb:1, fontFamily: 'sans-serif', fontSize: '0.875rem', fontWeight: 'bold', '& *': { fontFamily: 'sans-serif', fontSize: '0.875rem', fontWeight: 'bold'}}}>Mobile:</Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="h5" sx= {{ pb:1, fontFamily: 'sans-serif', fontSize: '0.875rem', '& *': { fontFamily: 'sans-serif', fontSize: '0.875rem'}}}>{userDetails.WORK_MOBILE_NUMBER}</Typography>
-      </Grid>
-      </Grid>
-      <Grid item lg={4} md={4} sm={12} xs={12}>
-      <Grid item xs={12}>
-        <Typography variant="h5" sx= {{ pb:1, fontFamily: 'sans-serif', fontSize: '0.875rem', fontWeight: 'bold', '& *': { fontFamily: 'sans-serif', fontSize: '0.875rem', fontWeight: 'bold'}}}>Status:</Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="h5" sx= {{ pb:1, fontFamily: 'sans-serif', fontSize: '0.875rem', '& *': { fontFamily: 'sans-serif', fontSize: '0.875rem'}}}>{userDetails.STATUS}</Typography>
-      </Grid>
-      </Grid>
-    </Grid>
-    <Grid container spacing={4}>
-    <Grid item xs={6} sx={{pb:4, height: '49vh'}}>
-    <Grid item xs={12} sx={{pt: 2}}>
-      <Typography variant="h4" sx={{ pb: 3, ml:-2, fontFamily: 'sans-serif', fontSize: '1.25rem', fontWeight: 'bold' }}>
-        Update Password
-      </Typography>
-    </Grid>
-    <Grid container spacing={2} direction="column" justifyContent="center" alignItems="center" sx={{ pt: 2, height: '95%', boxSizing: 'border-box', border: '1px solid #e0e0e0', boxShadow: '0px 0px 8px 2px rgba(0, 0, 0, 0.1)' }}>
-      <UpdatePassword/>
-    </Grid>
-    </Grid>
-    <Grid item xs={6} sx={{pb:4}}>
-    <Grid item xs={12} sx={{pt: 2}}>
-      <Typography variant="h4" sx={{ pb: 3, ml:-2, fontFamily: 'sans-serif', fontSize: '1.25rem', fontWeight: 'bold' }}>
-        Profile Image
-      </Typography>
-    </Grid>
-    <Grid container spacing={2} direction="column" justifyContent="center" alignItems="center" sx={{ height: '95%', boxSizing: 'border-box', border: '1px solid #e0e0e0', boxShadow: '0px 0px 8px 2px rgba(0, 0, 0, 0.1)' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+  <Box
+    sx={{
+      display: 'flex', // Use flex to arrange components horizontally
+      flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }, // Stack vertically on sm and xs, horizontally on md and lg
+      justifyContent: { md: 'space-between', lg: 'space-between' }, // Space between items for larger screens
+      // alignItems: { xs: 'center', sm: 'center', md: 'flex-start', lg: 'flex-start' },
+      border: '1px solid #e0e0e0',
+      boxShadow: '0px 0px 8px 2px rgba(0, 0, 0, 0.1)',
+      p: 4,
+      textAlign: 'center',
+      width: 'fit-content', // Border adjusts to content width
+      margin: '0 auto', // Centers the box horizontally
+      gap: 4
+    }}
+  >
+    {/* Left Half: Profile Image and Upload Button */}
+    <form onSubmit={handleFileUpload} encType="multipart/form-data">
+    <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
       <Avatar
-            src={profileImage} // Use the state for the image URL
-            alt="Profile Picture"
-            sx={{ width: 160, height: 162, borderRadius: '50%', border: '1px solid #000' }}
+        src={profileImage} // Use the state for the image URL
+        alt="Profile Picture"
+        sx={{ width: 160, height: 162, borderRadius: '50%', border: '1px solid #000' }}
+      />
+      <input
+        accept="image/*"
+        id="upload-button-file"
+        type="file"
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
+      <label htmlFor="upload-button-file">
+        <IconButton sx={{ color: "rgb(27,28,54)" }} component="span">
+          <CameraIcon />
+        </IconButton>
+      </label>
+      <Button variant="contained" type="submit" sx={{ marginTop: 1, marginBottom: 1, padding: '4px 8px', fontSize: '0.75rem' }}>
+        Upload
+      </Button>
+    </Box>
+    </form>
+
+    {/* Middle Section: Employee Details Table */}
+    <Box sx={{ p: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <Table sx={{ width: 'auto' }}>
+        <TableBody>
+          <TableRow>
+            <TableCell>
+              <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', marginRight: '40px' }}><b>Employee ID:</b></Typography>
+            </TableCell>
+            <TableCell>
+              <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem' }}>{empId}</Typography>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>
+              <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', marginRight: '40px' }}><b>Name:</b></Typography>
+            </TableCell>
+            <TableCell>
+              <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem' }}>{empName}</Typography>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>
+              <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', marginRight: '40px' }}><b>Designation:</b></Typography>
+            </TableCell>
+            <TableCell>
+              <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem' }}>{empDesignation}</Typography>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>
+              <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', marginRight: '40px' }}><b>Email:</b></Typography>
+            </TableCell>
+            <TableCell>
+              <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem' }}>{empEmail}</Typography>
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>
+              <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', marginRight: '40px' }}><b>Mobile:</b></Typography>
+            </TableCell>
+            <TableCell>
+              <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem' }}>{empMobile}</Typography>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </Box>
+
+    {/* Right Half: Update Password Section */}
+    <form onSubmit={handlePasswordUpdate} encType="multipart/form-data">
+    <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginTop: '50px', marginRight: '20px' }}>
+      <Button
+        variant="contained"
+        sx={{ marginBottom: 2, padding: '4px 8px', fontSize: '0.75rem' }}
+        onClick={handleUpdatePasswordClick}
+      >
+        Update Password
+      </Button>
+      {showFields && (
+        <>
+          <TextField
+            id='newpassword'
+            rows={1}
+            maxRows={1}
+            variant="outlined"
+            fullWidth
+            value={newpassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="Enter the new password"
+            InputProps={{
+                style: {
+                fontFamily: 'sans-serif', 
+                fontSize: '0.875rem',
+                height: '30px',
+                marginBottom: '10px',
+                },
+            }}
           />
-          <input
-            accept="image/*"
-            id="upload-button-file"
-            type="file"
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
+          <TextField
+            id='confirmnewpassword'
+            rows={1}
+            maxRows={1}
+            variant="outlined"
+            fullWidth
+            value={confirmnewpassword}
+            onChange={(e) => setConfirmNewPassword(e.target.value)}
+            placeholder="Confirm the new password"
+            InputProps={{
+                style: {
+                fontFamily: 'sans-serif', 
+                fontSize: '0.875rem',
+                height: '30px',
+                marginBottom: '10px',
+                },
+            }}
           />
-          <label htmlFor="upload-button-file">
-            <IconButton sx={{color:"rgb(27,28,54)"}} component="span">
-              <CameraIcon />
-            </IconButton>
-          </label>
-      </Box>
-    </Grid>
-    </Grid>
+          <Button variant="contained" type="submit" sx={{ padding: '4px 8px', fontSize: '0.75rem' }}>
+            Submit
+          </Button>
+        </>
+      )}
+    </Box>
+    </form>
+  </Box>
+</Grid>
     </Grid>
     </Grid></>
   );

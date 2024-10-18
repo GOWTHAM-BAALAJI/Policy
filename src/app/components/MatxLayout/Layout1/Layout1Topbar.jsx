@@ -78,7 +78,7 @@ const UserMenu = styled(Box)({
 const StyledItem = styled(MenuItem)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  minWidth: 125,
+  // minWidth: 125,
   "& a": {
     width: "100%",
     display: "flex",
@@ -98,6 +98,7 @@ const Layout1Topbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { settings, updateSettings } = useSettings();
+  const [roleId, setRoleId] = useState(null);
   const [userName, setUsername] = useState(null);
   const userToken = useSelector((state)=>{
     return state.token;//.data;
@@ -109,6 +110,9 @@ const Layout1Topbar = () => {
         const decodedToken = jwtDecode(userToken);
         if (decodedToken.emp_name) {
           setUsername(decodedToken.emp_name);
+        }
+        if (decodedToken.role_id) {
+          setRoleId(decodedToken.role_id);
         }
       } catch (error) {
         console.error("Error decoding token:", error);
@@ -141,6 +145,8 @@ const Layout1Topbar = () => {
     toast.success("Logged out successfully");
   };
 
+  const path = roleId === 8 ? "/display/list" : "/dashboard";
+
   return (
     <TopbarRoot>
       <TopbarContainer>
@@ -148,22 +154,28 @@ const Layout1Topbar = () => {
           <StyledIconButton onClick={handleSidebarToggle}>
             <Menu />
           </StyledIconButton>
-          <p style={{ marginLeft: '8px', fontFamily: 'sans-serif', fontSize: '16px', fontWeight: 'bold' }}>POLICY PROJECT</p>
+          <Link to={path} style={{ textDecoration: 'none', color: 'inherit' }}>
+            <p style={{ marginLeft: '8px', fontFamily: 'sans-serif', fontSize: '16px', fontWeight: 'bold' }}>
+              POLICIES & CIRCULARS
+            </p>
+          </Link>
         </Box>
 
         <Box display="flex" alignItems="center">
           <MatxMenu
             menuButton={
               <UserMenu>
-                <Hidden xsDown>
+                <Hidden mdDown>
                   <Span sx={{ fontSize: "16px", fontFamily: "sans-serif", fontWeight: "bold" }}>
                     {userName || 'Guest'}
                   </Span>
                 </Hidden>
                 <Avatar src="" sx={{ cursor: "pointer" }} />
               </UserMenu>
-            }>
+            }
+            >
 
+            <Box sx={{ minWidth: "100%", width: "auto", display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
             <StyledItem>
               <Link to="/profile">
                 <Person />
@@ -175,6 +187,7 @@ const Layout1Topbar = () => {
               <Settings />
               <Span>Logout</Span>
             </StyledItem>
+            </Box>
 
             {/* Remove or adjust the logout item */}
             {/* <StyledItem onClick={logout}>

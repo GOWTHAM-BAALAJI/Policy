@@ -51,7 +51,7 @@ export default function Footer() {
       <AppBar color="primary" position="static" sx={{ zIndex: 96 }}>
         <AppFooter>
           <FooterContent>
-            2024 © Policy project by Spandana
+            2024 © Policies & Circulars by Spandana
 
             {/* <Span m="auto"></Span>
 

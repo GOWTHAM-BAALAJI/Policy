@@ -92,7 +92,7 @@ export default function CATable() {
       cell: (row) => (
         <Typography
           variant="body2"
-          sx={{ textAlign: 'left', cursor: 'pointer', color: 'blue', textDecoration: 'underline', paddingLeft: '8px' }}
+          sx={{ textAlign: 'left', cursor: 'pointer', color: '#ee8812', textDecoration: 'none', paddingLeft: '8px', fontWeight: 'bold', fontSize: '16px' }}
           onClick={() => handleRowClick(row)}
         >
           {row.title}

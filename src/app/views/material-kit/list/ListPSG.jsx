@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, Card, Grid, MenuItem, Select, styled, Tabs, Tab, Typography } from "@mui/material";
+import { Box, Button, Card, Grid, MenuItem, Select, styled, Tabs, Tab, TextField, Typography } from "@mui/material";
 import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -83,8 +83,28 @@ export default function PSGTable() {
   const [rejectedCount, setRejectedCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
   const [waitingForActionCount, setWaitingForActionCount] = useState(0);
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(waitingForActionCount);
   // console.log("Count: ",count);
+
+  useEffect(() => {
+    if (waitingForActionCount > 0) {
+      setCount(waitingForActionCount);
+      setActiveTab('4');
+    } else if (approvedCount > 0) {
+      setCount(approvedCount);
+      setActiveTab('1');
+    } else if (rejectedCount > 0) {
+      setCount(rejectedCount);
+      setActiveTab('2');
+    } else if (pendingCount > 0) {
+      setCount(pendingCount);
+      setActiveTab('3');
+    }
+  }, [waitingForActionCount, approvedCount, rejectedCount, pendingCount]);
+
+  const [selectedType, setSelectedType] = useState('');
+
+  const filteredData = selectedType ? psgList.filter(record => record.type === Number(selectedType)) : psgList;
 
   const handleSort = (column, sortDirection) => {
     setSortColumn(column.selector); // Store column to be sorted
@@ -95,45 +115,6 @@ export default function PSGTable() {
     return state.token;//.data;
   });
   console.log("UserToken:",userToken);
-
-  // useEffect(() => {
-  //   console.log("Initial tab: ", initialTab);
-  
-  //   if (initialTab == '1'){
-  //     console.log("Initial tab: ",initialTab);
-  //     console.log("Approved count: ", approvedCount);
-  //     setCount(approvedCount || 0);
-  //   }
-  //   else if (initialTab == 2){
-  //     console.log("Rejected count: ", rejectedCount);
-  //     setCount(rejectedCount || 0);
-  //   }
-  //   else if (initialTab == 3){
-  //     console.log("Pending count: ", pendingCount);
-  //     setCount(pendingCount || 0);
-  //   }
-  //   else if (initialTab == 4){
-  //     console.log("Initial tab: ",initialTab);
-  //     console.log("Waiting count: ", waitingForActionCount);
-  //     setCount(waitingForActionCount || 0);
-  //   }
-  // }, [initialTab, approvedCount, rejectedCount, pendingCount, waitingForActionCount]);
-
-  // if (initialTab === 1){
-  //   console.log("Initial tab: ",initialTab);
-  //   setCount(approvedCount || 0);
-  // }
-  // else if (initialTab === 2){
-  //   setCount(rejectedCount || 0);
-  // }
-  // else if (initialTab === 3){
-  //   setCount(pendingCount || 0);
-  // }
-  // else if (initialTab === 4){
-  //   console.log("Initial tab: ",initialTab);
-  //   setCount(waitingForActionCount || 0);
-  // }
-  // console.log('Count for Tab:', count);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -175,93 +156,6 @@ export default function PSGTable() {
   }, []);
 
   const totalLength = approvedCount + rejectedCount + pendingCount + waitingForActionCount;
-
-  // useEffect(() => {
-  //   const fetchData = async (tab, page, rows) => {
-  //     try {
-        // const response = await fetch(`http://localhost:3000/policy/user?tab=${tab}&page=${page}&rows=${rows}`, {
-        //   method: 'GET',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //     Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
-        //   },
-        // });
-  //       console.log(response);
-  //       const data = await response.json();
-  //       console.log("Data:",data);
-  //       // const { approved, rejected, pending, waitingForAction } = response.data;
-
-  //       // Flatten the data and add the status field
-  //       // const formattedData = [
-  //       //   ...approved.map(item => ({ ...item, status: 'Approved' })),
-  //       //   ...rejected.map(item => ({ ...item, status: 'Rejected' })),
-  //       //   ...pending.map(item => ({ ...item, status: 'Pending' })),
-  //       //   ...waitingForAction.map(item => ({ ...item, status: 'Waiting for Action' })),
-  //       // ];
-  //       // console.log("Formatted Data:",formattedData);
-
-  //       const decodedToken = jwtDecode(userToken);
-  //       console.log('Decoded Token:', decodedToken.role_id);
-  //       if (decodedToken.role_id) {
-  //         setRoleId(decodedToken.role_id);
-  //       }
-  //       if (decodedToken.user_id) {
-  //         setUserId(decodedToken.user_id);
-  //       }
-  //       // console.log("Role ID:",roleId);
-
-  //       if (data && data.status) {
-  //         if (data.approved || data.rejected || data.pending || data.waitingForAction) {
-  //           // Combine approved, rejected, and pending data into a single array
-  //           const combinedData = [
-  //             ...data.waitingForAction.map(item => ({ ...item, status: 'Waiting for Action' })),
-  //             ...data.approved.map(item => ({ ...item, status: 'Approved' })),
-  //             ...data.rejected.map(item => ({ ...item, status: 'Rejected' })),
-  //             ...data.pending.map(item => ({ ...item, status: 'Pending' })),
-  //           ];
-  //           console.log("Combined Data:",combinedData);
-
-  //           const statusOrder = {
-  //             'Waiting for Action': 1,
-  //             'Approved': 2,
-  //             'Rejected': 3,
-  //             'Pending': 4,
-  //           };
-            
-  //           // Sort the combined data first by status and then by descending ID
-  //           const sortedCombinedData = combinedData.sort((a, b) => {
-  //             // Compare by status using the defined order
-  //             const statusComparison = statusOrder[a.status] - statusOrder[b.status];
-            
-  //             // If statuses are the same, compare by ID in descending order
-  //             if (statusComparison === 0) {
-  //               return b.id - a.id; // Assuming `id` is a numeric value
-  //             }
-            
-  //             return statusComparison; // Return the status comparison result
-  //           });
-            
-  //           // Now, sortedCombinedData will contain the data arranged as specified
-  //           console.log("Sorted combined data:",sortedCombinedData);
-
-  //           setPsgList(sortedCombinedData);
-  //           setApprovedCount(approvedCount);
-  //           setRejectedCount(rejectedCount);
-  //           setPendingCount(pendingCount);
-  //           setWaitingForActionCount(waitingForActionCount);
-  //         }
-  //       }
-
-  //       // setPsgList(formattedData);
-  //     } catch (error) {
-  //       console.error('Error fetching data', error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData(currentPage, rowsPerPage);
-  // }, [activeTab, currentPage, rowsPerPage]);
 
   const fetchData = async (tab, page, rows) => {
     setLoading(true);
@@ -305,29 +199,24 @@ export default function PSGTable() {
     }
   };
 
-//   useEffect(() => {
-//     // Filter the table data based on the active tab (status)
-//     const filteredData = psgList.filter(item => {
-//         if (activeTab === 'waitingforaction') return item.status === 'Waiting for Action';
-//         if (activeTab === 'approved') return item.status === 'Approved';
-//         if (activeTab === 'rejected') return item.status === 'Rejected';
-//         if (activeTab === 'pending') return item.status === 'Pending';
-//         return true;
-//     });
-//     setTableData(filteredData);
-// }, [activeTab, psgList]);
-
   useEffect(() => {
     console.log('Current roleId:', roleId); // Log the roleId
     console.log('Current userId:', userId); // Log the roleId
   }, [roleId, userId]);
 
-  // const sortedData = sortColumn ? customSort(psgList, sortColumn, sortDirection) : psgList;
+  const pendingApprover = selectedDocument?.Policy_status?.find(
+    status => status.approver_id === selectedDocument?.pending_at_id
+  );
+  console.log("Pending approved id: ",pendingApprover);
 
-  // const startIndex = currentPage * rowsPerPage;
-  // const endIndex = startIndex + rowsPerPage;
-  // const paginatedData = sortedData.slice(startIndex, endIndex);
-  // console.log("Paginated data: ",paginatedData);
+  // If pendingApprover is not found and pending_at_id is equal to initiator_id, set name to initiator's name
+  const pendingApproverName = pendingApprover 
+      ? pendingApprover.approver_details?.emp_name 
+      : (selectedDocument?.pending_at_id === selectedDocument?.initiator_id 
+          ? 'Initiator' 
+          : 'No pending approver');
+
+  console.log("Pending approver name:", pendingApproverName);
 
   const columns1 = [
     {
@@ -351,7 +240,7 @@ export default function PSGTable() {
       cell: (row) => (
         <Typography
           variant="body2"
-          sx={{ textAlign: 'left', cursor: 'pointer', color: 'blue', textDecoration: 'underline', paddingLeft: '8px' }}
+          sx={{ textAlign: 'left', cursor: 'pointer', color: '#ee8812', textDecoration: 'none', paddingLeft: '8px', fontWeight: 'bold', fontSize: '16px' }}
           onClick={() => handleRowClick(row)}
         >
           {row.title}
@@ -379,46 +268,27 @@ export default function PSGTable() {
       }
     },
     {
-      name: 'Updated on',
-      selector: row => new Date(row.updatedAt).toLocaleDateString() || 'N/A',
+      name: activeTab == 3 ? 'Pending At' : 'Updated On', // Conditionally render the name
+      selector: row => activeTab == 3 ? row.pending_at_details?.emp_name || 'N/A' : new Date(row.updatedAt).toLocaleDateString() || 'N/A',
       sortable: true,
-      // center: true,
-      cell: (row) => (
-        <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
-          {new Date(row.updatedAt).toLocaleDateString() || 'N/A'}
-        </div>
-      ),
+      cell: (row) => {
+        return (
+          <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
+            {activeTab == 3 ? (row.pending_at_details?.emp_name || 'N/A') : new Date(row.updatedAt).toLocaleDateString() || 'N/A'}
+          </div>
+        );
+      },
       width: '25%',
     },
   ];
 
   const columns = columns1;
-  // if (initialTab === 1){
-  //   console.log("Initial tab: ",initialTab);
-  //   setCount(approvedCount || 0);
-  // }
-  // else if (initialTab === 2){
-  //   setCount(rejectedCount || 0);
-  // }
-  // else if (initialTab === 3){
-  //   setCount(pendingCount || 0);
-  // }
-  // else if (initialTab === 4){
-  //   console.log("Initial tab: ",initialTab);
-  //   setCount(waitingForActionCount || 0);
-  // }
-  // console.log('Count for Tab:', count);
-  // const tabledata1 = paginatedData;
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
     fetchData(activeTab, page, rowsPerPage);
   };
 
-  // const handleChangeRowsPerPage = (event) => {
-  //   setRowsPerPage(+event.target.value);
-  //   setPage(0);
-  // };
   const handleRowsPerPageChange = (newRowsPerPage, page) => {
     setRowsPerPage(newRowsPerPage);
     setCurrentPage(1);
@@ -435,14 +305,15 @@ export default function PSGTable() {
     // setDecision('');
     // setRemarks('');
     // setUploadedFile(null);
-    navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status }});
+    navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status, activeTab }});
+    console.log("Active tab: ",activeTab);
   };
 
 
   return (
     <ContentBox className="analytics">
     <Card sx={{ px: 3, py: 3, height: '100%', width: '100%' }}>
-    <Grid container spacing={2}>
+    <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
       <Grid item lg={6} md={6} sm={6} xs={6}>
         <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1.4rem', marginLeft: { sm: 2, xs: 2 }, marginTop: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
           Policies, SOPs and Guidance notes
@@ -459,6 +330,10 @@ export default function PSGTable() {
               textTransform: 'none',
               marginTop: { sm: 2, xs: 2 },
               height: '30px',
+              backgroundColor: '#ee8812',
+              '&:hover': {
+                backgroundColor: 'rgb(249, 83, 22)', // Optional: Set a different color on hover
+              },
             }}
             onClick={() => navigate('/initiate/psg')}
           >
@@ -484,25 +359,26 @@ export default function PSGTable() {
                 }}
                 onChange={(e) => {
                   field.onChange(e);
+                  setSelectedType(e.target.value); // Set the selected type here
                 }}
               >
                 <MenuItem value="">
                   <em>None</em>
                 </MenuItem>
                 <MenuItem value={1}>Policy</MenuItem>
-                <MenuItem value={3}>SOP</MenuItem>
-                <MenuItem value={2}>Guidance Note</MenuItem>
+                <MenuItem value={2}>SOP</MenuItem>
+                <MenuItem value={3}>Guidance Note</MenuItem>
               </StyledSelect>
             )}
           />
         </Grid>
       </Grid>
-      <Grid item lg={12} md={12} sm={12} xs={12}>
+      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }, alignItems: 'center', overflowX: 'auto', whiteSpace: 'nowrap' }}>
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
           textColor="black"
-          indicatorColor="primary"
+          indicatorColor="secondary"
         >
           <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: 20, fontWeight: 100, textTransform: "none" }} />
           <Tab label="Approved" value="1" sx={{ fontFamily: "sans-serif", fontSize: 20, fontWeight: 100, textTransform: "none" }} />
@@ -511,10 +387,10 @@ export default function PSGTable() {
         </Tabs>
       </Grid>
       <Grid item lg={12} md={12} sm={12} xs={12}>
-        <Box width="100%" overflow="auto">
+        <Box width="100%" height="100%" overflow="auto">
           <DataTable
             columns={columns}
-            data={psgList}
+            data={filteredData}
             progressPending={loading}
             pagination
             paginationServer

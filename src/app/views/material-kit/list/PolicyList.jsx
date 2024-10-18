@@ -92,8 +92,28 @@ const PSGTable = ({ initialTab }) => {
   const [rejectedCount, setRejectedCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
   const [waitingForActionCount, setWaitingForActionCount] = useState(0);
-  const [count, setCount] = useState(0);
-  // console.log("Count: ",count);
+  const [count, setCount] = useState(waitingForActionCount);
+  console.log("Count: ",count);
+
+  useEffect(() => {
+    if (waitingForActionCount > 0) {
+      setCount(waitingForActionCount);
+      setActiveTab('4');
+    } else if (approvedCount > 0) {
+      setCount(approvedCount);
+      setActiveTab('1');
+    } else if (rejectedCount > 0) {
+      setCount(rejectedCount);
+      setActiveTab('2');
+    } else if (pendingCount > 0) {
+      setCount(pendingCount);
+      setActiveTab('3');
+    }
+  }, [waitingForActionCount, approvedCount, rejectedCount, pendingCount]);
+
+  const [selectedType, setSelectedType] = useState('');
+
+  const filteredData = selectedType ? psgList.filter(record => record.type === Number(selectedType)) : psgList;
 
   const handleSort = (column, sortDirection) => {
     setSortColumn(column.selector); // Store column to be sorted
@@ -197,6 +217,20 @@ const PSGTable = ({ initialTab }) => {
     console.log('Current userId:', userId); // Log the roleId
   }, [roleId, userId]);
 
+  const pendingApprover = selectedDocument?.Policy_status?.find(
+    status => status.approver_id === selectedDocument?.pending_at_id
+  );
+  console.log("Pending approved id: ",pendingApprover);
+
+  // If pendingApprover is not found and pending_at_id is equal to initiator_id, set name to initiator's name
+  const pendingApproverName = pendingApprover 
+      ? pendingApprover.approver_details?.emp_name 
+      : (selectedDocument?.pending_at_id === selectedDocument?.initiator_id 
+          ? 'Initiator' 
+          : 'No pending approver');
+
+  console.log("Pending approver name:", pendingApproverName);
+
   const columns1 = [
     {
       name: 'ID',
@@ -219,7 +253,7 @@ const PSGTable = ({ initialTab }) => {
       cell: (row) => (
         <Typography
           variant="body2"
-          sx={{ textAlign: 'left', cursor: 'pointer', color: 'blue', textDecoration: 'underline', paddingLeft: '8px' }}
+          sx={{ textAlign: 'left', cursor: 'pointer', color: '#ee8812', textDecoration: 'none', paddingLeft: '8px', fontWeight: 'bold', fontSize: '16px' }}
           onClick={() => handleRowClick(row)}
         >
           {row.title}
@@ -232,22 +266,31 @@ const PSGTable = ({ initialTab }) => {
       sortable: true,
       // center: true,
       width: '20%',
-      cell: (row) => (
-        <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
-          {row.status || 'N/A'}
-        </div>
-      ),
+      cell: (row) => {
+        const typeMapping = {
+          1: 'Policy',
+          2: 'SOP',
+          3: 'Guidance Note'
+        };
+        const displayType = typeMapping[row.type] || 'N/A';
+        return (
+          <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
+            {displayType}
+          </div>
+        );
+      }
     },
     {
-      name: 'Updated on',
-      selector: row => new Date(row.updatedAt).toLocaleDateString() || 'N/A',
+      name: activeTab == 3 ? 'Pending At' : 'Updated On', // Conditionally render the name
+      selector: row => activeTab == 3 ? row.pending_at_details?.emp_name || 'N/A' : new Date(row.updatedAt).toLocaleDateString() || 'N/A',
       sortable: true,
-      // center: true,
-      cell: (row) => (
-        <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
-          {new Date(row.updatedAt).toLocaleDateString() || 'N/A'}
-        </div>
-      ),
+      cell: (row) => {
+        return (
+          <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
+            {activeTab == 3 ? (row.pending_at_details?.emp_name || 'N/A') : new Date(row.updatedAt).toLocaleDateString() || 'N/A'}
+          </div>
+        );
+      },
       width: '25%',
     },
   ];
@@ -279,7 +322,7 @@ const PSGTable = ({ initialTab }) => {
     // setDecision('');
     // setRemarks('');
     // setUploadedFile(null);
-    navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status }});
+    navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status, activeTab }});
   };
 
 
@@ -287,7 +330,7 @@ const PSGTable = ({ initialTab }) => {
     <Grid container spacing={2}>
       <Grid item lg={6} md={6} sm={6} xs={6}>
         <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1.4rem', marginLeft: { sm: 2, xs: 2 }, marginTop: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
-          List of Policies, SOPs and Guidance notes
+          Policies, SOPs and Guidance notes
         </Typography>
       </Grid>
       {(roleId === 1 || roleId === 3) && (
@@ -301,6 +344,10 @@ const PSGTable = ({ initialTab }) => {
               textTransform: 'none',
               marginTop: { sm: 2, xs: 2 },
               height: '30px',
+              backgroundColor: '#ee8812',
+              '&:hover': {
+                backgroundColor: 'rgb(249, 83, 22)', // Optional: Set a different color on hover
+              },
             }}
             onClick={() => navigate('/initiate/psg')}
           >
@@ -326,14 +373,15 @@ const PSGTable = ({ initialTab }) => {
                 }}
                 onChange={(e) => {
                   field.onChange(e);
+                  setSelectedType(e.target.value); // Set the selected type here
                 }}
               >
                 <MenuItem value="">
                   <em>None</em>
                 </MenuItem>
                 <MenuItem value={1}>Policy</MenuItem>
-                <MenuItem value={3}>SOP</MenuItem>
-                <MenuItem value={2}>Guidance Note</MenuItem>
+                <MenuItem value={2}>SOP</MenuItem>
+                <MenuItem value={3}>Guidance Note</MenuItem>
               </StyledSelect>
             )}
           />
@@ -344,12 +392,12 @@ const PSGTable = ({ initialTab }) => {
           value={activeTab}
           onChange={handleTabChange}
           textColor="black"
-          indicatorColor="primary"
+          indicatorColor="secondary"
         >
-          <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: 18, fontWeight: 100, textTransform: "none" }} style={{ backgroundColor: activeTab === "4" ? "#d3d3d3" : "transparent",}} />
-          <Tab label="Approved" value="1" sx={{ fontFamily: "sans-serif", fontSize: 18, fontWeight: 100, textTransform: "none" }} style={{ backgroundColor: activeTab === "1" ? "#d3d3d3" : "transparent",}}/>
-          <Tab label="Rejected" value="2" sx={{ fontFamily: "sans-serif", fontSize: 18, fontWeight: 100, textTransform: "none" }} style={{ backgroundColor: activeTab === "2" ? "#d3d3d3" : "transparent",}}/>
-          <Tab label="Pending" value="3" sx={{ fontFamily: "sans-serif", fontSize: 18, fontWeight: 100, textTransform: "none" }} style={{ backgroundColor: activeTab === "3" ? "#d3d3d3" : "transparent",}}/>
+          <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: 18, fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Approved" value="1" sx={{ fontFamily: "sans-serif", fontSize: 18, fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Rejected" value="2" sx={{ fontFamily: "sans-serif", fontSize: 18, fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Pending" value="3" sx={{ fontFamily: "sans-serif", fontSize: 18, fontWeight: 100, textTransform: "none" }} />
         </Tabs>
         {/* <DoughnutChart height="400px" setSelectedTab={updateSelectedTab} /> */}
       </Grid>
@@ -357,7 +405,7 @@ const PSGTable = ({ initialTab }) => {
         <Box width="100%" overflow="auto">
           <DataTable
             columns={columns}
-            data={psgList}
+            data={filteredData}
             progressPending={loading}
             pagination
             paginationServer

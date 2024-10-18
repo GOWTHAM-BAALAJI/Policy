@@ -213,7 +213,7 @@ export const themeColors = {
     palette: {
       type: 'dark',
       primary: {
-        main: '#e53935',
+        main: '#ee8812',
         contrastText: '#ffffff',
       },
       secondary: {

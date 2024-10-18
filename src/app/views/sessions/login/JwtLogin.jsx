@@ -21,8 +21,9 @@ const StyledRoot = styled("div")(() => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  backgroundColor: "#1A2038",
+  backgroundColor: "#fff",
   minHeight: "100vh !important",
+  // boxShadow: "0 16px 60px rgba(0, 0, 0, 0.8)",
 
   "& .card": {
     maxWidth: 800,
@@ -40,7 +41,7 @@ const StyledRoot = styled("div")(() => ({
 
 const ContentBox = styled("div")(({ theme }) => ({
   padding: 32,
-  background: theme.palette.background.default
+  background: 'white'
 }));
 
 // initial login credentials
@@ -224,11 +225,14 @@ const handleMouseDownPassword = (event) => {
     return (
       <StyledRoot>
         <Card className="card">
-          <Grid container>
+          <Grid container sx={{ boxSizing: 'border-box', border: '2px solid #e0e0e0', boxShadow: '0px 0px 16px 2px rgba(0, 0, 0, 0.5)', }}>
             <Grid item sm={12} xs={12}>
               <div className="img-wrapper">
-                <img src={img1} width="40%" alt="" />
+                <img src={img1} width="20%" alt="" />
               </div>
+              <Typography sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '24px', fontWeight: 'bold', }}>
+                Policy
+              </Typography>
               <ContentBox>
                 <Formik
                   onSubmit={handleFormSubmit}
@@ -301,7 +305,7 @@ const handleMouseDownPassword = (event) => {
                       <FlexBox justifyContent="space-between">
                         <NavLink
                           to="/forgotpwd"
-                          style={{ color: theme.palette.primary.main }}>
+                          style={{ color: '#ee8812', fontWeight: '500' }}>
                           Forgot password?
                         </NavLink>
                       </FlexBox>
@@ -309,16 +313,23 @@ const handleMouseDownPassword = (event) => {
 
                       <LoadingButton
                         type="submit"
-                        color="primary"
+                        // color="rgb(238, 136, 18)"
                         fullWidth
                         loading={loading}
                         variant="contained"
-                        sx={{ my: 2 }}>
+                        sx={{
+                          my: 2,
+                          backgroundColor: "rgb(238, 136, 18)", // Use sx for color
+                          "&:hover": {
+                            backgroundColor: "rgba(235, 127, 2)", // Optional: Adjust hover color
+                          },
+                        }}
+                      >
                         Login
                       </LoadingButton>
 
                       <Typography sx={{ fontSize: '12px', fontWeight: 10, fontFamily: 'sans-serif', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        © 2024. Policy by Spandana
+                        © 2024. Policies & Circulars by Spandana
                       </Typography>
                     </form>
                   )}
@@ -334,11 +345,14 @@ const handleMouseDownPassword = (event) => {
   return (
     <StyledRoot>
         <Card className="card">
-          <Grid container>
+          <Grid container sx={{ boxSizing: 'border-box', border: '2px solid #e0e0e0', boxShadow: '0px 0px 16px 2px rgba(0, 0, 0, 0.5)', }}>
             <Grid item sm={12} xs={12}>
               <div className="img-wrapper">
-                <img src={img1} width="300" alt="" />
+                <img src={img1} width="20%" alt="" />
               </div>
+              <Typography sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '24px', fontWeight: 'bold', }}>
+                Policy
+              </Typography>
               <ContentBox>
                 <Formik
                   onSubmit={chkOTP}
@@ -409,16 +423,22 @@ const handleMouseDownPassword = (event) => {
                         
                       />
 
-                      <Box display="flex" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }}>
-                        <LoadingButton
+                      <Box display="flex" alignItems="flex-end" justifyContent="flex-end" sx={{ width: '100%' }}>
+                        {/* <LoadingButton
                           type="submit"
-                          color="primary"
+                          // color="primary"
                           loading={loading}
                           variant="contained"
-                          sx={{ my: 2 }}
+                          sx={{
+                            my: 2,
+                            backgroundColor: "rgb(238, 136, 18)", // Use sx for color
+                            "&:hover": {
+                              backgroundColor: "rgba(235, 127, 2)", // Optional: Adjust hover color
+                            },
+                          }}
                         >
                           Verify OTP
-                        </LoadingButton>
+                        </LoadingButton> */}
 
                         <Typography
                           component="a"
@@ -426,7 +446,8 @@ const handleMouseDownPassword = (event) => {
                           onClick={handleResendOTP}
                           sx={{
                             ml: 2, // Optional: Add margin to the left of the Resend OTP link
-                            color: theme.palette.primary.main,
+                            color: "#ee8812",
+                            fontWeight: '500',
                             cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
                             textDecoration: 'none', // Optional: Removes underline
                             '&:hover': {
@@ -437,6 +458,9 @@ const handleMouseDownPassword = (event) => {
                           {resendCooldown > 0 ? `Resend OTP (${resendCooldown}s)` : 'Resend OTP'}
                         </Typography>
                       </Box>
+                      <Typography sx={{ fontSize: '12px', fontWeight: 10, fontFamily: 'sans-serif', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        © 2024. Policies & Circulars by Spandana
+                      </Typography>
                     </form>
                   )}
                 </Formik>
