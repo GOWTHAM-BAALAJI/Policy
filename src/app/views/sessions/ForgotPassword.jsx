@@ -58,7 +58,7 @@ export default function ForgotPassword() {
 
   const handleFormSubmit = async (values) => {
     setLoading(true);
-    const url = "http://localhost:3000/auth/forgetPassword";
+    const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/forgetPassword";
     const requestData = {
       empRef: values.emailId,
     };

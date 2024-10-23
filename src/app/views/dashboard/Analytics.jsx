@@ -75,20 +75,19 @@ export default function Analytics() {
       <ContentBox className="analytics">
         <Grid container spacing={2}>
 
-          <Grid item lg={6} md={6} sm={12} xs={12} style={{ height: 'calc(100vh - 80px)' }}>
+          <Grid item lg={6} md={6} sm={12} xs={12}>
             <Card sx={{ px: 3, py: 3, height: '100%', width: '100%' }}>
               <Title>Dashboard</Title>
               <SubTitle>Policy, SOP & Guidance Note</SubTitle>
 
               <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <DoughnutChart height="100%" onClickSection={onClickSection} />
+                <DoughnutChart height="100%" width="100%" onClickSection={onClickSection} />
               </Box>
             </Card>
           </Grid>
-          {/* Dynamic table based on the clicked section of the chart */}
-          <Grid item lg={6} md={6} sm={12} xs={12} style={{ height: 'calc(100vh - 80px)' }}>
+          <Grid item lg={6} md={6} sm={12} xs={12}>
             <Card sx={{ height: '100%', width: '100%' }}>
-              {renderTable()} {/* Conditionally render the table */}
+              {renderTable()}
             </Card>
           </Grid>
         </Grid>

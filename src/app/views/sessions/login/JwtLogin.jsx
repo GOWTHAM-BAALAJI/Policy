@@ -98,7 +98,7 @@ export default function Login() {
 
   const handleFormSubmit = async (values) => {
     setLoading(true);
-    const url = "http://localhost:3000/auth/";
+    const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/";
     const requestData = {
       empRef: values.emailId,
       password: values.password
@@ -132,7 +132,7 @@ export default function Login() {
       return;
 
     setLoading(true);
-    const url = 'http://localhost:3000/auth/resendOtp';
+    const url = 'https://policyuat.spandanasphoorty.com/policy_apis/auth/resendOtp';
     const data = {
       "user_id": userId
     };
@@ -165,7 +165,7 @@ export default function Login() {
 
   const chkOTP = async (values) => {
     setLoading(true);
-    const url = "http://localhost:3000/auth/verifyOTP";
+    const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/verifyOTP";
     const data = {
       "user_id": userId,
       "otp": values.otp,
@@ -231,7 +231,7 @@ const handleMouseDownPassword = (event) => {
                 <img src={img1} width="20%" alt="" />
               </div>
               <Typography sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '24px', fontWeight: 'bold', }}>
-                Policy
+                Policies & Circulars
               </Typography>
               <ContentBox>
                 <Formik
@@ -351,7 +351,7 @@ const handleMouseDownPassword = (event) => {
                 <img src={img1} width="20%" alt="" />
               </div>
               <Typography sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '24px', fontWeight: 'bold', }}>
-                Policy
+                Policies & Circulars
               </Typography>
               <ContentBox>
                 <Formik

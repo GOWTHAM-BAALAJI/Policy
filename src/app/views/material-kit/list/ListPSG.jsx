@@ -1,15 +1,53 @@
 import React, { useState, useEffect } from "react";
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, Card, Grid, MenuItem, Select, styled, Tabs, Tab, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, Grid, IconButton, MenuItem, Select, styled, Tabs, Tab, TextField, Typography } from "@mui/material";
 import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 import { jwtDecode } from "jwt-decode";
+import axios from 'axios';
+import toast from "react-hot-toast";
+import CloseIcon from '@mui/icons-material/Close'
 
 const ContentBox = styled("div")(({ theme }) => ({
-  margin: "20px",
+  margin: "15px",
   [theme.breakpoints.down("sm")]: { margin: "16px" }
+}));
+
+const StyledTextField = styled(TextField)(() => ({
+  width: "100%",
+  marginBottom: "16px",
+  "& .MuiInputLabel-root": {
+    textAlign: "center",
+    position: "absolute",
+    top: "50%",
+    left: "10px",
+    transform: "translateY(-50%)",
+    fontFamily: "sans-serif",
+    fontSize: "0.875rem",
+    transition: "top 0.2s ease-out, font-size 0.2s ease-out",
+  },
+  "& .MuiInputLabel-shrink": {
+    top: "2px", // Adjust this value to move the label to the border of the box outline
+    fontSize: "0.75rem", // Optional: Reduce font size when the label is shrunk
+  },
+  '& .MuiInputBase-root': {
+    height: 30, // Adjust the height as needed
+    fontFamily: 'sans-serif',
+    fontSize: '0.875rem',
+    backgroundColor: 'transparent', // Default background color
+  },
+
+  "& .MuiOutlinedInput-root": {
+    position: "relative", // Ensure the label is positioned relative to the input
+  },
+
+  "& .MuiInputBase-input": {
+    backgroundColor: "transparent", // Input remains transparent
+    height: "100%", // Ensure input takes full height
+    boxSizing: "border-box",
+  },
 }));
 
 const StyledSelect = styled(Select)(() => ({
@@ -119,7 +157,7 @@ export default function PSGTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:3000/policy/user/count', {
+        const response = await fetch('https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -160,7 +198,8 @@ export default function PSGTable() {
   const fetchData = async (tab, page, rows) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3000/policy/user?tab=${tab}&page=${page}&rows=${rows}`, {
+      let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -204,6 +243,67 @@ export default function PSGTable() {
     console.log('Current userId:', userId); // Log the roleId
   }, [roleId, userId]);
 
+  const [searchValue, setSearchValue] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleInputChange = (event) => {
+    setSearchValue(event.target.value);
+  };
+
+  const handleSearchData = async (tab, page, rows, searchValue) => {
+    setLoading(true);
+  
+    // Check for empty search value and return early if invalid
+    if (!searchValue) {
+      toast.error("Please provide some search words");
+      setLoading(false);
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchValue(searchValue);
+  
+    try {
+      // First API call: Fetch data based on searchValue
+      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      setPsgList(data);
+  
+      // Second API call: Fetch the count data based on searchValue
+      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+  
+      if (!countResponse.ok) {
+        throw new Error('Failed to fetch count data');
+      }
+  
+      const countData = await countResponse.json();
+      console.log("Count data: ", countData);
+  
+      // Check tab values and set the count based on the tab
+      if (tab === "1") setCount(countData.approved);
+      if (tab === "2") setCount(countData.rejected);
+      if (tab === "3") setCount(countData.pending);
+      if (tab === "4") setCount(countData.waitingForAction);
+  
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };  
+
   const pendingApprover = selectedDocument?.Policy_status?.find(
     status => status.approver_id === selectedDocument?.pending_at_id
   );
@@ -218,15 +318,19 @@ export default function PSGTable() {
 
   console.log("Pending approver name:", pendingApproverName);
 
+  const getDisplayPolicyId = (policy_id) => {
+    return "PL" + String(policy_id).padStart(7, "0");
+  };
+
   const columns1 = [
     {
-      name: 'ID',
+      name: 'Policy ID',
       selector: row => row.id || 'N/A',
       sortable: true,
       // center: true,
       cell: (row) => (
         <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
-          {row.id || 'N/A'}
+          {getDisplayPolicyId(row.id) || 'N/A'}
         </div>
       ),
       width: '15%',
@@ -284,16 +388,36 @@ export default function PSGTable() {
 
   const columns = columns1;
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    fetchData(activeTab, page, rowsPerPage);
+  const handlePageChange = (newPage) => {
+    if (isSearching) {
+      setCurrentPage(newPage);
+      handleSearchData(activeTab, newPage, rowsPerPage, searchValue);
+    } else {
+      setCurrentPage(newPage);
+      fetchData(activeTab, newPage, rowsPerPage);
+    }
   };
 
-  const handleRowsPerPageChange = (newRowsPerPage, page) => {
-    setRowsPerPage(newRowsPerPage);
-    setCurrentPage(1);
-    fetchData(activeTab, 1, newRowsPerPage);
+  // const handlePageChange = (page) => {
+  //   setCurrentPage(page);
+  //   fetchData(activeTab, page, rowsPerPage);
+  // };
+
+  const handleRowsPerPageChange = (newRowsPerPage) => {
+    if (isSearching) {
+      setRowsPerPage(newRowsPerPage);
+      handleSearchData(activeTab, currentPage, newRowsPerPage, searchValue);  // Search API with updated rows per page
+    } else {
+      setRowsPerPage(newRowsPerPage);
+      fetchData(activeTab, currentPage, newRowsPerPage);  // Default rows per page change
+    }
   };
+
+  // const handleRowsPerPageChange = (newRowsPerPage, page) => {
+  //   setRowsPerPage(newRowsPerPage);
+  //   setCurrentPage(1);
+  //   fetchData(activeTab, 1, newRowsPerPage);
+  // };
 
   useEffect(() => {
     fetchData(activeTab, currentPage, rowsPerPage);
@@ -312,14 +436,14 @@ export default function PSGTable() {
 
   return (
     <ContentBox className="analytics">
-    <Card sx={{ px: 3, py: 3, height: '100%', width: '100%' }}>
+    <Card sx={{ px: 1, py: 1, height: '100%', width: '100%' }}>
     <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
       <Grid item lg={6} md={6} sm={6} xs={6}>
-        <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1.4rem', marginLeft: { sm: 2, xs: 2 }, marginTop: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
+        <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1rem', marginLeft: 2, marginTop: 2, marginRight: 2 }}>
           Policies, SOPs and Guidance notes
         </Typography>
       </Grid>
-      {(roleId === 1 || roleId === 3) && (
+      {(roleId === 1 || roleId === 3 || roleId === 9) && (
         <Grid item lg={3} md={3} sm={3} xs={3}>
           <Button
             variant="contained"
@@ -329,7 +453,7 @@ export default function PSGTable() {
               fontSize: '0.875rem',
               textTransform: 'none',
               marginTop: { sm: 2, xs: 2 },
-              height: '30px',
+              height: '25px',
               backgroundColor: '#ee8812',
               '&:hover': {
                 backgroundColor: 'rgb(249, 83, 22)', // Optional: Set a different color on hover
@@ -341,7 +465,7 @@ export default function PSGTable() {
           </Button>
         </Grid>
       )}
-      <Grid item lg={(roleId === 1 || roleId === 3) ? 3 : 6} md={(roleId === 1 || roleId === 3) ? 3 : 6} sm={(roleId === 1 || roleId === 3) ? 3 : 6} xs={(roleId === 1 || roleId === 3) ? 3 : 6}>
+      <Grid item lg={(roleId === 1 || roleId === 3 || roleId === 9) ? 3 : 6} md={(roleId === 1 || roleId === 3 || roleId === 9) ? 3 : 6} sm={(roleId === 1 || roleId === 3 || roleId === 9) ? 3 : 6} xs={(roleId === 1 || roleId === 3 || roleId === 9) ? 3 : 6}>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 2, mr: 2 }}>
           <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2, mt: 0.5 }}>
             Type
@@ -373,20 +497,47 @@ export default function PSGTable() {
           />
         </Grid>
       </Grid>
-      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }, alignItems: 'center', overflowX: 'auto', whiteSpace: 'nowrap' }}>
+      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2, display: 'flex', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }, alignItems: 'center', overflowX: 'auto', whiteSpace: 'nowrap' }}>
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
           textColor="black"
           indicatorColor="secondary"
         >
-          <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: 20, fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Approved" value="1" sx={{ fontFamily: "sans-serif", fontSize: 20, fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Rejected" value="2" sx={{ fontFamily: "sans-serif", fontSize: 20, fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Pending" value="3" sx={{ fontFamily: "sans-serif", fontSize: 20, fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Approved" value="1" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Rejected" value="2" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Pending" value="3" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
         </Tabs>
       </Grid>
-      <Grid item lg={12} md={12} sm={12} xs={12}>
+      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
+        <StyledTextField
+          value={searchValue}
+          onChange={handleInputChange}
+          sx={{ width: '300px', marginRight: 2 }}
+        />
+        {searchValue && (
+          <IconButton
+            onClick={() => {
+              setSearchValue(''); // Clear the search field
+              setIsSearching(false); // Reset isSearching state
+              fetchData(activeTab, currentPage, rowsPerPage); // Fetch data without search
+            }}
+            sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }} // Adjust for proper spacing
+          >
+            <CloseIcon />
+          </IconButton>
+        )}
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ marginTop: -2, textTransform: 'none', height: '30px', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }}
+          onClick={() => handleSearchData(activeTab, currentPage, rowsPerPage, searchValue)}
+        >
+          Search
+        </Button>
+      </Grid>
+      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2 }}>
         <Box width="100%" height="100%" overflow="auto">
           <DataTable
             columns={columns}
@@ -411,7 +562,7 @@ export default function PSGTable() {
               },
               headCells: {
                 style: {
-                  fontSize: '1rem',
+                  fontSize: '0.875rem',
                   fontFamily: 'sans-serif',
                   fontWeight: 'bold',
                   textAlign: 'center',

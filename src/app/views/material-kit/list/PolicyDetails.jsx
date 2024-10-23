@@ -83,6 +83,10 @@ export default function PolicyDetails() {
     console.log("Document status: ", status);
     console.log("Document tab: ", activeTab);
 
+    const getDisplayPolicyId = (policy_id) => {
+        return "PL" + String(policy_id).padStart(7, "0");
+    };
+
     // const reviewersOptions = [
     //     { value:'572', label: 'testUser2' }
     // ]
@@ -202,7 +206,7 @@ export default function PolicyDetails() {
 
     useEffect(() => {
         // Fetch reviewers from the API
-        axios.get('http://localhost:3000/auth/getReviewer', {
+        axios.get('https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer', {
             headers: {
               Authorization: `Bearer ${userToken}`,  // Include the JWT token in the Authorization header
             },
@@ -224,7 +228,7 @@ export default function PolicyDetails() {
 
     useEffect(() => {
         // Fetch reviewers from the API
-        axios.get('http://localhost:3000/auth/getApprover', {
+        axios.get('https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover', {
             headers: {
               Authorization: `Bearer ${userToken}`,  // Include the JWT token in the Authorization header
             },
@@ -364,7 +368,7 @@ export default function PolicyDetails() {
         //   console.log('isWaitingForAction:', isWaitingForAction);
         //   console.log('isApproved:', isApproved);
         //   console.log('isRejected:', isRejected);
-            const response = await fetch(`http://localhost:3000/policy/${documentId}`, {
+            const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/${documentId}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -412,7 +416,7 @@ export default function PolicyDetails() {
 
         const mappedDecision = mapDecisionToNumber(decision);
 
-        if((roleId === 1 || roleId === 3) && activeTab == 4){
+        if((roleId === 1 || roleId === 3 || roleId === 9) && activeTab == 4){
             if(selectedDocument.initiator_id === userId){
                 if (!documentTitle || !documentDescription || uploadedFile.length === 0 || !selectedReviewer || approvalMembers.length === 0 || selectedUserGroup.length === 0) {
                     toast.error("Please fill in all the required fields");
@@ -462,7 +466,7 @@ export default function PolicyDetails() {
             }
         }
     
-        const url = "http://localhost:3000/policy/update";
+        const url = "https://policyuat.spandanasphoorty.com/policy_apis/policy/update";
         const formData = new FormData(); // Create a FormData object
     
         // Append other data to FormData
@@ -520,47 +524,39 @@ export default function PolicyDetails() {
         <ContentBox className="analytics">
         <Card sx={{ px: 3, py: 3, height: '100%', width: '100%' }}>
         {/* <form onSubmit={handleSubmit} encType="multipart/form-data"> */}
-        <Grid container spacing={2} alignItems="center">
-        <Grid item lg={6} md={6} sm={6} xs={6}>
-            <Typography
-                variant="h5"
-                sx={{
-                    fontFamily: 'sans-serif',
-                    fontSize: '1.4rem',
-                    fontWeight: 'bold',
-                    marginLeft: 2,
-                    marginTop: 2,
-                    marginRight: 2,
-                }}
+        <Grid container>
+        <Grid item xs={12} display="flex" justifyContent="flex-end">
+            <Button
+            variant="contained"
+            onClick={handleBackClick}
+            sx={{
+                marginRight: 2,
+                marginTop: 2,
+                height: '28px',
+                backgroundColor: '#ee8812',
+                '&:hover': { backgroundColor: 'rgb(249, 83, 22)' },
+            }}
             >
-                Document Details:
-            </Typography>
-        </Grid>
-        {activeTab == 4 && (
-        <Grid item lg={3} md={3} sm={3} xs={3} display="flex" justifyContent="flex-start">
-            <Typography
-                variant="h5"
-                sx={{
-                    fontFamily: 'sans-serif',
-                    fontSize: '1.4rem',
-                    fontWeight: 'bold',
-                    marginLeft: 6,
-                    marginTop: 2,
-                    marginRight: 2,
-                }}
-            >
-                Action:
-            </Typography>
-        </Grid>
-        )}
-        <Grid item lg={activeTab == 4 ? 3 : 6} md={activeTab == 4 ? 3 : 6} sm={activeTab == 4 ? 3 : 6} xs={activeTab == 4 ? 3 : 6} display="flex" justifyContent="flex-end">
-            <Button variant="contained" onClick={handleBackClick} sx={{ marginLeft: 2, marginRight: 2, marginTop: 2, height: '28px', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)' }, }}>
-                Back
+            Back
             </Button>
         </Grid>
         </Grid>
-        <Grid container spacing={2} alignItems="center">
+        <Grid container spacing={2} alignItems="flex-start">
         <Grid item lg={6} md={6} sm={12} xs={12} sx={{fontFamily: 'sans-serif', fontSize: '0.875 rem', marginLeft: 2, marginTop: 2, marginRight: 2, paddingRight: '16px'}}>
+        <Typography
+                variant="h5"
+                sx={{
+                    fontFamily: 'sans-serif',
+                    fontSize: '1.4rem',
+                    fontWeight: 'bold',
+                    marginBottom: 2,
+                    marginTop: -2,
+                    marginRight: 2,
+                    
+                }}
+            >
+                Document Details:
+        </Typography>
         {selectedDocument && (
             <>
             {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif' }}>
@@ -571,7 +567,7 @@ export default function PolicyDetails() {
                     <TableBody>
                         <TableRow>
                             <TableCell sx={{ pl: 2, width: '30%' }}><b>Document ID:</b></TableCell>
-                            <TableCell sx={{ pl: 2, width: '70%' }}>{selectedDocument.id}</TableCell>
+                            <TableCell sx={{ pl: 2, width: '70%' }}>{getDisplayPolicyId(selectedDocument.id)}</TableCell>
                         </TableRow>
                         <TableRow>
                             <TableCell sx={{ pl: 2, }}><b>Document Title:</b></TableCell>
@@ -656,7 +652,7 @@ export default function PolicyDetails() {
             {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, mb: -1 }}>
             <b>Files:</b>
             </Typography> */}
-            {activeTab == 4 && (roleId === 1 || roleId === 3) ? (
+            {activeTab == 4 && (roleId === 1 || roleId === 3 || roleId === 9) ? (
             <>
             {selectedDocument.policy_files && Array.isArray(selectedDocument.policy_files) && selectedDocument.policy_files.length > 0 ? (
             
@@ -667,37 +663,43 @@ export default function PolicyDetails() {
                 </Typography> */}
                 <TableCell>
                 <ul>
-                {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 2) ? (
-                    <li style={{ listStyleType: 'none' }}>
-                        <a
-                        href={`http://localhost:3000/policy_document/${selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 2).file_name}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        download
-                        style={{
-                            // color: 'blue',
-                            // textDecoration: 'underline',
-                            cursor: 'pointer',
-                        }}
-                        >
-                        <div className="img-wrapper">
-                            <img src={img1} width="15%" alt="" />
+                {selectedDocument.policy_files
+                    .filter(file => file.version === selectedDocument.version && file.type === 2) // Filter files based on condition
+                    .map((file, index) => (
+                    <li key={index} style={{ listStyleType: 'none' }}>
+                        <div style={{ position: 'relative', paddingLeft: '25px' }}>
+                            <div style={{ position: 'absolute', left: '0', top: '0' }}>
+                                <strong>{index + 1}.</strong>
+                            </div>
+                            <div>
+                                <a
+                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                download
+                                style={{
+                                    cursor: 'pointer',
+                                }}
+                                >
+                                <div className="img-wrapper">
+                                    <img src={img1} width="15%" alt="" />
+                                </div>
+                                </a>
+                                <div>
+                                Version: {file.version}
+                                <span style={{ marginLeft: '16px' }}>
+                                    Uploaded on: {new Date(file.createdAt).toLocaleDateString('en-GB')}
+                                </span>
+                                </div>
+                            </div>
                         </div>
-                        {/* <InsertDriveFileIcon sx={{ fontSize: 44, color: 'yellow' }} /> */}
-                        </a>
-                            Version: {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 2).version}
-                            <span style={{ marginLeft: '16px' }}>
-                            Uploaded on: {(() => {
-                                const file = selectedDocument.policy_files.find(
-                                file => file.version === selectedDocument.version && file.type === 2
-                                );
-                                return file ? new Date(file.createdAt).toLocaleDateString('en-GB') : 'N/A';
-                            })()}
-                        </span>
                     </li>
-                    ) : (
+                    ))}
+
+                {/* If no files match, display a message */}
+                {selectedDocument.policy_files.filter(file => file.version === selectedDocument.version && file.type === 2).length === 0 && (
                     <Typography>No file found for the selected version and type.</Typography>
-                    )}
+                )}
                 </ul>
                 </TableCell>
             </TableRow>
@@ -710,38 +712,43 @@ export default function PolicyDetails() {
                 <TableCell sx={{ pl: 2 }}><b>Uploaded files</b></TableCell>
                 <TableCell>
                 <ul>
-                {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1) ? (
-                        <li style={{ listStyleType: 'none' }}>
-                        <a
-                            href={`http://localhost:3000/policy_document/${selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).file_name}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            download
-                            style={{
-                            // color: 'blue',
-                            // textDecoration: 'underline',
-                            cursor: 'pointer',
-                            }}
-                        >
-                        <div className="img-wrapper">
-                            <img src={img1} width="15%" alt="" />
+                {selectedDocument.policy_files
+                    .filter(file => file.version === selectedDocument.version && file.type === 1) // Filter files based on version and type
+                    .map((file, index) => (
+                    <li key={index} style={{ listStyleType: 'none' }}>
+                        <div style={{ position: 'relative', paddingLeft: '25px' }}>
+                            <div style={{ position: 'absolute', left: '0', top: '0' }}>
+                                <strong>{index + 1}.</strong>
+                            </div>
+                            <div>
+                                <a
+                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                download
+                                style={{
+                                    cursor: 'pointer',
+                                }}
+                                >
+                                <div className="img-wrapper">
+                                    <img src={img1} width="15%" alt="" />
+                                </div>
+                                </a>
+                                <div>
+                                Version: {file.version}
+                                <span style={{ marginLeft: '16px' }}>
+                                    Uploaded on: {new Date(file.createdAt).toLocaleDateString('en-GB')}
+                                </span>
+                                </div>
+                            </div>
                         </div>
-                        </a>
-                        <div>
-                            Version: {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).version}
-                            <span style={{ marginLeft: '16px' }}>
-                            Uploaded on: {(() => {
-                                const file = selectedDocument.policy_files.find(
-                                file => file.version === selectedDocument.version && file.type === 1
-                                );
-                                return file ? new Date(file.createdAt).toLocaleDateString('en-GB') : 'N/A';
-                            })()}
-                        </span>
-                        </div>
-                        </li>
-                    ) : (
-                        <Typography>No file found for the selected version and type.</Typography>
-                    )}
+                    </li>
+                    ))}
+
+                {/* Fallback message if no files match */}
+                {selectedDocument.policy_files.filter(file => file.version === selectedDocument.version && file.type === 1).length === 0 && (
+                    <Typography>No file found for the selected version and type.</Typography>
+                )}
                 </ul>
                 </TableCell>
             </TableRow></>
@@ -756,38 +763,43 @@ export default function PolicyDetails() {
                         <TableCell sx={{ pl: 2 }}><b>Received file</b></TableCell>
                         <TableCell>
                         <ul>
-                        {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1) ? (
-                            <li style={{ listStyleType: 'none' }}>
-                                <a
-                                href={`http://localhost:3000/policy_document/${selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).file_name}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                download
-                                style={{
-                                    // color: 'blue',
-                                    // textDecoration: 'underline',
-                                    cursor: 'pointer',
-                                }}
-                                >
-                                <div className="img-wrapper">
-                                    <img src={img1} width="15%" alt="" />
-                                </div>
-                                </a>
-                                <div>
-                                    Version: {selectedDocument.policy_files.find(file => file.version === selectedDocument.version && file.type === 1).version}
-                                    <span style={{ marginLeft: '16px' }}>
-                                    Uploaded on: {(() => {
-                                        const file = selectedDocument.policy_files.find(
-                                        file => file.version === selectedDocument.version && file.type === 1
-                                        );
-                                        return file ? new Date(file.createdAt).toLocaleDateString('en-GB') : 'N/A';
-                                    })()}
-                                    </span>
+                        {selectedDocument.policy_files
+                            .filter(file => file.version === selectedDocument.version && file.type === 1) // Filter files based on version and type
+                            .map((file, index) => (
+                            <li key={index} style={{ listStyleType: 'none' }}>
+                                <div style={{ position: 'relative', paddingLeft: '25px' }}>
+                                    <div style={{ position: 'absolute', left: '0', top: '0' }}>
+                                        <strong>{index + 1}.</strong>
+                                    </div>
+                                    <div>
+                                        <a
+                                        href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        download
+                                        style={{
+                                            cursor: 'pointer',
+                                        }}
+                                        >
+                                        <div className="img-wrapper">
+                                            <img src={img1} width="15%" alt="" />
+                                        </div>
+                                        </a>
+                                        <div>
+                                        Version: {file.version}
+                                        <span style={{ marginLeft: '16px' }}>
+                                            Uploaded on: {new Date(file.createdAt).toLocaleDateString('en-GB')}
+                                        </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </li>
-                            ) : (
+                            ))}
+
+                        {/* Fallback message if no files match */}
+                        {selectedDocument.policy_files.filter(file => file.version === selectedDocument.version && file.type === 1).length === 0 && (
                             <Typography>No file found for the selected version and type.</Typography>
-                            )}
+                        )}
                         </ul>
                         </TableCell>
                         </TableRow></>
@@ -802,25 +814,32 @@ export default function PolicyDetails() {
                     <ul>
                     {selectedDocument.policy_files.map((file, index) => (
                     <li key={index} style={{ marginBottom: '8px', listStyleType: 'none' }}>
-                        <a
-                        href={`http://localhost:3000/policy_document/${file.file_name}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        download
-                        style={{
-                            // color: 'blue',
-                            // textDecoration: 'underline',
-                            cursor: 'pointer',
+                        <div style={{ position: 'relative', paddingLeft: '25px' }}>
+                            <div style={{ position: 'absolute', left: '0', top: '0' }}>
+                                {index + 1})
+                            </div>
+                            <div>
+                                <a
+                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                download
+                                style={{
+                                    // color: 'blue',
+                                    // textDecoration: 'underline',
+                                    cursor: 'pointer',
 
-                        }}
-                        >
-                        <div className="img-wrapper">
-                            <img src={img1} width="15%" alt="" />
-                        </div>
-                        </a>
-                        <div style={{ marginTop: '4px' }}>
-                            Version: {file.version}
-                            <span style={{ marginLeft: '16px' }}>Uploaded on: {new Date(file.createdAt).toLocaleDateString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
+                                }}
+                                >
+                                <div className="img-wrapper">
+                                    <img src={img1} width="15%" alt="" />
+                                </div>
+                                </a>
+                                <div style={{ marginTop: '4px' }}>
+                                    Version: {file.version}
+                                    <span style={{ marginLeft: '16px' }}>Uploaded on: {new Date(file.createdAt).toLocaleDateString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
+                                </div>
+                            </div>
                         </div>
                     </li>
                 ))}
@@ -835,7 +854,7 @@ export default function PolicyDetails() {
                     {selectedDocument.policy_files.map((file, index) => (
                     <li key={index} style={{ marginBottom: '8px', listStyleType: 'none' }}>
                         <a
-                        href={`http://localhost:3000/policy_document/${file.file_name}`}
+                        href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         download
@@ -867,6 +886,18 @@ export default function PolicyDetails() {
             )}
             </Grid>
             <Grid item lg={5} md={5} sm={12} xs={12} sx={{fontFamily: 'sans-serif', fontSize: '0.875 rem', marginLeft: 2, marginTop: 2, marginRight: 2}}>
+            <Typography
+                variant="h5"
+                sx={{
+                    fontFamily: 'sans-serif',
+                    fontSize: '1.4rem',
+                    fontWeight: 'bold',
+                    marginTop: -2,
+                    marginRight: 2,
+                }}
+            >
+                Action:
+            </Typography>
             {selectedDocument ? (
             <>
             {/* {(status === "Approved") && selectedDocument.pending_at_id === null && roleId !== 8 && (
@@ -907,14 +938,14 @@ export default function PolicyDetails() {
             )} */}
             <form onSubmit={handleSubmit} encType="multipart/form-data">
             {/* <Box sx={{ width: '600px', margin: '0 auto', padding: '16px',}}> */}
-            {activeTab == 4 && selectedDocument.pending_at_id === userId && (roleId === 1) && (
+            {activeTab == 4 && selectedDocument.pending_at_id === userId && (roleId === 1 || roleId === 9) && (
             <>
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 2 }}>
                 <b>Policy ID:</b>
             </Typography>
             <StyledTextField
                 fullWidth
-                value={documentID}  // Use the state as the value (editable)
+                value={getDisplayPolicyId(documentID)}  // Use the state as the value (editable)
                 onChange={(e) => setDocumentID(e.target.value)}  // Update the state when changed
                 sx={{ mt: 1, }}
                 InputProps={{

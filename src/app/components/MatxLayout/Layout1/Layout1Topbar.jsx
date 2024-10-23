@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate  } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
+import Profile from "app/views/profile/Profile";
+
 import {
   Box,
   styled,
@@ -100,6 +102,7 @@ const Layout1Topbar = () => {
   const { settings, updateSettings } = useSettings();
   const [roleId, setRoleId] = useState(null);
   const [userName, setUsername] = useState(null);
+  const [profileImage, setProfileImage] = useState({});
   const userToken = useSelector((state)=>{
     return state.token;//.data;
     });
@@ -113,6 +116,9 @@ const Layout1Topbar = () => {
         }
         if (decodedToken.role_id) {
           setRoleId(decodedToken.role_id);
+        }
+        if (decodedToken.profile_pic) {
+          setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
         }
       } catch (error) {
         console.error("Error decoding token:", error);
@@ -170,7 +176,7 @@ const Layout1Topbar = () => {
                     {userName || 'Guest'}
                   </Span>
                 </Hidden>
-                <Avatar src="" sx={{ cursor: "pointer" }} />
+                <Avatar src={profileImage} sx={{ cursor: "pointer" }} />
               </UserMenu>
             }
             >

@@ -105,8 +105,8 @@ const InitiateCA = () => {
 
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [uploadFilename, setUploadFilename] = useState("");
-    const [uploadedFile, setUploadedFile] = useState(null);
+    const [uploadFilename, setUploadFilename] = useState([]);
+    const [uploadedFile, setUploadedFile] = useState([]);
     const [selectedUserGroup, setSelectedUserGroup] = useState([]);
 
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -131,24 +131,38 @@ const InitiateCA = () => {
     };
 
     const handleFileUpload = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          setUploadFilename(file.name); // Store the filename in state
-          setUploadedFile(file);
+        const files = Array.from(e.target.files);
+        if (files.length > 10) {
+            toast.error("You can only upload a maximum of 10 files.");
+            return;
         }
+        files.forEach(file => {
+            setUploadFilename(prev => [...prev, file.name]); // Store the filenames in state
+            setUploadedFile(prev => [...prev, file]); // Store the file objects
+        });
+    };
+    
+    const openUploadedFile = (index) => {
+        const fileURL = URL.createObjectURL(uploadedFile[index]);
+        window.open(fileURL); // Open the file in a new tab
+    };
+    
+    const handleRemoveFile = (index) => {
+        setUploadFilename((prev) => prev.filter((_, i) => i !== index)); // Remove the filename
+        setUploadedFile((prev) => prev.filter((_, i) => i !== index)); // Remove the file object
     };
 
-    const openUploadedFile = () => {
-        if (uploadedFile) {
-          const fileURL = URL.createObjectURL(uploadedFile);
-          window.open(fileURL); // Open the file in a new tab
-        }
-    };
+    // const openUploadedFile = () => {
+    //     if (uploadedFile) {
+    //       const fileURL = URL.createObjectURL(uploadedFile);
+    //       window.open(fileURL); // Open the file in a new tab
+    //     }
+    // };
 
-    const handleRemoveFile = () => {
-        setUploadFilename(''); // Clear the filename
-        setUploadedFile(null); // Remove the uploaded file
-    };
+    // const handleRemoveFile = () => {
+    //     setUploadFilename(''); // Clear the filename
+    //     setUploadedFile(null); // Remove the uploaded file
+    // };
 
     const handleDialogClose = () => {
         setDialogOpen(false);
@@ -168,7 +182,7 @@ const InitiateCA = () => {
         //     navigate('/list/psg');
         // }, 2000);
 
-        const url = "http://localhost:3000/circular-advisories/";
+        const url = "https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/";
         const formData = new FormData(); // Create a FormData object
     
         //Append files to FormData
@@ -317,55 +331,65 @@ const InitiateCA = () => {
                     </Typography>
                     </Grid>
                     <Grid item xs={9} sm={9} md={9} lg={9}>
-                    <Grid container alignItems="center" spacing={2}>
-                        <Grid item xs>
-                            <TextField
-                            id="upload"
-                            value={uploadFilename}
-                            placeholder="Choose a file..."
-                            // required
-                            variant="outlined"
-                            fullWidth
-                            InputProps={{
-                                readOnly: true,
-                                style: {
-                                fontFamily: 'sans-serif',
-                                fontSize: '0.875rem',
-                                height: '30px',
-                                },
-                            }}
-                            onChange={(e) => setUploadFilename(e.target.value)}
-                            onClick={openUploadedFile}
-                            />
-                        </Grid>
-                        {uploadedFile && (
-                            <Grid item>
-                                <IconButton onClick={handleRemoveFile} aria-label="remove file" size="small">
-                                <CloseIcon />
-                                </IconButton>
+                            <Grid container direction="column" spacing={1}>
+                                <Grid item>
+                                    <Grid container alignItems="center">
+                                        <Grid item>
+                                            <Button
+                                                variant="contained"
+                                                component="label"
+                                                sx={{
+                                                    fontFamily: 'sans-serif',
+                                                    fontSize: '0.875rem',
+                                                    height: '30px',
+                                                    backgroundColor: '#ee8812',
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgb(249, 83, 22)',
+                                                    },
+                                                }}
+                                            >
+                                                Upload
+                                                <input
+                                                    type="file"
+                                                    hidden
+                                                    accept=".doc, .docx, .pdf"
+                                                    multiple
+                                                    onChange={(e) => handleFileUpload(e)} // Handle file upload
+                                                />
+                                            </Button>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                                {/* Display uploaded filenames below the upload button */}
+                                <Grid item>
+                                    <Grid container direction="column" spacing={0}>
+                                        {uploadFilename.map((filename, index) => (
+                                            <Grid item key={index} container alignItems="center" spacing={1}>
+                                                <Grid item>
+                                                    <Typography 
+                                                        variant="body2" 
+                                                        sx={{ 
+                                                            cursor: 'pointer', 
+                                                            fontFamily: 'sans-serif', 
+                                                            fontSize: '0.875rem',
+                                                            marginRight: 1 // Add some space between filename and close button
+                                                        }}
+                                                        onClick={() => openUploadedFile(index)} // Open specific file on click
+                                                    >
+                                                        {filename}
+                                                    </Typography>
+                                                </Grid>
+                                                <Grid item>
+                                                    <IconButton onClick={() => handleRemoveFile(index)} aria-label="remove file" size="small">
+                                                        <CloseIcon />
+                                                    </IconButton>
+                                                </Grid>
+                                            </Grid>
+                                        ))}
+                                    </Grid>
+                                </Grid>
                             </Grid>
-                        )}
-                        <Grid item xs>
-                            <Button
-                            variant="contained"
-                            component="label"
-                            sx={{
-                                fontFamily: 'sans-serif',
-                                fontSize: '0.875rem',
-                                height: '30px',
-                            }}
-                            >
-                            Upload
-                            <input
-                                type="file"
-                                hidden
-                                accept=".doc, .docx, .pdf"
-                                onChange={(e) => handleFileUpload(e)} // Handle file upload
-                            />
-                            </Button>
                         </Grid>
-                    </Grid>
-                    </Grid>
                 </Grid>
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: {sm: 2, xs: 2}, marginRight: {sm: 2, xs: 2}}}>
@@ -411,7 +435,7 @@ const InitiateCA = () => {
                 </Grid>
                 </Grid>
                 <Grid container justifyContent="center" alignItems="center" sx={{ marginTop: 2 }}>
-                    <Button type="submit" variant="contained" sx={{ height: '30px', fontFamily: 'sans-serif', fontSize: '0.875rem' }}>
+                    <Button type="submit" variant="contained" sx={{ height: '30px', fontFamily: 'sans-serif', fontSize: '0.875rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }}>
                         Submit
                     </Button>
                 </Grid>

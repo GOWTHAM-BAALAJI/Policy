@@ -3,7 +3,7 @@ import { useTheme } from "@mui/material/styles";
 import ReactEcharts from "echarts-for-react";
 import { useDispatch, useSelector } from 'react-redux';
 
-export default function DoughnutChart({ height = '100%', color = [], onClickSection }) {
+export default function DoughnutChart({ height = '100%', width = '100%', color = [], onClickSection }) {
   const theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [selectedSection, setSelectedSection] = useState(null);
@@ -21,7 +21,7 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:3000/policy/user/count', {
+        const response = await fetch('https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -91,11 +91,14 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
   };
 
   const option = {
+    responsive: true,
+    maintainAspectRatio: false,
     legend: {
       show: true,
       itemGap: 20,
       icon: "circle",
       bottom: 20,
+      padding: [20, 0, 0, 0],
       textStyle: {
         color: "black",
         fontSize: 13,
@@ -188,7 +191,7 @@ export default function DoughnutChart({ height = '100%', color = [], onClickSect
 
   return (
     <ReactEcharts
-      style={{ height: height, width: "100%" }}
+      style={{ height: height, width: width }}
       option={option}
       onEvents={{
         'click': onChartClick  // Register the click event

@@ -178,12 +178,14 @@ const InitiatePSG = () => {
 
     const handleFileUpload = (e) => {
         const files = Array.from(e.target.files);
+        if (files.length > 10) {
+            toast.error("You can only upload a maximum of 10 files.");
+            return;
+        }
         files.forEach(file => {
             setUploadFilenames(prev => [...prev, file.name]); // Store the filenames in state
             setUploadedFiles(prev => [...prev, file]); // Store the file objects
         });
-        // setUploadedFiles(prev => [...prev, ...e]);
-        // setUploadFilenames(prev => [...prev, e.name]);
     };
     
     const openUploadedFile = (index) => {
@@ -241,8 +243,6 @@ const InitiatePSG = () => {
     //     formData.append("user_group", selectedUserGroup || null);
     
     //     console.log("Request Data:", formData);
-
-    //     const url = "http://localhost:3000/policy/";
     
     //     fetch(url, {
     //         method: "POST",
@@ -267,7 +267,7 @@ const InitiatePSG = () => {
 
     useEffect(() => {
         // Fetch reviewers from the API
-        axios.get('http://localhost:3000/auth/getReviewer', {
+        axios.get('https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer', {
             headers: {
               Authorization: `Bearer ${userToken}`,  // Include the JWT token in the Authorization header
             },
@@ -289,7 +289,7 @@ const InitiatePSG = () => {
 
     useEffect(() => {
         // Fetch reviewers from the API
-        axios.get('http://localhost:3000/auth/getApprover', {
+        axios.get('https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover', {
             headers: {
               Authorization: `Bearer ${userToken}`,  // Include the JWT token in the Authorization header
             },
@@ -309,6 +309,8 @@ const InitiatePSG = () => {
           });
     }, []);
 
+    const filteredApprovalMembers = selectedReviewer ? approvalMembers.filter(member => member.value !== selectedReviewer) : approvalMembers;
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
@@ -326,7 +328,7 @@ const InitiatePSG = () => {
         //     navigate('/list/psg');
         // }, 2000);
 
-        const url = "http://localhost:3000/policy/";
+        const url = "https://policyuat.spandanasphoorty.com/policy_apis/policy/";
         const formData = new FormData(); // Create a FormData object
     
         // Append files to FormData
@@ -377,52 +379,7 @@ const InitiatePSG = () => {
             success: (data) => `Policy Initiated Successfully`, // Adjust based on your API response
             error: (err) => `Error while Initiating`,
           });
-        // console.log("Result:",result);
-        // if (response.ok && result?.status) {
-        //     console.log("Successfully submitted");
-        // } else {
-        //     // setPasswordError("Invalid employee ID or password");
-        // }
-        // } catch (error) {
-        // console.error(error);
-        // // setPasswordError("Failed to load, please try again later.");
-        // }
-    }
-    // const userToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NzEsImVtcF9pZCI6InNmMDAwMDAwMSIsImVtcF9uYW1lIjoidGVzdFVzZXIxIiwiZW1wX2VtYWlsIjoidGVzdHVzZXIxQHNwYW5kYW5hc3Bob29ydHkuY29tIiwicm9sZV9pZCI6MSwiaWF0IjoxNzI3OTY5NjQwLCJleHAiOjE3Mjc5NzMyNDB9.uI74ktmWkddM8N7j0_HI36TgAbrjHHElMQeYU2S49UU';
-
-//     const handleSubmit = async (e) => {
-//   e.preventDefault();
-
-//   const payload = {
-//     title: title,
-//     description: description,
-//     files: uploadFilenames || [],
-//     reviewer_id: selectedReviewer || null,
-//     approver_ids: selectedApprovalMembers || [],
-//     user_group: selectedUserGroup || null,
-//   };
-
-//   try {
-//     const response = await fetch('http://localhost:3000/policy', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': `Bearer ${userToken}`, // Ensure userToken is defined
-//       },
-//       body: JSON.stringify(payload),
-//     });
-
-//     if (!response.ok) {
-//       throw new Error(`HTTP error! status: ${response.status}`);
-//     }
-
-//     const data = await response.json();
-//     console.log('Success:', data);
-//   } catch (error) {
-//     console.error('Error during submission:', error);
-//   }
-// };
-
+    };
     
     return(
         <ContentBox className="analytics">
@@ -561,6 +518,10 @@ const InitiatePSG = () => {
                                                     fontFamily: 'sans-serif',
                                                     fontSize: '0.875rem',
                                                     height: '30px',
+                                                    backgroundColor: '#ee8812',
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgb(249, 83, 22)',
+                                                    },
                                                 }}
                                             >
                                                 Upload
@@ -568,6 +529,7 @@ const InitiatePSG = () => {
                                                     type="file"
                                                     hidden
                                                     accept=".doc, .docx"
+                                                    multiple
                                                     onChange={(e) => handleFileUpload(e)} // Handle file upload
                                                 />
                                             </Button>
@@ -680,7 +642,7 @@ const InitiatePSG = () => {
                                                     <MenuItem value="" disabled>
                                                         <ListItemText style={{ color: "#bdbdbd" }} primary="Select the approval members" />
                                                     </MenuItem>
-                                                    {approvalMembers.map((member) => (
+                                                    {filteredApprovalMembers.map((member) => (
                                                         <MenuItem key={member.value} value={member.value}>
                                                         <Checkbox checked={selectedApprovalMembers.indexOf(member.value) > -1} />
                                                         <ListItemText
@@ -743,7 +705,7 @@ const InitiatePSG = () => {
                 </Grid>
                 </Grid>
                 <Grid container justifyContent="center" alignItems="center" sx={{ marginTop: 1.5, marginBottom: 1.5 }}>
-                    <Button type="submit" variant="contained" sx={{ height: '30px', fontFamily: 'sans-serif', fontSize: '0.875rem' }}>
+                    <Button type="submit" variant="contained" sx={{ height: '30px', fontFamily: 'sans-serif', fontSize: '0.875rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }}>
                         Submit
                     </Button>
                 </Grid>

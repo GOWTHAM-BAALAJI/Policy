@@ -41,7 +41,7 @@ export default function CATable() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/circular-advisories/', {
+      const response = await fetch('https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -70,25 +70,29 @@ export default function CATable() {
     console.log('Current userId:', userId); // Log the roleId
   }, [roleId, userId]);
 
+  const getDisplayPolicyId = (policy_id) => {
+    return "PL" + String(policy_id).padStart(7, "0");
+  };
+
   const columns1 = [
     {
-      name: 'ID',
+      name: 'Policy ID',
       selector: row => row.id || 'N/A',
       sortable: true,
       // center: true,
       cell: (row) => (
         <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
-          {row.id || 'N/A'}
+          {getDisplayPolicyId(row.id) || 'N/A'}
         </div>
       ),
-      width: '10%',
+      width: '20%',
     },
     {
       name: 'Document Title',
       selector: row => row.title || 'N/A',
       sortable: true,
       // center: true,
-      width: '30%',
+      width: '35%',
       cell: (row) => (
         <Typography
           variant="body2"
@@ -104,7 +108,7 @@ export default function CATable() {
       selector: row => row.description || 'N/A',
       sortable: true,
       // center: true,
-      width: '60%',
+      width: '45%',
       cell: (row) => (
         <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
           {row.description || 'N/A'}
@@ -135,7 +139,7 @@ export default function CATable() {
     setSelectedRow(row);
   
     try {
-      const response = await fetch(`http://localhost:3000/circular-advisories/${row.id}`, {
+      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/${row.id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +150,7 @@ export default function CATable() {
       const data = await response.json();
   
       if (data.status && data.data.file_name) {
-        const fileResponse = await fetch(`http://localhost:3000/CA_document/${data.data.file_name}`, {
+        const fileResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/CA_document/${data.data.file_name}`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${userToken}`,
@@ -179,7 +183,7 @@ export default function CATable() {
           Circulars and Advisories
         </Typography>
       </Grid>
-      {(roleId === 1 || roleId === 3) && (
+      {(roleId === 1 || roleId === 3 || roleId === 9) && (
         <Grid item lg={6} md={6} sm={6} xs={6} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end' }}>
           <Button
             variant="contained"
@@ -190,6 +194,10 @@ export default function CATable() {
               textTransform: 'none',
               marginTop: { sm: 2, xs: 2 },
               height: '30px',
+              backgroundColor: '#ee8812',
+              '&:hover': {
+                backgroundColor: 'rgb(249, 83, 22)',
+              },
             }}
             onClick={() => navigate('/initiate/ca')}
           >

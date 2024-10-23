@@ -77,7 +77,7 @@
 
 
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import CssBaseline from "@mui/material/CssBaseline";
 import { setupActivityListeners, clearActivityListeners } from '../redux/idleTimeout';
@@ -105,6 +105,8 @@ function IdleTimeoutHandler() {
 }
 
 const App = () => {
+  // const [profilepic, setProfilepic] = useState(null);
+
   return (
     <SettingsProvider>
       <MatxTheme>
