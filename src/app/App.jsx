@@ -105,13 +105,13 @@ function IdleTimeoutHandler() {
 }
 
 const App = () => {
-  // const [profilepic, setProfilepic] = useState(null);
+  const [profilepic, setProfilepic] = useState(null);
 
   return (
     <SettingsProvider>
       <MatxTheme>
         <CssBaseline />
-        <RouterProvider router={createBrowserRouter(routes)} />
+        <RouterProvider router={createBrowserRouter(routes)} element={profilepic} />
         <IdleTimeoutHandler />
       </MatxTheme>
       <Toaster/>

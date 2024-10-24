@@ -49,12 +49,12 @@ export default function Brand({ children }) {
     }
   }, [userToken]);
 
-  const path = roleId === 8 ? "/display/list" : "/dashboard";
+  const path = roleId === 16 ? "/display/list" : "/dashboard";
 
   return (
     <BrandRoot>
     <Link to={path} style={{ textDecoration: 'none', color: 'inherit' }}>
-      <Box display="flex" alignItems="center">
+      <Box display="flex" alignItems="center" sx={{ mb: 2 }}>
         <div className="img-wrapper">
           <img src={img1} width="40" alt="" />
         </div>

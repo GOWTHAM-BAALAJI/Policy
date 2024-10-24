@@ -102,11 +102,15 @@ const Layout1Topbar = () => {
   const { settings, updateSettings } = useSettings();
   const [roleId, setRoleId] = useState(null);
   const [userName, setUsername] = useState(null);
-  const [profileImage, setProfileImage] = useState({});
   const userToken = useSelector((state)=>{
     return state.token;//.data;
     });
   console.log("UserToken:",userToken);
+
+  const userProfile = useSelector((state) => state.userData);
+  const { profile_pic } = userProfile;
+  const [profileImage, setProfileImage] = useState(profile_pic||"");
+
   useEffect(() => {
     if (userToken) {
       try {
@@ -151,7 +155,7 @@ const Layout1Topbar = () => {
     toast.success("Logged out successfully");
   };
 
-  const path = roleId === 8 ? "/display/list" : "/dashboard";
+  const path = roleId === 16 ? "/display/list" : "/dashboard";
 
   return (
     <TopbarRoot>

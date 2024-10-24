@@ -58,6 +58,7 @@ export default function Sidenav({ children }) {
         const decodedToken = jwtDecode(userToken);
         if (decodedToken.role_id) {
           setRoleId(decodedToken.role_id);
+          console.log("Role Id: ",roleId);
         }
       } catch (error) {
         console.error("Error decoding token:", error);
@@ -70,7 +71,7 @@ export default function Sidenav({ children }) {
     <Fragment>
       <StyledScrollBar options={{ suppressScrollX: true }}>
         {children}
-        <MatxVerticalNav items={roleId === 8 ? navigations2 : navigations1} />
+        <MatxVerticalNav items={roleId === 16 ? navigations2 : navigations1} />
       </StyledScrollBar>
 
       <SideNavMobile onClick={() => updateSidebarMode({ mode: "close" })} />

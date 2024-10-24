@@ -8,7 +8,7 @@ import DataTable from 'react-data-table-component';
 import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
 import toast from "react-hot-toast";
-import CloseIcon from '@mui/icons-material/Close'
+import CloseIcon from '@mui/icons-material/Close';
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",

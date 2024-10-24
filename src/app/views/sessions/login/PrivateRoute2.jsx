@@ -3,14 +3,9 @@ import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { jwtDecode } from "jwt-decode";
 
-const PrivateRoute1 = ({ element }) => {
+const PrivateRoute = ({ element }) => {
+    const userToken = useSelector((state) => state.token);
     const [roleId, setRoleId] = useState(null);
-
-    const userToken = useSelector((state)=>{
-        return state.token;//.data;
-        });
-    console.log("UserToken:",userToken);    
-
     useEffect(() => {
         if (userToken) {
           try {
@@ -24,8 +19,8 @@ const PrivateRoute1 = ({ element }) => {
           }
         }
     }, [userToken]);
-    
-    return roleId !== 16 ? element : <Navigate to="/display/list" />;
+
+    return userToken ? <Navigate to="/dashboard" /> : element ;
 };
 
-export default PrivateRoute1;
+export default PrivateRoute;

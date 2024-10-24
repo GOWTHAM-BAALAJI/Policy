@@ -8,6 +8,7 @@ import sessionRoutes from "./views/sessions/session-routes";
 import materialRoutes from "app/views/material-kit/MaterialRoutes";
 import PrivateRoute from "./views/sessions/login/PrivateRoute";
 import PrivateRoute1 from "./views/sessions/login/PrivateRoute1";
+import PrivateRoute2 from "./views/sessions/login/PrivateRoute2";
 import { element } from "prop-types";
 
 const Analytics = Loadable(lazy(() => import("app/views/dashboard/Analytics")));
@@ -17,7 +18,7 @@ const Profile = Loadable(lazy(() => import("./views/profile/Profile")));
 const routes = [
   {
     path: "/",
-    element: <JwtLogin />
+    element: <PrivateRoute2 element={<JwtLogin />} />
   },
   {
     element: <MatxLayout />,
@@ -30,7 +31,7 @@ const routes = [
       },
       {
         path: "/profile",
-        element: < Profile />
+        element: <PrivateRoute element={<Profile />} />
       },
     ]
   },

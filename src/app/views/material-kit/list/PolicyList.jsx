@@ -441,7 +441,7 @@ const PSGTable = ({ initialTab }) => {
   return (
     <Grid container spacing={2}>
       <Grid item lg={6} md={6} sm={6} xs={6}>
-        <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1.4rem', marginLeft: { sm: 2, xs: 2 }, marginTop: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
+        <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1rem', marginLeft: { sm: 2, xs: 2 }, marginTop: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
           Policies, SOPs and Guidance notes
         </Typography>
       </Grid>
@@ -506,10 +506,10 @@ const PSGTable = ({ initialTab }) => {
           textColor="black"
           indicatorColor="secondary"
         >
-          <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: 18, fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Approved" value="1" sx={{ fontFamily: "sans-serif", fontSize: 18, fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Rejected" value="2" sx={{ fontFamily: "sans-serif", fontSize: 18, fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Pending" value="3" sx={{ fontFamily: "sans-serif", fontSize: 18, fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Approved" value="1" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Rejected" value="2" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Pending" value="3" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
         </Tabs>
       </Grid>
       <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
@@ -564,7 +564,7 @@ const PSGTable = ({ initialTab }) => {
               },
               headCells: {
                 style: {
-                  fontSize: '1rem',
+                  fontSize: '0.875rem',
                   fontFamily: 'sans-serif',
                   fontWeight: 'bold',
                   textAlign: 'center',

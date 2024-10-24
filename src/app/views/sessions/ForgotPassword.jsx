@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Grid, styled, TextField } from "@mui/material";
+import { Button, Card, Grid, styled, TextField, Typography } from "@mui/material";
 import img1 from "../../assets/spandana_logo.png";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import {IconButton, InputAdornment } from '@mui/material';
+import toast from "react-hot-toast";
 
 // STYLED COMPONENTS
 const StyledRoot = styled("div")(() => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  backgroundColor: "#1A2038",
+  backgroundColor: "#fff",
   minHeight: "100vh !important",
 
   "& .card": {
@@ -31,7 +32,7 @@ const StyledRoot = styled("div")(() => ({
 
 const ContentBox = styled("div")(({ theme }) => ({
   padding: 32,
-  background: theme.palette.background.default
+  background: 'white'
 }));
 
 const initialValues = {
@@ -71,7 +72,10 @@ export default function ForgotPassword() {
 
       const result = await response.json();
       if (response.ok && result.status === 200) {
-        navigate('/');
+        toast.success("The link was sent to the registered mail ID");
+        setTimeout(() => {
+          navigate('/');
+      }, 2000);
         setEmailError("");
       } else {
         setEmailError("Invalid Employee ID or Email ID");
@@ -87,12 +91,14 @@ export default function ForgotPassword() {
   return (
     <StyledRoot>
       <Card className="card">
-        <Grid container>
+        <Grid container sx={{ boxSizing: 'border-box', border: '2px solid #e0e0e0', boxShadow: '0px 0px 16px 2px rgba(0, 0, 0, 0.5)', }}>
           <Grid item xs={12}>
             <div className="img-wrapper">
-              <img width="300" src={img1} alt="" />
+              <img width="20%" src={img1} alt="" />
             </div>
-
+            <Typography sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '24px', fontWeight: 'bold', }}>
+              Policies & Circulars
+            </Typography>
             <ContentBox>
             <Formik
                   onSubmit={handleFormSubmit}
@@ -128,16 +134,16 @@ export default function ForgotPassword() {
                   }}
                 />
 
-                <Button fullWidth variant="contained" color="primary" type="submit">
+                <Button fullWidth variant="contained" type="submit" sx={{ backgroundColor: "rgb(238, 136, 18)","&:hover": { backgroundColor: "rgba(235, 127, 2)", }, }}>
                   Reset Password
                 </Button>
 
                 <Button
                   fullWidth
-                  color="primary"
+                  color="secondary"
                   variant="outlined"
                   onClick={() => navigate(-1)}
-                  sx={{ mt: 3 }}>
+                  sx={{ mt: 2 }}>
                   Go Back
                 </Button>
               </form>

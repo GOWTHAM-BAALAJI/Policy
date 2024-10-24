@@ -76,7 +76,7 @@ export default function Analytics() {
         <Grid container spacing={2}>
 
           <Grid item lg={6} md={6} sm={12} xs={12}>
-            <Card sx={{ px: 3, py: 3, height: '100%', width: '100%' }}>
+            <Card sx={{ px: 3, py: 3, minHeight: '80vh', height: '100%', width: '100%' }}>
               <Title>Dashboard</Title>
               <SubTitle>Policy, SOP & Guidance Note</SubTitle>
 
@@ -86,7 +86,7 @@ export default function Analytics() {
             </Card>
           </Grid>
           <Grid item lg={6} md={6} sm={12} xs={12}>
-            <Card sx={{ height: '100%', width: '100%' }}>
+            <Card sx={{ minHeight: '80vh', height: '100%', width: '100%' }}>
               {renderTable()}
             </Card>
           </Grid>

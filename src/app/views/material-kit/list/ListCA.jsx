@@ -1,26 +1,58 @@
 import React, { useState, useEffect } from "react";
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, Card, Grid, MenuItem, Select, styled, Tabs, Tab, Typography } from "@mui/material";
+import { Box, Button, Card, Grid, IconButton, MenuItem, Select, styled, Tabs, Tab, TextField, Typography } from "@mui/material";
 import { useForm, Controller } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 import { jwtDecode } from "jwt-decode";
+import CloseIcon from '@mui/icons-material/Close';
+import toast from "react-hot-toast";
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "20px",
   [theme.breakpoints.down("sm")]: { margin: "16px" }
 }));
 
+const StyledTextField = styled(TextField)(() => ({
+  width: "100%",
+  marginBottom: "16px",
+  "& .MuiInputLabel-root": {
+    textAlign: "center",
+    position: "absolute",
+    top: "50%",
+    left: "10px",
+    transform: "translateY(-50%)",
+    fontFamily: "sans-serif",
+    fontSize: "0.875rem",
+    transition: "top 0.2s ease-out, font-size 0.2s ease-out",
+  },
+  "& .MuiInputLabel-shrink": {
+    top: "2px", // Adjust this value to move the label to the border of the box outline
+    fontSize: "0.75rem", // Optional: Reduce font size when the label is shrunk
+  },
+  '& .MuiInputBase-root': {
+    height: 30, // Adjust the height as needed
+    fontFamily: 'sans-serif',
+    fontSize: '0.875rem',
+    backgroundColor: 'transparent', // Default background color
+  },
+
+  "& .MuiOutlinedInput-root": {
+    position: "relative", // Ensure the label is positioned relative to the input
+  },
+
+  "& .MuiInputBase-input": {
+    backgroundColor: "transparent", // Input remains transparent
+    height: "100%", // Ensure input takes full height
+    boxSizing: "border-box",
+  },
+}));
+
 export default function CATable() {
   const { control } = useForm();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const queryParams = new URLSearchParams(location.search);
-  const initialTab = queryParams.get('tab') || '4';
-
-  const [activeTab, setActiveTab] = useState(initialTab);
   const [tabledata, setTableData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -38,10 +70,10 @@ export default function CATable() {
   });
   console.log("UserToken:",userToken);
 
-  const fetchData = async () => {
+  const fetchData = async (page, rows) => {
     setLoading(true);
     try {
-      const response = await fetch('https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/', {
+      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -70,25 +102,80 @@ export default function CATable() {
     console.log('Current userId:', userId); // Log the roleId
   }, [roleId, userId]);
 
-  const getDisplayPolicyId = (policy_id) => {
-    return "PL" + String(policy_id).padStart(7, "0");
+  const [searchValue, setSearchValue] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+
+  const handleInputChange = (event) => {
+    setSearchValue(event.target.value);
+  };
+
+  const handleSearchData = async (page, rows, searchValue) => {
+    setLoading(true);
+  
+    // Check for empty search value and return early if invalid
+    if (!searchValue) {
+      toast.error("Please provide some search words");
+      setLoading(false);
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchValue(searchValue);
+  
+    try {
+      // First API call: Fetch data based on searchValue
+      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}&search=${searchValue}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      setPsgList(data.data);
+  
+      // Second API call: Fetch the count data based on searchValue
+      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/count?search=${searchValue}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+  
+      if (!countResponse.ok) {
+        throw new Error('Failed to fetch count data');
+      }
+  
+      const countData = await countResponse.json();
+      console.log("Count data: ", countData);
+  
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getDisplayCircularId = (policy_id) => {
+    return "CL" + String(policy_id).padStart(7, "0");
   };
 
   const columns1 = [
     {
-      name: 'Policy ID',
+      name: 'Circular ID',
       selector: row => row.id || 'N/A',
       sortable: true,
       // center: true,
       cell: (row) => (
         <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
-          {getDisplayPolicyId(row.id) || 'N/A'}
+          {getDisplayCircularId(row.id) || 'N/A'}
         </div>
       ),
       width: '20%',
     },
     {
-      name: 'Document Title',
+      name: 'Circular Title',
       selector: row => row.title || 'N/A',
       sortable: true,
       // center: true,
@@ -104,7 +191,7 @@ export default function CATable() {
       ),
     },
     {
-      name: 'Document Description',
+      name: 'Circular Description',
       selector: row => row.description || 'N/A',
       sortable: true,
       // center: true,
@@ -121,18 +208,18 @@ export default function CATable() {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    fetchData(activeTab, page, rowsPerPage);
+    fetchData(page, rowsPerPage);
   };
 
   const handleRowsPerPageChange = (newRowsPerPage, page) => {
     setRowsPerPage(newRowsPerPage);
     setCurrentPage(1);
-    fetchData(activeTab, 1, newRowsPerPage);
+    fetchData(1, newRowsPerPage);
   };
 
   useEffect(() => {
-    fetchData(activeTab, currentPage, rowsPerPage);
-  }, [activeTab, currentPage, rowsPerPage]);
+    fetchData(currentPage, rowsPerPage);
+  }, [currentPage, rowsPerPage]);
 
   const handleRowClick = async (row) => {
     setSelectedDocument(row.title);
@@ -205,6 +292,33 @@ export default function CATable() {
           </Button>
         </Grid>
       )}
+      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
+        <StyledTextField
+          value={searchValue}
+          onChange={handleInputChange}
+          sx={{ width: '300px', marginRight: 2 }}
+        />
+        {searchValue && (
+          <IconButton
+            onClick={() => {
+              setSearchValue(''); // Clear the search field
+              setIsSearching(false); // Reset isSearching state
+              fetchData(currentPage, rowsPerPage); // Fetch data without search
+            }}
+            sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }} // Adjust for proper spacing
+          >
+            <CloseIcon />
+          </IconButton>
+        )}
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ marginTop: -2, textTransform: 'none', height: '30px', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }}
+          onClick={() => handleSearchData(currentPage, rowsPerPage, searchValue)}
+        >
+          Search
+        </Button>
+      </Grid>
       <Grid item lg={12} md={12} sm={12} xs={12}>
         <Box width="100%" overflow="auto">
           <DataTable

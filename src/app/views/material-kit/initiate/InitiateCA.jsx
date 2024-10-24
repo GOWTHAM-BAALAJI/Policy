@@ -185,15 +185,15 @@ const InitiateCA = () => {
         const url = "https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/";
         const formData = new FormData(); // Create a FormData object
     
-        //Append files to FormData
-        // uploadedFile.forEach(file => {
-        //     formData.append("files[]", file); // Name the file array appropriately
-        // });
+        // Append files to FormData
+        uploadedFile.forEach(file => {
+            formData.append("files[]", file); // Name the file array appropriately
+        });
     
         // Append other data to FormData
         formData.append("title", title);
         formData.append("description", description);
-        formData.append("files[]",uploadedFile);
+        // formData.append("files[]",uploadedFile);
         formData.append("user_group", selectedUserGroup || null);
     
         const submitPromise=fetch(url, {
