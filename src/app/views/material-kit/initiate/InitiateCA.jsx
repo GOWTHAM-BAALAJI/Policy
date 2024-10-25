@@ -168,11 +168,32 @@ const InitiateCA = () => {
         setDialogOpen(false);
     };
 
+    const [isBtnDisabled, setIsBtnDisabled] = useState(false);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
+
+        setIsBtnDisabled(true);
+            setTimeout(() => {
+                setIsBtnDisabled(false);
+              }, 4000);
+        
         if (!title || !description || uploadedFile.length === 0 || selectedUserGroup.length === 0) {
             toast.error("Please fill in all the required fields");
+            setIsBtnDisabled(true);
+            setTimeout(() => {
+                setIsBtnDisabled(false);
+              }, 4000);
+            return;
+        }
+
+        if(uploadedFile.length > 10){
+            toast.error("You can upload a maximum of 10 files only");
+            setIsBtnDisabled(true);
+            setTimeout(() => {
+                setIsBtnDisabled(false);
+            }, 4000);
             return;
         }
         // setDialogTitle("Success");
@@ -181,6 +202,20 @@ const InitiateCA = () => {
         // setTimeout(() => {
         //     navigate('/list/psg');
         // }, 2000);
+
+        const isValidFileFormat = uploadedFile.every(file => 
+            file.name.endsWith(".doc") || file.name.endsWith(".docx") || file.name.endsWith(".pdf")
+        );
+    
+        if (!isValidFileFormat) {
+            toast.error("Please upload only .doc, .docx or .pdf files");
+            setIsBtnDisabled(true);
+            setTimeout(() => {
+                setIsBtnDisabled(false);
+              }, 4000);
+            // setLoading(false);
+            return;
+        }
 
         const url = "https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/";
         const formData = new FormData(); // Create a FormData object
@@ -205,6 +240,9 @@ const InitiateCA = () => {
             body: formData,
         })
         .then((response) => {
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
             return response.json();
         })
         .then((data) => {
@@ -215,13 +253,14 @@ const InitiateCA = () => {
                     navigate('/list/ca');
                 }, 1000);
             } else {
-                console.log("Error");
+                throw new Error("Submission failed");
             }
             setLoading(false); // Reset loading state
         })
         .catch((error) => {
             console.error("Submission error:", error);
             setLoading(false); // Reset loading state
+            throw error;
         });
 
 
@@ -415,11 +454,14 @@ const InitiateCA = () => {
                                     id="userGroups"
                                     value={selectedUserGroup}
                                     // required
+                                    displayEmpty
                                     onChange={(e) => {
                                         setSelectedUserGroup(e.target.value);
                                     }}
                                     >
-                                    <option value="">Select a user group</option>
+                                    <MenuItem value="" disabled>
+                                        <ListItemText style={{ color: "#bdbdbd" }} primary="Select a user group" />
+                                    </MenuItem>
                                     {userGroupOptions.map((option) => (
                                             <MenuItem key={option.value} value={option.value}>
                                             <ListItemText primary={option.label} />
@@ -435,7 +477,7 @@ const InitiateCA = () => {
                 </Grid>
                 </Grid>
                 <Grid container justifyContent="center" alignItems="center" sx={{ marginTop: 2 }}>
-                    <Button type="submit" variant="contained" sx={{ height: '30px', fontFamily: 'sans-serif', fontSize: '0.875rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }}>
+                    <Button type="submit" disabled={isBtnDisabled} variant="contained" sx={{ mb: 2, height: '30px', fontFamily: 'sans-serif', fontSize: '0.875rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }}>
                         Submit
                     </Button>
                 </Grid>

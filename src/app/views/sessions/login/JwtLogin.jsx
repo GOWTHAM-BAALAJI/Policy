@@ -54,11 +54,9 @@ const initialValues = {
 
 // form field validation schema
 const validationSchema = Yup.object().shape({
-  emailId: Yup.string()
-    .required("Email ID is required!"),
+  emailId: Yup.string(),
   password: Yup.string()
     .min(6, "Password must be 6 characters long")
-    .required("Password is required!"),
 });
 
 export default function Login() {
@@ -96,8 +94,20 @@ export default function Login() {
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
+  const [isBtnDisabled, setIsBtnDisabled] = useState(false);
+
   const handleFormSubmit = async (values) => {
     setLoading(true);
+
+    if(!values.emailId || !values.password){
+      toast.error("Please fill in all the required fields");
+      setIsBtnDisabled(true);
+      setTimeout(() => {
+          setIsBtnDisabled(false);
+      }, 4000);
+      return;
+    }
+
     const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/";
     const requestData = {
       empRef: values.emailId,
@@ -117,11 +127,19 @@ export default function Login() {
         setUserId(result.user_id);
         setPasswordError(""); // Clear error if login is successful
       } else {
-        setPasswordError("Invalid employee ID or password");
+        toast.error("Invalid employee ID or password");
+        setIsBtnDisabled(true);
+        setTimeout(() => {
+            setIsBtnDisabled(false);
+        }, 4000);
       }
     } catch (error) {
       console.error(error);
-      setPasswordError("Failed to load, please try again later.");
+      toast.error("Failed to load, please try again later.");
+      setIsBtnDisabled(true);
+      setTimeout(() => {
+          setIsBtnDisabled(false);
+      }, 4000);
     } finally {
       setLoading(false);
     }
@@ -153,11 +171,19 @@ export default function Login() {
         setDialogOpen(true);
         setResendCooldown(30);
       } else {
-        setPasswordError("Failed to resend OTP.");
+        toast.error("Failed to resend OTP.");
+        setIsBtnDisabled(true);
+        setTimeout(() => {
+            setIsBtnDisabled(false);
+        }, 4000); 
       }
     } catch (error) {
       console.error(error);
-      setPasswordError("Failed to resend OTP.");
+      toast.error("Failed to resend OTP.");
+      setIsBtnDisabled(true);
+      setTimeout(() => {
+          setIsBtnDisabled(false);
+      }, 4000);
     } finally {
       setLoading(false);
     }
@@ -198,14 +224,26 @@ export default function Login() {
           // Navigate to dashboard after setting the token
           navigate('/dashboard');
         } else {
-          setPasswordError("Token not found in response.");
+          toast.error("Token not found in response.");
+          setIsBtnDisabled(true);
+          setTimeout(() => {
+              setIsBtnDisabled(false);
+          }, 4000);
         }
       } else {
-        setPasswordError("Invalid OTP");
+        toast.error("Invalid OTP");
+        setIsBtnDisabled(true);
+        setTimeout(() => {
+            setIsBtnDisabled(false);
+        }, 4000);
       }
     } catch (error) {
       console.error("Error in OTP Verification:", error);
-      setPasswordError("Failed to verify OTP.");
+      toast.error("Failed to verify OTP.");
+      setIsBtnDisabled(true);
+      setTimeout(() => {
+          setIsBtnDisabled(false);
+      }, 4000);
     } finally {
       setLoading(false);
     }
@@ -315,7 +353,8 @@ const handleMouseDownPassword = (event) => {
                         type="submit"
                         // color="rgb(238, 136, 18)"
                         fullWidth
-                        loading={loading}
+                        disabled={isBtnDisabled}
+                        // loading={loading}
                         variant="contained"
                         sx={{
                           my: 2,
@@ -407,7 +446,7 @@ const handleMouseDownPassword = (event) => {
                               handleSubmit(); // Trigger form submission
                             }
                           } else {
-                            setPasswordError("OTP must be exactly 4 digits.");
+                            // toast.error("OTP must be exactly 4 digits.");
                             e.target.value = values.otp;  // Revert to the last valid state
                           }
                         }}

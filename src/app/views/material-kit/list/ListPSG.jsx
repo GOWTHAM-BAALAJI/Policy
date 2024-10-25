@@ -461,7 +461,7 @@ export default function PSGTable() {
             }}
             onClick={() => navigate('/initiate/psg')}
           >
-            Create New
+            New
           </Button>
         </Grid>
       )}

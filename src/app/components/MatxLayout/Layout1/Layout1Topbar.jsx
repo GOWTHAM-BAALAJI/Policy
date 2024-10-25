@@ -33,6 +33,7 @@ import {
   Home,
   Menu,
   Person,
+  PowerSettingsNew,
   Settings,
 } from "@mui/icons-material";
 
@@ -185,17 +186,17 @@ const Layout1Topbar = () => {
             }
             >
 
-            <Box sx={{ minWidth: "100%", width: "auto", display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            <Box sx={{ minWidth: "100%", width: "auto", display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
             <StyledItem>
               <Link to="/profile">
                 <Person />
-                <Span>Profile</Span>
+                <Span sx={{ ml: "2px"}}>Profile</Span>
               </Link>
             </StyledItem>
 
             <StyledItem onClick={handleSignOut}>
-              <Settings />
-              <Span>Logout</Span>
+              <PowerSettingsNew />
+              <Span sx={{ ml: "2px"}}>Logout</Span>
             </StyledItem>
             </Box>
 

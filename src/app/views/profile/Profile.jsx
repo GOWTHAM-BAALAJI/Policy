@@ -155,13 +155,25 @@ const Profile = () => {
     };
     reader.readAsDataURL(file);
   };
+
+  const [isBtnDisabled1, setIsBtnDisabled1] = useState(false);
+  const [isBtnDisabled2, setIsBtnDisabled2] = useState(false);
   
   const handleFileUpload = async (event) => {
     event.preventDefault();
     setLoading(true);
 
+    setIsBtnDisabled1(true);
+        setTimeout(() => {
+            setIsBtnDisabled1(false);
+        }, 4000);
+
     if (!selectedFile) {
-      toast.error("Please fill in all the required fields");
+      toast.error("Please select a file");
+      setIsBtnDisabled1(true);
+        setTimeout(() => {
+            setIsBtnDisabled1(false);
+        }, 4000);
       return;
     }
 
@@ -210,13 +222,35 @@ const Profile = () => {
     event.preventDefault();
     setLoading(true);
 
+    setIsBtnDisabled2(true);
+        setTimeout(() => {
+            setIsBtnDisabled2(false);
+        }, 4000);
+
     if (!newpassword || !confirmnewpassword) {
       toast.error("Please fill in all the required fields");
+      setIsBtnDisabled2(true);
+        setTimeout(() => {
+            setIsBtnDisabled2(false);
+        }, 4000);
+      return;
+    }
+
+    if(newpassword.length < 6 || confirmnewpassword.length < 6) {
+      toast.error("New password must be atleast 6 characters long");
+      setIsBtnDisabled2(true);
+        setTimeout(() => {
+            setIsBtnDisabled2(false);
+        }, 4000);
       return;
     }
 
     if (newpassword !== confirmnewpassword) {
       toast.error("New password must match with Confirm new password");
+      setIsBtnDisabled2(true);
+        setTimeout(() => {
+            setIsBtnDisabled2(false);
+        }, 4000);
       return;
     }
 
@@ -310,7 +344,7 @@ const Profile = () => {
               <CameraIcon />
             </IconButton>
           </label>
-          <Button variant="contained" type="submit" sx={{ marginTop: 1, marginBottom: 1, padding: '4px 8px', fontSize: '0.75rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)' }, }}>
+          <Button variant="contained" disabled={isBtnDisabled1} type="submit" sx={{ marginTop: 1, marginBottom: 1, padding: '4px 8px', fontSize: '0.75rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)' }, }}>
             Upload
           </Button>
         </Box>
@@ -436,7 +470,7 @@ const Profile = () => {
                   ),
                 }}
               />
-              <Button variant="contained" type="submit" sx={{ padding: '4px 8px', fontSize: '0.75rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)' }, }}>
+              <Button variant="contained" disabled={isBtnDisabled2} type="submit" sx={{ padding: '4px 8px', fontSize: '0.75rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)' }, }}>
                 Submit
               </Button>
             </>

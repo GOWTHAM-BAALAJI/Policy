@@ -311,14 +311,35 @@ const InitiatePSG = () => {
 
     const filteredApprovalMembers = selectedReviewer ? approvalMembers.filter(member => member.value !== selectedReviewer) : approvalMembers;
 
+    const [isBtnDisabled, setIsBtnDisabled] = useState(false);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
+
+        setIsBtnDisabled(true);
+        setTimeout(() => {
+            setIsBtnDisabled(false);
+        }, 4000);
+        
         if (!documentType || !title || !description || uploadedFiles.length === 0 || !selectedReviewer || selectedApprovalMembers.length === 0 || selectedUserGroup.length === 0) {
             if (!documentType || !title || !description || uploadedFiles.length === 0 || selectedUserGroup.length === 0) {
                 toast.error("Please fill in all the required fields");
+                setIsBtnDisabled(true);
+                setTimeout(() => {
+                    setIsBtnDisabled(false);
+                }, 4000);
                 return;
             }
+            return;
+        }
+
+        if(uploadedFiles.length > 10){
+            toast.error("You can upload a maximum of 10 files only");
+            setIsBtnDisabled(true);
+            setTimeout(() => {
+                setIsBtnDisabled(false);
+            }, 4000);
             return;
         }
         // setDialogTitle("Success");
@@ -327,6 +348,20 @@ const InitiatePSG = () => {
         // setTimeout(() => {
         //     navigate('/list/psg');
         // }, 2000);
+
+        const isValidFileFormat = uploadedFiles.every(file => 
+            file.name.endsWith(".doc") || file.name.endsWith(".docx")
+        );
+    
+        if (!isValidFileFormat) {
+            toast.error("Please upload only .doc or .docx files");
+            setIsBtnDisabled(true);
+            setTimeout(() => {
+                setIsBtnDisabled(false);
+              }, 4000);
+            // setLoading(false);
+            return;
+        }
 
         const url = "https://policyuat.spandanasphoorty.com/policy_apis/policy/";
         const formData = new FormData(); // Create a FormData object
@@ -354,6 +389,9 @@ const InitiatePSG = () => {
             body: formData,
         })
         .then((response) => {
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
             return response.json();
         })
         .then((data) => {
@@ -364,13 +402,14 @@ const InitiatePSG = () => {
                     navigate('/list/psg');
                 }, 1000);
             } else {
-                console.log("Error");
+                throw new Error("Submission failed");
             }
             setLoading(false); // Reset loading state
         })
         .catch((error) => {
             console.error("Submission error:", error);
             setLoading(false); // Reset loading state
+            throw error;
         });
 
 
@@ -705,7 +744,7 @@ const InitiatePSG = () => {
                 </Grid>
                 </Grid>
                 <Grid container justifyContent="center" alignItems="center" sx={{ marginTop: 1.5, marginBottom: 1.5 }}>
-                    <Button type="submit" variant="contained" sx={{ height: '30px', fontFamily: 'sans-serif', fontSize: '0.875rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }}>
+                    <Button type="submit" disabled={isBtnDisabled} variant="contained" sx={{ height: '30px', fontFamily: 'sans-serif', fontSize: '0.875rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }}>
                         Submit
                     </Button>
                 </Grid>

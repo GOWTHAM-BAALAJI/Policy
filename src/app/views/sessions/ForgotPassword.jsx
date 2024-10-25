@@ -41,8 +41,7 @@ const initialValues = {
 
 // form field validation schema
 const validationSchema = Yup.object().shape({
-  emailId: Yup.string()
-    .required("Email ID is required!"),
+  emailId: Yup.string(),
 });
 
 export default function ForgotPassword() {
@@ -57,8 +56,20 @@ export default function ForgotPassword() {
     'Content-Type': 'application/json',
   };
 
+  const [isBtnDisabled, setIsBtnDisabled] = useState(false);
+
   const handleFormSubmit = async (values) => {
     setLoading(true);
+
+    if(!values.emailId){
+      toast.error("Please fill the required field");
+      setIsBtnDisabled(true);
+      setTimeout(() => {
+          setIsBtnDisabled(false);
+      }, 4000);
+      return;
+    }
+
     const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/forgetPassword";
     const requestData = {
       empRef: values.emailId,
@@ -78,11 +89,19 @@ export default function ForgotPassword() {
       }, 2000);
         setEmailError("");
       } else {
-        setEmailError("Invalid Employee ID or Email ID");
+        toast.error("Invalid Employee ID or Email ID");
+        setIsBtnDisabled(true);
+        setTimeout(() => {
+            setIsBtnDisabled(false);
+        }, 4000);
       }
     } catch (error) {
       console.error(error);
-      setEmailError("Failed to load, please try again later.");
+      toast.error("Failed to load, please try again later.");
+      setIsBtnDisabled(true);
+      setTimeout(() => {
+          setIsBtnDisabled(false);
+      }, 4000);
     } finally {
       setLoading(false);
     }
@@ -134,7 +153,7 @@ export default function ForgotPassword() {
                   }}
                 />
 
-                <Button fullWidth variant="contained" type="submit" sx={{ backgroundColor: "rgb(238, 136, 18)","&:hover": { backgroundColor: "rgba(235, 127, 2)", }, }}>
+                <Button fullWidth variant="contained" disabled={isBtnDisabled} type="submit" sx={{ backgroundColor: "rgb(238, 136, 18)","&:hover": { backgroundColor: "rgba(235, 127, 2)", }, }}>
                   Reset Password
                 </Button>
 

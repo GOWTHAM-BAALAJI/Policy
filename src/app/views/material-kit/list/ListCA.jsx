@@ -288,7 +288,7 @@ export default function CATable() {
             }}
             onClick={() => navigate('/initiate/ca')}
           >
-            Create New
+            New
           </Button>
         </Grid>
       )}

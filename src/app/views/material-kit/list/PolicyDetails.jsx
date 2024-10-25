@@ -475,10 +475,16 @@ export default function PolicyDetails() {
         navigate(-1); // Navigates to the previous page
     };
     
+    const [isBtnDisabled, setIsBtnDisabled] = useState(false);
     
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
+
+        setIsBtnDisabled(true);
+        setTimeout(() => {
+            setIsBtnDisabled(false);
+        }, 4000);
 
         const mappedDecision = mapDecisionToNumber(decision);
 
@@ -486,24 +492,40 @@ export default function PolicyDetails() {
             if(selectedDocument.initiator_id === userId){
                 if (!documentTitle || !documentDescription || uploadedFile.length === 0 || !selectedReviewer || approvalMembers.length === 0 || selectedUserGroup.length === 0) {
                     toast.error("Please fill in all the required fields");
+                    setIsBtnDisabled(true);
+                    setTimeout(() => {
+                        setIsBtnDisabled(false);
+                    }, 4000);
                     return;
                 }
             }
             else{
                 if(!mappedDecision){
                     toast.error("Please fill the decision");
+                    setIsBtnDisabled(true);
+                    setTimeout(() => {
+                        setIsBtnDisabled(false);
+                    }, 4000);
                     return;
                 }
                 else{
                     if(mappedDecision === 2){
                         if(!remarks || uploadedFile1.length === 0){
                             toast.error("Please fill the remarks and upload a file");
+                            setIsBtnDisabled(true);
+                            setTimeout(() => {
+                                setIsBtnDisabled(false);
+                            }, 4000);
                             return;
                         }
                     }
                     else if(mappedDecision === 3){
                         if(!remarks){
-                            toast.error("Please fill the remarks")
+                            toast.error("Please fill the remarks");
+                            setIsBtnDisabled(true);
+                            setTimeout(() => {
+                                setIsBtnDisabled(false);
+                            }, 4000);
                             return;
                         }
                     }
@@ -514,22 +536,80 @@ export default function PolicyDetails() {
         if ((isApprover(roleId) || isReviewer(roleId)) && selectedDocument.initiator_id !== userId && activeTab == 4){
             if(!mappedDecision){
                 toast.error("Please fill the decision");
+                setIsBtnDisabled(true);
+                setTimeout(() => {
+                    setIsBtnDisabled(false);
+                }, 4000);
                 return;
             }
             else{
                 if(mappedDecision === 2){
                     if(!remarks || uploadedFile1.length === 0){
                         toast.error("Please fill the remarks and upload a file");
+                        setIsBtnDisabled(true);
+                        setTimeout(() => {
+                            setIsBtnDisabled(false);
+                        }, 4000);
                         return;
                     }
                 }
                 else if(mappedDecision === 3){
                     if(!remarks){
-                        toast.error("Please fill the remarks")
+                        toast.error("Please fill the remarks");
+                        setIsBtnDisabled(true);
+                        setTimeout(() => {
+                            setIsBtnDisabled(false);
+                        }, 4000);
                         return;
                     }
                 }
             }
+        }
+
+        if(uploadedFile1.length > 10){
+            toast.error("You can upload a maximum of 10 files only");
+            setIsBtnDisabled(true);
+            setTimeout(() => {
+                setIsBtnDisabled(false);
+            }, 4000);
+            return;
+        }
+
+        if(uploadedFile.length > 10){
+            toast.error("You can upload a maximum of 10 files only");
+            setIsBtnDisabled(true);
+            setTimeout(() => {
+                setIsBtnDisabled(false);
+            }, 4000);
+            return;
+        }
+
+        const isValidFileFormat1 = uploadedFile1.every(file => 
+            file.name.endsWith(".doc") || file.name.endsWith(".docx")
+        );
+    
+        if (!isValidFileFormat1) {
+            toast.error("Please upload only .doc or .docx files");
+            setIsBtnDisabled(true);
+            setTimeout(() => {
+                setIsBtnDisabled(false);
+              }, 4000);
+            // setLoading(false);
+            return;
+        }
+
+        const isValidFileFormat = uploadedFile.every(file => 
+            file.name.endsWith(".doc") || file.name.endsWith(".docx")
+        );
+    
+        if (!isValidFileFormat) {
+            toast.error("Please upload only .doc or .docx files");
+            setIsBtnDisabled(true);
+            setTimeout(() => {
+                setIsBtnDisabled(false);
+              }, 4000);
+            // setLoading(false);
+            return;
         }
     
         const url = "https://policyuat.spandanasphoorty.com/policy_apis/policy/update";
@@ -568,6 +648,9 @@ export default function PolicyDetails() {
             body: formData,
         })
         .then((response) => {
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
             return response.json();
         })
         .then((data) => {
@@ -578,13 +661,14 @@ export default function PolicyDetails() {
                     navigate('/list/psg');
                 }, 1000);
             } else {
-                console.log("Error");
+                throw new Error("Submission failed");
             }
             setLoading(false); // Reset loading state
         })
         .catch((error) => {
             console.error("Submission error:", error);
             setLoading(false); // Reset loading state
+            throw error;
         });
 
         toast.promise(submitForm, {
@@ -667,7 +751,7 @@ export default function PolicyDetails() {
                                 </TableRow>
                             ))}
                             <TableRow>
-                                <TableCell sx={{ pl: 2, }}><b>Version:</b></TableCell>
+                                <TableCell sx={{ pl: 2, }}><b>Current Version:</b></TableCell>
                                 <TableCell sx={{ pl: 2, }}>{selectedDocument.version}</TableCell>
                             </TableRow>
                             </>
@@ -704,7 +788,7 @@ export default function PolicyDetails() {
                             </TableRow>
                             </>
                         )}
-                        {activeTab == 2 && (selectedDocument.pending_at_id === selectedDocument.initiator_id || selectedDocument.pending_at_id === null) && latestPolicyStatus && roleId !== 16 && (
+                        {activeTab == 2 && selectedDocument.pending_at_id === null && latestPolicyStatus && roleId !== 16 && (
                             <>
                             <TableRow>
                                 <TableCell sx={{ pl: 2 }}><b>Remarks: </b></TableCell>
@@ -745,11 +829,13 @@ export default function PolicyDetails() {
             {/* <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mt: 1, mb: -1 }}>
             <b>Files:</b>
             </Typography> */}
-            {activeTab == 4 && (isInitiator(roleId)) ? (
+            {activeTab == 4 && (isInitiator(roleId)) && selectedDocument.initiator_id === userId ? (
             <>
             {selectedDocument.policy_files && Array.isArray(selectedDocument.policy_files) && selectedDocument.policy_files.length > 0 ? (
-            
-            <><TableRow>
+            <>
+                {/* {!(isReviewer(roleId) || isApprover(roleId)) && (selectedDocument.reviewer_id === userId || selectedDocument.Policy_status.some(status => status.approver_id === userId)) && ( */}
+                <>
+                <TableRow>
                 <TableCell sx={{ pl: 2 }}><b>Received for changes</b></TableCell>
                 {/* <Typography variant="h10" sx={{ fontFamily: 'sans-serif', mt: 2, ml: 10 }}>
                     <b>Received for Changes</b>
@@ -802,6 +888,8 @@ export default function PolicyDetails() {
                 </table>
                 </TableCell>
             </TableRow>
+            </>
+            {/* )} */}
 
             <TableRow>
 
@@ -944,7 +1032,7 @@ export default function PolicyDetails() {
                 <Typography>No files uploaded</Typography>
             )}
             </>
-            ) : activeTab == 4 && (isApprover(roleId) || isReviewer(roleId)) ? (
+            ) : activeTab == 4 && (isApprover(roleId) || isReviewer(roleId)) && (selectedDocument.reviewer_id === userId || selectedDocument.Policy_status.some(status => status.approver_id === userId)) ? (
                 <>
                 {selectedDocument.policy_files && Array.isArray(selectedDocument.policy_files) && selectedDocument.policy_files.length > 0 ? (
                     <><TableRow>
@@ -1240,6 +1328,51 @@ export default function PolicyDetails() {
                                     ))}
                             </tbody>
                         </table>
+                    </>
+                )}
+                {selectedDocument.version !== '1.0' && (
+                    <>
+                        <Typography sx={{ marginBottom: 2, marginTop: 2, textDecoration: 'underline' }}>Latest files uploaded by the initiator:</Typography>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
+                            <thead>
+                                <tr>
+                                    <th style={{ width: '15%', borderBottom: '1px solid #ddd', padding: '8px', textAlign: 'left' }}>S.no</th>
+                                    <th style={{ width: '20%', borderBottom: '1px solid #ddd', padding: '8px', textAlign: 'left' }}>File</th>
+                                    <th style={{ width: '20%', borderBottom: '1px solid #ddd', padding: '8px', textAlign: 'left' }}>Version</th>
+                                    <th style={{ width: '25%', borderBottom: '1px solid #ddd', padding: '8px', textAlign: 'left' }}>Uploaded On</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {selectedDocument.policy_files
+                                    .filter(file => file.version === selectedDocument.version && file.type === 1)
+                                    .map((file, index) => (
+                                        <tr key={index}>
+                                            <td style={{ width: '15%', padding: '8px', borderBottom: '1px solid #ddd' }}>{index + 1}</td>
+                                            <td style={{ width: '20%', padding: '8px', borderBottom: '1px solid #ddd' }}>
+                                                <a
+                                                    href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    download
+                                                    style={{ cursor: 'pointer' }}
+                                                >
+                                                    <div className="img-wrapper">
+                                                        <img src={img1} width="45%" alt="" />
+                                                    </div>
+                                                </a>
+                                            </td>
+                                            <td style={{ width: '20%', padding: '8px', borderBottom: '1px solid #ddd' }}>{file.version}</td>
+                                            <td style={{ width: '25%', padding: '8px', borderBottom: '1px solid #ddd' }}>
+                                                {new Date(file.createdAt).toLocaleDateString('en-GB')}
+                                            </td>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </table>
+                    </>
+                )}
+                {selectedDocument.version !== '1.0' && (
+                    <>
                         <Typography sx={{ marginBottom: 2, textDecoration:'underline' }}>Previous files sent for review:</Typography>
                         <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
                             <thead>
@@ -1301,48 +1434,6 @@ export default function PolicyDetails() {
                                                     style={{ cursor: 'pointer' }}
                                                 >
                                                     <img src={img1} width="45%" alt="" />
-                                                </a>
-                                            </td>
-                                            <td style={{ width: '20%', padding: '8px', borderBottom: '1px solid #ddd' }}>{file.version}</td>
-                                            <td style={{ width: '25%', padding: '8px', borderBottom: '1px solid #ddd' }}>
-                                                {new Date(file.createdAt).toLocaleDateString('en-GB')}
-                                            </td>
-                                        </tr>
-                                    ))}
-                            </tbody>
-                        </table>
-                    </>
-                )}
-
-                {selectedDocument.version !== '1.0' && selectedDocument.pending_at_id !== selectedDocument.initiator_id && (
-                    <>
-                        <Typography sx={{ marginBottom: 2, marginTop: 2, textDecoration: 'underline' }}>Latest files uploaded by the initiator:</Typography>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
-                            <thead>
-                                <tr>
-                                    <th style={{ width: '15%', borderBottom: '1px solid #ddd', padding: '8px', textAlign: 'left' }}>S.no</th>
-                                    <th style={{ width: '20%', borderBottom: '1px solid #ddd', padding: '8px', textAlign: 'left' }}>File</th>
-                                    <th style={{ width: '20%', borderBottom: '1px solid #ddd', padding: '8px', textAlign: 'left' }}>Version</th>
-                                    <th style={{ width: '25%', borderBottom: '1px solid #ddd', padding: '8px', textAlign: 'left' }}>Uploaded On</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {selectedDocument.policy_files
-                                    .filter(file => file.version === selectedDocument.version && file.type === 1)
-                                    .map((file, index) => (
-                                        <tr key={index}>
-                                            <td style={{ width: '15%', padding: '8px', borderBottom: '1px solid #ddd' }}>{index + 1}</td>
-                                            <td style={{ width: '20%', padding: '8px', borderBottom: '1px solid #ddd' }}>
-                                                <a
-                                                    href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    download
-                                                    style={{ cursor: 'pointer' }}
-                                                >
-                                                    <div className="img-wrapper">
-                                                        <img src={img1} width="45%" alt="" />
-                                                    </div>
                                                 </a>
                                             </td>
                                             <td style={{ width: '20%', padding: '8px', borderBottom: '1px solid #ddd' }}>{file.version}</td>
@@ -1478,6 +1569,7 @@ export default function PolicyDetails() {
             </Typography>
             <StyledTextField
                 fullWidth
+                inputProps={{ maxLength: 100 }}
                 value={documentTitle}  // Use the state as the value (editable)
                 onChange={(e) => setDocumentTitle(e.target.value)}  // Update the state when changed
                 sx={{ mt: 1 }}
@@ -1487,6 +1579,7 @@ export default function PolicyDetails() {
             </Typography>
             <StyledTextField
                 fullWidth
+                inputProps={{ maxLength: 1000 }}
                 value={documentDescription}  // Use the state as the value (editable)
                 onChange={(e) => setDocumentDescription(e.target.value)}  // Update the state when changed
                 sx={{ mt: 1 }}
@@ -1639,7 +1732,7 @@ export default function PolicyDetails() {
                 <em>None</em>
                 </MenuItem>
                 <MenuItem value="approved">Approve</MenuItem>
-                <MenuItem value="reviewraised">Review raised</MenuItem>
+                <MenuItem value="reviewraised">Raise a review</MenuItem>
                 <MenuItem value="rejected">Reject</MenuItem>
             </StyledSelect>
             </Box>
@@ -1656,6 +1749,7 @@ export default function PolicyDetails() {
                 label="Remarks"
                 variant="outlined"
                 fullWidth
+                inputProps={{ maxLength: 1000 }}
                 multiline
                 rows={4}
                 value={remarks}
@@ -1735,7 +1829,7 @@ export default function PolicyDetails() {
             {selectedDocument.pending_at_id === userId && activeTab == 4 && (
             <Grid container justifyContent="center" sx={{ mt: 2, mb: 2 }}>
                 <Grid item>
-                    <Button type="submit" variant="contained" sx={{ padding: '6px 16px', fontSize: '0.875rem', minHeight: '24px', lineHeight: 1, backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)' } }}>
+                    <Button type="submit" disabled={isBtnDisabled} variant="contained" sx={{ padding: '6px 16px', fontSize: '0.875rem', minHeight: '24px', lineHeight: 1, backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)' } }}>
                         Submit
                     </Button>
                 </Grid>
