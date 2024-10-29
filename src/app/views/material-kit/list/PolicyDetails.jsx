@@ -482,15 +482,12 @@ export default function PolicyDetails() {
         setLoading(true);
 
         setIsBtnDisabled(true);
-        setTimeout(() => {
-            setIsBtnDisabled(false);
-        }, 4000);
 
         const mappedDecision = mapDecisionToNumber(decision);
 
         if((isInitiator(roleId)) && activeTab == 4){
             if(selectedDocument.initiator_id === userId){
-                if (!documentTitle || !documentDescription || uploadedFile.length === 0 || !selectedReviewer || approvalMembers.length === 0 || selectedUserGroup.length === 0) {
+                if (!(documentTitle.trimStart()) || !(documentDescription.trimStart()) || uploadedFile.length === 0 || !selectedReviewer || approvalMembers.length === 0 || selectedUserGroup.length === 0) {
                     toast.error("Please fill in all the required fields");
                     setIsBtnDisabled(true);
                     setTimeout(() => {
@@ -510,7 +507,7 @@ export default function PolicyDetails() {
                 }
                 else{
                     if(mappedDecision === 2){
-                        if(!remarks || uploadedFile1.length === 0){
+                        if(!(remarks.trimStart()) || uploadedFile1.length === 0){
                             toast.error("Please fill the remarks and upload a file");
                             setIsBtnDisabled(true);
                             setTimeout(() => {
@@ -520,7 +517,7 @@ export default function PolicyDetails() {
                         }
                     }
                     else if(mappedDecision === 3){
-                        if(!remarks){
+                        if(!(remarks.trimStart())){
                             toast.error("Please fill the remarks");
                             setIsBtnDisabled(true);
                             setTimeout(() => {
@@ -544,7 +541,7 @@ export default function PolicyDetails() {
             }
             else{
                 if(mappedDecision === 2){
-                    if(!remarks || uploadedFile1.length === 0){
+                    if(!(remarks.trimStart()) || uploadedFile1.length === 0){
                         toast.error("Please fill the remarks and upload a file");
                         setIsBtnDisabled(true);
                         setTimeout(() => {
@@ -554,7 +551,7 @@ export default function PolicyDetails() {
                     }
                 }
                 else if(mappedDecision === 3){
-                    if(!remarks){
+                    if(!(remarks.trimStart())){
                         toast.error("Please fill the remarks");
                         setIsBtnDisabled(true);
                         setTimeout(() => {
@@ -626,10 +623,10 @@ export default function PolicyDetails() {
         // Append other data to FormData
         formData.append("policy_id", selectedDocument.id);
         formData.append("decision", mappedDecision);
-        formData.append("remarks", remarks);
+        formData.append("remarks", remarks.trimStart());
         // formData.append("files[]", uploadedFile1);
-        formData.append("title", documentTitle);
-        formData.append("description", documentDescription);
+        formData.append("title", documentTitle.trimStart());
+        formData.append("description", documentDescription.trimStart());
         // formData.append("files[]", uploadedFile);
         // const file1 = uploadedFile.files[0];
         // console.log("File1: ",file1);
@@ -667,6 +664,7 @@ export default function PolicyDetails() {
         })
         .catch((error) => {
             console.error("Submission error:", error);
+            setIsBtnDisabled(false);
             setLoading(false); // Reset loading state
             throw error;
         });
@@ -1577,12 +1575,15 @@ export default function PolicyDetails() {
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block' }}>
                 <b>Document Description:</b>
             </Typography>
-            <StyledTextField
+            <TextField
                 fullWidth
+                multiline
+                rows={2}
+                maxRows={2}
                 inputProps={{ maxLength: 1000 }}
                 value={documentDescription}  // Use the state as the value (editable)
                 onChange={(e) => setDocumentDescription(e.target.value)}  // Update the state when changed
-                sx={{ mt: 1 }}
+                sx={{ mt: 1, mb: 1 }}
             />
             <Typography variant="h8" sx={{ fontFamily: 'sans-serif', display: 'block', mb:1 }}>
                 <b>Upload the updated document:</b>

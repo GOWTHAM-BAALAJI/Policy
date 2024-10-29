@@ -318,19 +318,13 @@ const InitiatePSG = () => {
         setLoading(true);
 
         setIsBtnDisabled(true);
-        setTimeout(() => {
-            setIsBtnDisabled(false);
-        }, 4000);
         
-        if (!documentType || !title || !description || uploadedFiles.length === 0 || !selectedReviewer || selectedApprovalMembers.length === 0 || selectedUserGroup.length === 0) {
-            if (!documentType || !title || !description || uploadedFiles.length === 0 || selectedUserGroup.length === 0) {
-                toast.error("Please fill in all the required fields");
-                setIsBtnDisabled(true);
-                setTimeout(() => {
-                    setIsBtnDisabled(false);
-                }, 4000);
-                return;
-            }
+        if (!documentType || !(title.trimStart()) || !(description.trimStart()) || uploadedFiles.length === 0 || !selectedReviewer || selectedApprovalMembers.length === 0 || selectedUserGroup.length === 0) {
+            toast.error("Please fill in all the required fields");
+            setIsBtnDisabled(true);
+            setTimeout(() => {
+                setIsBtnDisabled(false);
+            }, 4000);
             return;
         }
 
@@ -373,8 +367,8 @@ const InitiatePSG = () => {
     
         // Append other data to FormData
         formData.append("type",documentType);
-        formData.append("title", title);
-        formData.append("description", description);
+        formData.append("title", title.trimStart());
+        formData.append("description", description.trimStart());
         // formData.append("files",uploadedFiles);
         formData.append("reviewer_id", selectedReviewer || null);
         formData.append("approver_ids", JSON.stringify(selectedApprovalMembers || [])); // Convert array to string
@@ -398,6 +392,7 @@ const InitiatePSG = () => {
             console.log("Server Response: ", data);
             if (data.status) {
                 console.log("Successfully submitted");
+                setIsBtnDisabled(false);
                 setTimeout(() => {
                     navigate('/list/psg');
                 }, 1000);
@@ -408,6 +403,7 @@ const InitiatePSG = () => {
         })
         .catch((error) => {
             console.error("Submission error:", error);
+            setIsBtnDisabled(false);
             setLoading(false); // Reset loading state
             throw error;
         });

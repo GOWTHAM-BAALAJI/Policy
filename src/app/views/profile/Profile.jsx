@@ -4,7 +4,6 @@ import { useForm, Controller } from 'react-hook-form';
 import * as Yup from 'yup';
 import { LoadingButton } from "@mui/lab";
 import { Formik } from "formik";
-import UpdatePassword from './UpdatePassword';
 import { useDispatch, useSelector } from 'react-redux';
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
@@ -82,6 +81,7 @@ const Profile = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profileImage, setProfileImage] = useState("");
+  const [storeImage, setStoreImage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [newpassword, setNewPassword] = useState("");
   const [confirmnewpassword, setConfirmNewPassword] = useState("");
@@ -140,6 +140,9 @@ const Profile = () => {
         if (decodedToken.profile_pic) {
           setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
         }
+        if (decodedToken.profile_pic) {
+          setStoreImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
+        }
       } catch (error) {
         console.error('Invalid token:', error);
       }
@@ -164,9 +167,6 @@ const Profile = () => {
     setLoading(true);
 
     setIsBtnDisabled1(true);
-        setTimeout(() => {
-            setIsBtnDisabled1(false);
-        }, 4000);
 
     if (!selectedFile) {
       toast.error("Please select a file");
@@ -175,6 +175,20 @@ const Profile = () => {
             setIsBtnDisabled1(false);
         }, 4000);
       return;
+    }
+
+    const isValidFileFormat =  selectedFile.name.endsWith(".jpeg") || selectedFile.name.endsWith(".jpg") || selectedFile.name.endsWith(".png");
+
+    if (!isValidFileFormat) {
+        toast.error("Please upload only .jpeg, .jpg or .png files");
+        setIsBtnDisabled1(true);
+        setTimeout(() => {
+            setIsBtnDisabled1(false);
+          }, 4000);
+        setProfileImage(storeImage);
+        console.log("Profile image: ",storeImage);
+        // setLoading(false);
+        return;
     }
 
     // Prepare the form data for the API call
@@ -208,6 +222,7 @@ const Profile = () => {
     })
     .catch((error) => {
         console.error("Submission error:", error);
+        setIsBtnDisabled1(false);
         setLoading(false); // Reset loading state
     });
 
@@ -223,9 +238,6 @@ const Profile = () => {
     setLoading(true);
 
     setIsBtnDisabled2(true);
-        setTimeout(() => {
-            setIsBtnDisabled2(false);
-        }, 4000);
 
     if (!newpassword || !confirmnewpassword) {
       toast.error("Please fill in all the required fields");
@@ -287,6 +299,7 @@ const Profile = () => {
     })
     .catch((error) => {
         console.error("Submission error:", error);
+        setIsBtnDisabled2(false);
         setLoading(false); // Reset loading state
     });
 
@@ -333,7 +346,7 @@ const Profile = () => {
             sx={{ width: 160, height: 162, borderRadius: '50%', border: '1px solid #000' }}
           />
           <input
-            accept="image/*"
+            accept=".jpeg,.jpg,.png"
             id="upload-button-file"
             type="file"
             style={{ display: 'none' }}

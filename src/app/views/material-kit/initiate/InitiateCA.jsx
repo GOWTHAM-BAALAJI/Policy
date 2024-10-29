@@ -175,11 +175,8 @@ const InitiateCA = () => {
         setLoading(true);
 
         setIsBtnDisabled(true);
-            setTimeout(() => {
-                setIsBtnDisabled(false);
-              }, 4000);
         
-        if (!title || !description || uploadedFile.length === 0 || selectedUserGroup.length === 0) {
+        if (!(title.trimStart()) || !(description.trimStart()) || uploadedFile.length === 0 || selectedUserGroup.length === 0) {
             toast.error("Please fill in all the required fields");
             setIsBtnDisabled(true);
             setTimeout(() => {
@@ -226,8 +223,8 @@ const InitiateCA = () => {
         });
     
         // Append other data to FormData
-        formData.append("title", title);
-        formData.append("description", description);
+        formData.append("title", title.trimStart());
+        formData.append("description", description.trimStart());
         // formData.append("files[]",uploadedFile);
         formData.append("user_group", selectedUserGroup || null);
     
@@ -260,6 +257,7 @@ const InitiateCA = () => {
         .catch((error) => {
             console.error("Submission error:", error);
             setLoading(false); // Reset loading state
+            setIsBtnDisabled(false);
             throw error;
         });
 

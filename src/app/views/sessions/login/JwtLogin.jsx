@@ -99,7 +99,7 @@ export default function Login() {
   const handleFormSubmit = async (values) => {
     setLoading(true);
 
-    if(!values.emailId || !values.password){
+    if(!((values.emailId).trim()) || !values.password){
       toast.error("Please fill in all the required fields");
       setIsBtnDisabled(true);
       setTimeout(() => {
@@ -110,7 +110,7 @@ export default function Login() {
 
     const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/";
     const requestData = {
-      empRef: values.emailId,
+      empRef: (values.emailId).trim(),
       password: values.password
     };
   
@@ -123,7 +123,7 @@ export default function Login() {
 
       const result = await response.json();
       if (response.ok && result?.status) {
-        setUsername(values.emailId);
+        setUsername((values.emailId).trim());
         setUserId(result.user_id);
         setPasswordError(""); // Clear error if login is successful
       } else {
@@ -136,10 +136,7 @@ export default function Login() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to load, please try again later.");
-      setIsBtnDisabled(true);
-      setTimeout(() => {
-          setIsBtnDisabled(false);
-      }, 4000);
+      setIsBtnDisabled(false);
     } finally {
       setLoading(false);
     }
@@ -295,15 +292,6 @@ const handleMouseDownPassword = (event) => {
                         helperText={emailIdError || (touched.emailId && errors.emailId)}
                         error={Boolean(emailIdError || (errors.emailId && touched.emailId))}
                         sx={{ mb: 2 }}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton edge="end">
-                                <PersonOutlineIcon />
-                              </IconButton>
-                            </InputAdornment>
-                          ),
-                        }}
                       />
 
                       <TextField
@@ -408,7 +396,7 @@ const handleMouseDownPassword = (event) => {
                         label="Email ID or Employee ID"
                         variant="outlined"
                         onBlur={handleBlur}
-                        value={values.emailId}
+                        value={(values.emailId).trim()}
                         onChange={(e) => {
                           handleChange(e);
                           setEmailIdError("");

@@ -3,10 +3,10 @@ import { useTheme } from "@mui/material/styles";
 import ReactEcharts from "echarts-for-react";
 import { useDispatch, useSelector } from 'react-redux';
 
-export default function DoughnutChart({ height = '100%', width = '100%', color = [], onClickSection }) {
+export default function DoughnutChart({ height = '100%', width = '100%', color = [], selectedTab, onClickSection }) {
   const theme = useTheme();
   const [loading, setLoading] = useState(true);
-  const [selectedSection, setSelectedSection] = useState(null);
+  const [selectedSection, setSelectedSection] = useState(selectedTab || null);
 
   const [approvedCount, setApprovedCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
@@ -57,14 +57,13 @@ export default function DoughnutChart({ height = '100%', width = '100%', color =
     fetchData();
   }, []);
 
-  const colors = ["#ef5e59", "#c65284", "#855792", "#d99d96"];
-
-  // Define your navigation function
-  const navigateToPage = (name) => {
-    if (onClickSection) {
-      onClickSection(name); // Pass the clicked section back to Analytics.jsx
+  useEffect(() => {
+    if (selectedTab) {
+      setSelectedSection(selectedTab);
     }
-  };
+  }, [selectedTab]);
+
+  const colors = ["#ef5e59", "#c65284", "#855792", "#d99d96"];
 
   const getSeriesData = () => {
     const data = [

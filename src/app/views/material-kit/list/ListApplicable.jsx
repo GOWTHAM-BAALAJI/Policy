@@ -176,18 +176,29 @@ const ApplicableTable = () => {
     setSearchValue(event.target.value);
   };
 
+  const [isBtnDisabled, setIsBtnDisabled] = useState(false);
+
   const handleSearchData = async (page, rows, searchValue) => {
     setLoading(true);
+
+    setIsBtnDisabled(true);
+        setTimeout(() => {
+            setIsBtnDisabled(false);
+        }, 1000);
   
     // Check for empty search value and return early if invalid
-    if (!searchValue) {
+    if (!(searchValue.trimStart())) {
       toast.error("Please provide some search words");
       setLoading(false);
+      setIsBtnDisabled(true);
+        setTimeout(() => {
+            setIsBtnDisabled(false);
+        }, 1000);
       return;
     }
 
     setIsSearching(true);
-    setSearchValue(searchValue);
+    setSearchValue((searchValue.trimStart()));
   
     try {
       // First API call: Fetch data based on searchValue
@@ -321,10 +332,10 @@ const ApplicableTable = () => {
 
   return (
     <ContentBox className="analytics">
-    <Card sx={{ px: 3, py: 3, height: '100%', width: '100%' }}>
+    <Card sx={{ px: 1, py: 1, height: '100%', width: '100%' }}>
     <Grid container spacing={2}>
     <Grid item lg={6} md={6} sm={6} xs={6}>
-        <Typography variant="h5" sx={{fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1.4rem', marginLeft: {sm: 2, xs: 2}, marginTop: {sm: 2, xs: 2}, marginRight: {sm: 2, xs: 2}}}>
+        <Typography variant="h5" sx={{fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1rem', marginLeft: {sm: 2, xs: 2}, marginTop: {sm: 2, xs: 2}, marginRight: {sm: 2, xs: 2}}}>
             Policies, SOPs and Guidance notes
         </Typography>
     </Grid>
@@ -380,6 +391,7 @@ const ApplicableTable = () => {
         <Button
           variant="contained"
           color="primary"
+          disabled={isBtnDisabled}
           sx={{ marginTop: -2, textTransform: 'none', height: '30px', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }}
           onClick={() => handleSearchData(currentPage, rowsPerPage, searchValue)}
         >
@@ -415,7 +427,7 @@ const ApplicableTable = () => {
             },
             headCells: {
               style: {
-                fontSize: '1rem',
+                fontSize: '0.875rem',
                 fontFamily: 'sans-serif',
                 fontWeight: 'bold',
                 textAlign: 'center',

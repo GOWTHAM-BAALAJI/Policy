@@ -250,18 +250,29 @@ export default function PSGTable() {
     setSearchValue(event.target.value);
   };
 
+  const [isBtnDisabled, setIsBtnDisabled] = useState(false);
+
   const handleSearchData = async (tab, page, rows, searchValue) => {
     setLoading(true);
+
+    setIsBtnDisabled(true);
+        setTimeout(() => {
+            setIsBtnDisabled(false);
+        }, 1000);
   
     // Check for empty search value and return early if invalid
-    if (!searchValue) {
+    if (!(searchValue.trimStart())) {
       toast.error("Please provide some search words");
       setLoading(false);
+      setIsBtnDisabled(true);
+        setTimeout(() => {
+            setIsBtnDisabled(false);
+        }, 1000);
       return;
     }
 
     setIsSearching(true);
-    setSearchValue(searchValue);
+    setSearchValue(searchValue.trimStart());
   
     try {
       // First API call: Fetch data based on searchValue
@@ -531,6 +542,7 @@ export default function PSGTable() {
         <Button
           variant="contained"
           color="primary"
+          disabled={isBtnDisabled}
           sx={{ marginTop: -2, textTransform: 'none', height: '30px', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }}
           onClick={() => handleSearchData(activeTab, currentPage, rowsPerPage, searchValue)}
         >

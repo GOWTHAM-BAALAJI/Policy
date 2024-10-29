@@ -4,10 +4,6 @@ import DoughnutChart from "./shared/Doughnut";
 import { useDispatch, useSelector } from 'react-redux';
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from 'react-router-dom';
-import ApprovedTable from "./Approved";
-import RejectedTable from "./Rejected";
-import PendingTable from "./Approvalpending";
-import WaitingForActionTable from "./Reviewraised";
 import PolicyList from "../material-kit/list/PolicyList";
 
 // STYLED COMPONENTS
@@ -54,19 +50,30 @@ export default function Analytics() {
     setSelectedSection(sectionName); // Update state based on the clicked section
   };
 
+  const handleTabChange = (tabIndex) => {
+    const tabMap = {
+      1: 'Approved',
+      2: 'Rejected',
+      3: 'Pending',
+      4: 'Waiting for Action'
+    };
+    const sectionName = tabMap[tabIndex];
+    setSelectedSection(sectionName);
+  };
+
   // Render the table based on the selected chart section
   const renderTable = () => {
     switch (selectedSection) {
       case 'Approved':
-        return <PolicyList initialTab={1}/>;
+        return <PolicyList initialTab={1} onTabChange={handleTabChange}/>;
       case 'Rejected':
-        return <PolicyList initialTab={2}/>;
+        return <PolicyList initialTab={2} onTabChange={handleTabChange}/>;
       case 'Pending':
-        return <PolicyList initialTab={3}/>;
+        return <PolicyList initialTab={3} onTabChange={handleTabChange}/>;
       case 'Waiting for Action':
-        return <PolicyList initialTab={4}/>;
+        return <PolicyList initialTab={4} onTabChange={handleTabChange}/>;
       default:
-        return <PolicyList initialTab={4} />;
+        return <PolicyList initialTab={4} onTabChange={handleTabChange}/>;
     }
   };
 
@@ -81,7 +88,7 @@ export default function Analytics() {
               <SubTitle>Policy, SOP & Guidance Note</SubTitle>
 
               <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <DoughnutChart height="100%" width="100%" onClickSection={onClickSection} />
+                <DoughnutChart height="100%" width="100%" onClickSection={onClickSection} selectedTab={selectedSection} />
               </Box>
             </Card>
           </Grid>

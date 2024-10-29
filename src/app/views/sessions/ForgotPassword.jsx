@@ -61,7 +61,9 @@ export default function ForgotPassword() {
   const handleFormSubmit = async (values) => {
     setLoading(true);
 
-    if(!values.emailId){
+    setIsBtnDisabled(true);
+
+    if(!((values.emailId).trim())){
       toast.error("Please fill the required field");
       setIsBtnDisabled(true);
       setTimeout(() => {
@@ -72,7 +74,7 @@ export default function ForgotPassword() {
 
     const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/forgetPassword";
     const requestData = {
-      empRef: values.emailId,
+      empRef: (values.emailId).trim(),
     };
     try {
       const response = await fetch(url, {
@@ -98,10 +100,7 @@ export default function ForgotPassword() {
     } catch (error) {
       console.error(error);
       toast.error("Failed to load, please try again later.");
-      setIsBtnDisabled(true);
-      setTimeout(() => {
-          setIsBtnDisabled(false);
-      }, 4000);
+      setIsBtnDisabled(false);
     } finally {
       setLoading(false);
     }
