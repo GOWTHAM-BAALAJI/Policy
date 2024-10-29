@@ -518,7 +518,7 @@ const InitiatePSG = () => {
                         <MenuItem value="" disabled>
                           <ListItemText
                             style={{ color: "#bdbdbd" }}
-                            primary="Select a document type"
+                            primary="Select document type"
                           />
                         </MenuItem>
                         {types.map((option) => (
@@ -559,7 +559,7 @@ const InitiatePSG = () => {
                         maxRows={1}
                         variant="outlined"
                         fullWidth
-                        placeholder="Enter the title"
+                        placeholder="Enter title"
                         // required
                         inputProps={{ maxLength: 100 }}
                         InputProps={{
@@ -609,7 +609,7 @@ const InitiatePSG = () => {
                         maxRows={2}
                         variant="outlined"
                         fullWidth
-                        placeholder="Enter the description"
+                        placeholder="Enter description"
                         // required
                         inputProps={{ maxLength: 1000 }}
                         InputProps={{
@@ -781,7 +781,7 @@ const InitiatePSG = () => {
               <Grid container alignItems="flex-start" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Select the Reviewer <span style={{ color: "red" }}>*</span>
+                    Select Reviewer <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -800,7 +800,7 @@ const InitiatePSG = () => {
                         }}
                       >
                         <MenuItem value="" disabled>
-                          <ListItemText style={{ color: "#bdbdbd" }} primary="Select a reviewer" />
+                          <ListItemText style={{ color: "#bdbdbd" }} primary="Select reviewer" />
                         </MenuItem>
                         {reviewers.map((option) => (
                           <MenuItem key={option.value} value={option.value}>
@@ -849,7 +849,7 @@ const InitiatePSG = () => {
                                 if (selected.length === 0) {
                                   return (
                                     <span style={{ color: "#bdbdbd" }}>
-                                      Select the approval members
+                                      Select approval commitee members
                                     </span>
                                   ); // Placeholder text
                                 }
@@ -859,7 +859,7 @@ const InitiatePSG = () => {
                               <MenuItem value="" disabled>
                                 <ListItemText
                                   style={{ color: "#bdbdbd" }}
-                                  primary="Select the approval members"
+                                  primary="Select approval members"
                                 />
                               </MenuItem>
                               {filteredApprovalMembers.map((member) => (
@@ -920,7 +920,7 @@ const InitiatePSG = () => {
                               <MenuItem value="" disabled>
                                 <ListItemText
                                   style={{ color: "#bdbdbd" }}
-                                  primary="Select a user group"
+                                  primary="Select user group"
                                 />
                               </MenuItem>
                               {userGroupOptions.map((option) => (

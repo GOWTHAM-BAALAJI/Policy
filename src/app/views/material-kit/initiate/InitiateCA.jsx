@@ -370,7 +370,7 @@ const InitiateCA = () => {
                         maxRows={1}
                         variant="outlined"
                         fullWidth
-                        placeholder="Enter the title"
+                        placeholder="Enter title"
                         // required
                         inputProps={{ maxLength: 100 }}
                         InputProps={{
@@ -420,7 +420,7 @@ const InitiateCA = () => {
                         maxRows={2}
                         variant="outlined"
                         fullWidth
-                        placeholder="Enter the description"
+                        placeholder="Enter description"
                         // required
                         inputProps={{ maxLength: 1000 }}
                         InputProps={{
@@ -616,7 +616,7 @@ const InitiateCA = () => {
                               <MenuItem value="" disabled>
                                 <ListItemText
                                   style={{ color: "#bdbdbd" }}
-                                  primary="Select a user group"
+                                  primary="Select user group"
                                 />
                               </MenuItem>
                               {userGroupOptions.map((option) => (
