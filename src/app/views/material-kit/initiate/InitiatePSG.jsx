@@ -309,17 +309,30 @@ const InitiatePSG = () => {
           });
     }, []);
 
+
     const filteredApprovalMembers = selectedReviewer ? approvalMembers.filter(member => member.value !== selectedReviewer) : approvalMembers;
 
     const [isBtnDisabled, setIsBtnDisabled] = useState(false);
+
+    const handleTitleChange = (e)=>{
+        if(!(title==='' && e.target.value===' '))
+            setTitle(e.target.value);
+    }
+
+    const handleDescriptionChange = (e)=>{
+        if(!(description==='' && e.target.value===' '))
+            setDescription(e.target.value);
+    }
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         setLoading(true);
 
         setIsBtnDisabled(true);
-        
-        if (!documentType || !(title.trimStart()) || !(description.trimStart()) || uploadedFiles.length === 0 || !selectedReviewer || selectedApprovalMembers.length === 0 || selectedUserGroup.length === 0) {
+        setTitle(title.trimEnd());
+        setDescription(description.trimEnd());       
+
+        if (!documentType || !title || !description || uploadedFiles.length === 0 || !selectedReviewer || selectedApprovalMembers.length === 0 || selectedUserGroup.length === 0) {
             toast.error("Please fill in all the required fields");
             setIsBtnDisabled(true);
             setTimeout(() => {
@@ -423,14 +436,17 @@ const InitiatePSG = () => {
             <Grid container spacing={2}>
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <Typography variant="h5" sx={{fontFamily: 'sans-serif', fontSize: '1.4rem', marginLeft: {sm: 2, xs: 2}, marginTop: {sm: 2, xs: 2}, marginRight: {sm: 2, xs: 2}}}>
-                        Initiate a Policy, SOP or Guidance note
+                        Initiate a Policy, SOP or Guidance note 
                     </Typography>
+                </Grid>
+                <Grid item lg={12} md={12} sm={12} xs={12} sx={{marginLeft: {sm: 2, xs: 2}}} >
+                <span style={{fontSize:'0.7rem'}}>Fields marked with (<span style={{color:"red"}}>*</span>) are mandatory</span>
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: {sm: 2, xs: 2}, marginRight: {sm: 2, xs: 2}}}>
                 <Grid container alignItems="center" spacing={2}>
                     <Grid item xs={3} sm={3} md={3} lg={3}>
                     <Typography variant="h5" sx={{fontFamily: 'sans-serif', fontSize: '0.875rem'}}>
-                        Type of Document
+                        Type of Document <span style={{ color: 'red' }} >*</span>
                     </Typography>
                     </Grid>
                     <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -465,7 +481,7 @@ const InitiatePSG = () => {
                 <Grid container alignItems="center" spacing={2}>
                     <Grid item xs={3} sm={3} md={3} lg={3}>
                     <Typography variant="h5" sx={{fontFamily: 'sans-serif', fontSize: '0.875rem'}}>
-                        Title
+                        Title <span style={{ color: 'red' }} >*</span>
                     </Typography>
                     </Grid>
                     <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -474,7 +490,8 @@ const InitiatePSG = () => {
                             <TextField
                             id='title'
                             value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            // onChange={(e) => setTitle(e.target.value)}
+                            onChange ={handleTitleChange}
                             // multiline
                             rows={1}
                             maxRows={1}
@@ -493,6 +510,7 @@ const InitiatePSG = () => {
                             />
                         </Grid>
                     </Grid>
+                    {title.length}/100 characters
                     </Grid>
                 </Grid>
                 </Grid>
@@ -500,7 +518,7 @@ const InitiatePSG = () => {
                 <Grid container alignItems="center" spacing={2}>
                     <Grid item xs={3} sm={3} md={3} lg={3}>
                     <Typography variant="h5" sx={{fontFamily: 'sans-serif', fontSize: '0.875rem'}}>
-                        Description
+                        Description <span style={{ color: 'red' }} >*</span>
                     </Typography>
                     </Grid>
                     <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -509,7 +527,7 @@ const InitiatePSG = () => {
                             <TextField
                             id='description'
                             value={description}
-                            onChange={(e) => setDescription(e.target.value)}
+                            onChange={handleDescriptionChange}
                             multiline
                             rows={2}
                             maxRows={2}
@@ -528,6 +546,7 @@ const InitiatePSG = () => {
                             />
                         </Grid>
                     </Grid>
+                    {description.length}/1000 characters
                     </Grid>
                 </Grid>
                 </Grid>
@@ -538,7 +557,7 @@ const InitiatePSG = () => {
                                 variant="h5" 
                                 sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', alignSelf: 'flex-start' }} // Adjust lineHeight to match button height
                             >
-                                Upload
+                                Upload <span style={{ color: 'red' }} >*</span>
                             </Typography>
                         </Grid>
                         <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -607,7 +626,7 @@ const InitiatePSG = () => {
                 <Grid container alignItems="center" spacing={2}>
                     <Grid item xs={3} sm={3} md={3} lg={3}>
                     <Typography variant="h5" sx={{fontFamily: 'sans-serif', fontSize: '0.875rem'}}>
-                        Select the Reviewer
+                        Select the Reviewer <span style={{ color: 'red' }} >*</span>
                     </Typography>
                     </Grid>
                     <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -646,7 +665,7 @@ const InitiatePSG = () => {
                                 variant="h5" 
                                 sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem' }}
                             >
-                                Select Approval committee members
+                                Select Approval committee members <span style={{ color: 'red' }} >*</span>
                             </Typography>
                         </Grid>
                         <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -701,7 +720,7 @@ const InitiatePSG = () => {
                     variant="h5" 
                     sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem' }}
                     >
-                    Select User Groups for publishing
+                    Select User Groups for publishing <span style={{ color: 'red' }} >*</span>
                     </Typography>
                     </Grid>
                     <Grid item xs={9} sm={9} md={9} lg={9}>
