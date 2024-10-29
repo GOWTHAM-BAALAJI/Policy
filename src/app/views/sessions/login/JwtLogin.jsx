@@ -12,6 +12,7 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import img1 from '../../../assets/spandana_logo.png';
 import toast from "react-hot-toast";
+import { jwtDecode } from "jwt-decode";
 
 const FlexBox = styled(Box)(() => ({
   display: "flex"
@@ -71,10 +72,25 @@ export default function Login() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
+  const [profileImage, setProfileImage] = useState("");
 
   const userToken = useSelector((state)=>{
     return state.token;//.data;
   });
+
+  useEffect(() => {
+    if (userToken) {
+      try {
+        const decodedToken = jwtDecode(userToken);
+        if (decodedToken.profile_pic) {
+          setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
+        }
+      } catch (error) {
+        console.error('Invalid token:', error);
+      }
+    }
+  }, [userToken]);
+
 
   const headers = {
     'Accept': 'application/json',
@@ -210,6 +226,7 @@ export default function Login() {
       if (result?.status) {
         toast.success("Logged in successfully")
         const token           = result.jwt;
+        console.log("User defined token: ",token);
         // const loggedUser      = result.user_data;
         // const permissionList  = result.permissionList;
 

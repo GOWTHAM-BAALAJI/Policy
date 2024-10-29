@@ -109,8 +109,15 @@ const Layout1Topbar = () => {
   console.log("UserToken:",userToken);
 
   const userProfile = useSelector((state) => state.userData);
+  console.log("User profile: ",userProfile);
   const { profile_pic } = userProfile;
-  const [profileImage, setProfileImage] = useState(profile_pic||"");
+  console.log("Profile pic: ",profile_pic);
+  const [profileImage, setProfileImage] = useState("");
+  useEffect(() => {
+    if (profile_pic) {
+        setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
+    }
+}, [profile_pic]);
 
   useEffect(() => {
     if (userToken) {
@@ -123,7 +130,7 @@ const Layout1Topbar = () => {
           setRoleId(decodedToken.role_id);
         }
         if (decodedToken.profile_pic) {
-          setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
+          setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
         }
       } catch (error) {
         console.error("Error decoding token:", error);

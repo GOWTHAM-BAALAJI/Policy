@@ -37,6 +37,7 @@ import {
 import Avatar from '@mui/material/Avatar';
 import { CameraAlt as CameraIcon } from '@mui/icons-material';
 import { Span } from '../../../app/components/Typography';
+import { setUserData } from '../../../redux/actions/userActions';
 // import '../../../src/App.css';
 
 const StyledTextField = styled(MuiTextField)(() => ({
@@ -77,13 +78,22 @@ const Profile = () => {
   };
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const [storeImage, setStoreImage] = useState("");
+  const userProfile = useSelector((state) => state.userData);
+  console.log("User profile: ",userProfile);
+  const { profile_pic } = userProfile;
+  console.log("Profile pic: ",profile_pic);
+  const [profileImage, setProfileImage] = useState("");
+  console.log("Profile image: ",profileImage);
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [profileImage, setProfileImage] = useState("");
-  const [storeImage, setStoreImage] = useState("");
+  // const [profileImage, setProfileImage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [newpassword, setNewPassword] = useState("");
+  console.log("New password: ",newpassword);
   const [confirmnewpassword, setConfirmNewPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
@@ -103,7 +113,7 @@ const Profile = () => {
   const [empMobile, setEmpMobile] = useState(null);
   const [empDesignation, setEmpDesignation] = useState(null);
 
-  const userProfile = useSelector((state) => state.userData);
+  // const userProfile = useSelector((state) => state.userData);
   // const [profileImage, setProfileImage] = useState(localStorage.getItem('userData.profile_pic') || "");
 
   const userToken = useSelector((state)=>{
@@ -117,6 +127,16 @@ const Profile = () => {
       navigate('/');
     }
   }, [userToken]);
+
+  useEffect(() => {
+    try{
+      if(profile_pic){
+        setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
+      }
+    } catch(error){
+      console.error('Error:', error);
+    }
+  })
 
   useEffect(() => {
     if (userToken) {
@@ -137,12 +157,12 @@ const Profile = () => {
         if (decodedToken.designation) {
           setEmpDesignation(decodedToken.designation);
         }
-        if (decodedToken.profile_pic) {
-          setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
-        }
-        if (decodedToken.profile_pic) {
-          setStoreImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
-        }
+        // if (decodedToken.profile_pic) {
+        //   setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
+        // }
+        // if (decodedToken.profile_pic) {
+        //   setStoreImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
+        // }
       } catch (error) {
         console.error('Invalid token:', error);
       }
@@ -151,12 +171,33 @@ const Profile = () => {
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    setSelectedFile(file);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setProfileImage(reader.result);
+    
+    const isValidFileFormat =  file.name.endsWith(".jpeg") || file.name.endsWith(".jpg") || file.name.endsWith(".png");
+
+    if (!isValidFileFormat) {
+        toast.error("Please upload only .jpeg, .jpg or .png files");
+        setIsBtnDisabled1(true);
+        setTimeout(() => {
+            setIsBtnDisabled1(false);
+          }, 4000);
+        setSelectedFile(null);
+        setProfileImage(storeImage);
+        // console.log("Profile image: ",storeImage);
+        // setLoading(false);
+        return;
+    }
+    // if (isValidFileFormat) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const imageDataUrl = reader.result;
+        console.log("Image rendered correctly", imageDataUrl); // Verify that result is received
+        setProfileImage(imageDataUrl); // Set the base64 URL for immediate rendering
+        setStoreImage(imageDataUrl);   // Optionally store it elsewhere if needed
     };
-    reader.readAsDataURL(file);
+    console.log("11111111111111111111111111111111111111111111111111111111111");
+      reader.readAsDataURL(file);
+    // }
   };
 
   const [isBtnDisabled1, setIsBtnDisabled1] = useState(false);
@@ -166,7 +207,7 @@ const Profile = () => {
     event.preventDefault();
     setLoading(true);
 
-    setIsBtnDisabled1(true);
+    // setIsBtnDisabled1(true);
 
     if (!selectedFile) {
       toast.error("Please select a file");
@@ -175,20 +216,6 @@ const Profile = () => {
             setIsBtnDisabled1(false);
         }, 4000);
       return;
-    }
-
-    const isValidFileFormat =  selectedFile.name.endsWith(".jpeg") || selectedFile.name.endsWith(".jpg") || selectedFile.name.endsWith(".png");
-
-    if (!isValidFileFormat) {
-        toast.error("Please upload only .jpeg, .jpg or .png files");
-        setIsBtnDisabled1(true);
-        setTimeout(() => {
-            setIsBtnDisabled1(false);
-          }, 4000);
-        setProfileImage(storeImage);
-        console.log("Profile image: ",storeImage);
-        // setLoading(false);
-        return;
     }
 
     // Prepare the form data for the API call
@@ -212,6 +239,11 @@ const Profile = () => {
         console.log("Server Response: ", data);
         if (data.status) {
             console.log("Successfully uploaded");
+            const img = data.image;
+            console.log("User uploaded img: ",img);
+            if(img){
+              dispatch(setUserData({ profile_pic: img }));
+            }
             // setTimeout(() => {
             //     navigate('/list/psg');
             // }, 1000);
@@ -237,7 +269,7 @@ const Profile = () => {
     event.preventDefault();
     setLoading(true);
 
-    setIsBtnDisabled2(true);
+    // setIsBtnDisabled2(true);
 
     if (!newpassword || !confirmnewpassword) {
       toast.error("Please fill in all the required fields");
@@ -268,18 +300,21 @@ const Profile = () => {
 
     const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/updatePassword";
     const requestData = {
-      newPassword: event.target.newpassword.value,
+      newPassword: newpassword,
     };
+    console.log("Request data: ",requestData);
 
     const submitPromise2=fetch(url, {
       method: "POST",
       headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${userToken}`, // Example header for token authentication
           // Note: Do not include 'Content-Type: application/json' when sending FormData
       },
       body: JSON.stringify(requestData),
     })
     .then((response) => {
+      console.log("Response: ",response);
         return response.json();
     })
     .then((data) => {
@@ -294,6 +329,7 @@ const Profile = () => {
             // }, 1000);
         } else {
             console.log("Error");
+            throw new Error("Updation failed");
         }
         setLoading(false); // Reset loading state
     })
@@ -360,6 +396,22 @@ const Profile = () => {
           <Button variant="contained" disabled={isBtnDisabled1} type="submit" sx={{ marginTop: 1, marginBottom: 1, padding: '4px 8px', fontSize: '0.75rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)' }, }}>
             Upload
           </Button>
+          <Grid item xs={12} sx={{ textAlign: "right" }}>
+            <Typography
+              variant="body2"
+              sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
+            >
+              Max image size 5MB
+            </Typography>
+          </Grid>
+          <Grid item xs={12} sx={{ textAlign: "right" }}>
+            <Typography
+              variant="body2"
+              sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
+            >
+              .jpg/.jpeg/.png allowed
+            </Typography>
+          </Grid>
         </Box>
         </form>
 

@@ -141,6 +141,7 @@ export default function PSGTable() {
   }, [waitingForActionCount, approvedCount, rejectedCount, pendingCount]);
 
   const [selectedType, setSelectedType] = useState('');
+  console.log("Type: ",selectedType);
 
   const filteredData = selectedType ? psgList.filter(record => record.type === Number(selectedType)) : psgList;
 
@@ -252,31 +253,23 @@ export default function PSGTable() {
 
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
 
-  const handleSearchData = async (tab, page, rows, searchValue) => {
+  const handleSearchType = async (tab, page, rows, searchValue, selectedType) => {
+    console.log("Selected type: ",selectedType);
     setLoading(true);
 
     setIsBtnDisabled(true);
         setTimeout(() => {
             setIsBtnDisabled(false);
         }, 1000);
-  
-    // Check for empty search value and return early if invalid
-    if (!(searchValue.trimStart())) {
-      toast.error("Please provide some search words");
-      setLoading(false);
-      setIsBtnDisabled(true);
-        setTimeout(() => {
-            setIsBtnDisabled(false);
-        }, 1000);
-      return;
-    }
 
     setIsSearching(true);
-    setSearchValue(searchValue.trimStart());
+    setSelectedType(selectedType);
+    console.log("Selected type: ",selectedType);
+    // setSearchValue(searchValue.trimStart());
   
     try {
       // First API call: Fetch data based on searchValue
-      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}`, {
+      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -287,7 +280,70 @@ export default function PSGTable() {
       setPsgList(data);
   
       // Second API call: Fetch the count data based on searchValue
-      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}`, {
+      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+  
+      if (!countResponse.ok) {
+        throw new Error('Failed to fetch count data');
+      }
+  
+      const countData = await countResponse.json();
+      console.log("Count data: ", countData);
+  
+      // Check tab values and set the count based on the tab
+      if (tab === "1") setCount(countData.approved);
+      if (tab === "2") setCount(countData.rejected);
+      if (tab === "3") setCount(countData.pending);
+      if (tab === "4") setCount(countData.waitingForAction);
+  
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }; 
+
+  const handleSearchData = async (tab, page, rows, searchValue, selectedType) => {
+    setLoading(true);
+
+    setIsBtnDisabled(true);
+        setTimeout(() => {
+            setIsBtnDisabled(false);
+        }, 1000);
+  
+    // Check for empty search value and return early if invalid
+    // if (!(searchValue.trimStart())) {
+    //   toast.error("Please provide some search words");
+    //   setLoading(false);
+    //   setIsBtnDisabled(true);
+    //     setTimeout(() => {
+    //         setIsBtnDisabled(false);
+    //     }, 1000);
+    //   return;
+    // }
+
+    setIsSearching(true);
+    setSearchValue(searchValue.trimStart());
+  
+    try {
+      // First API call: Fetch data based on searchValue
+      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      setPsgList(data);
+  
+      // Second API call: Fetch the count data based on searchValue
+      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -434,6 +490,10 @@ export default function PSGTable() {
     fetchData(activeTab, currentPage, rowsPerPage);
   }, [activeTab, currentPage, rowsPerPage]);
 
+  useEffect(() => {
+    handleSearchType(activeTab, currentPage, rowsPerPage, searchValue, selectedType);
+  }, [selectedType, activeTab, currentPage, rowsPerPage, searchValue]);
+
   const handleRowClick = (row) => {
     setSelectedDocument(row.title);
     setSelectedRow(row);
@@ -484,6 +544,7 @@ export default function PSGTable() {
           <Controller
             name="documentType"
             control={control}
+            value={selectedType}
             render={({ field }) => (
               <StyledSelect
                 labelId="document-type-label"
@@ -495,6 +556,7 @@ export default function PSGTable() {
                 onChange={(e) => {
                   field.onChange(e);
                   setSelectedType(e.target.value); // Set the selected type here
+                  // handleSearchType(activeTab, currentPage, rowsPerPage, searchValue, selectedType);
                 }}
               >
                 <MenuItem value="">
@@ -539,7 +601,7 @@ export default function PSGTable() {
             <CloseIcon />
           </IconButton>
         )}
-        <Button
+        {/* <Button
           variant="contained"
           color="primary"
           disabled={isBtnDisabled}
@@ -547,7 +609,7 @@ export default function PSGTable() {
           onClick={() => handleSearchData(activeTab, currentPage, rowsPerPage, searchValue)}
         >
           Search
-        </Button>
+        </Button> */}
       </Grid>
       <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2 }}>
         <Box width="100%" height="100%" overflow="auto">
