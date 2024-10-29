@@ -495,7 +495,7 @@ const InitiatePSG = () => {
               xs={12}
               sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
             >
-              <Grid container alignItems="center" spacing={2}>
+              <Grid container alignItems="flex-start" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                     Type of Document <span style={{ color: "red" }}>*</span>
@@ -540,7 +540,7 @@ const InitiatePSG = () => {
               xs={12}
               sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
             >
-              <Grid container alignItems="center" spacing={2}>
+              <Grid container alignItems="flex-start" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                     Title <span style={{ color: "red" }}>*</span>
@@ -577,7 +577,7 @@ const InitiatePSG = () => {
                       variant="body2"
                       sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
                     >
-                      {description.length}/1000 characters
+                      {title.length}/100 characters
                     </Typography>
                   </Grid>
                 </Grid>
@@ -591,7 +591,7 @@ const InitiatePSG = () => {
               xs={12}
               sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
             >
-              <Grid container alignItems="center" spacing={2}>
+              <Grid container alignItems="flex-start" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                     Description <span style={{ color: "red" }}>*</span>
@@ -736,7 +736,12 @@ const InitiatePSG = () => {
                                 }}
                                 onClick={() => openUploadedFile(index)} // Open specific file on click
                               >
-                                {index + 1}. {filename}
+                                {index + 1}.{" "}
+                                {filename.length > 40
+                                  ? filename.substring(0, 37) +
+                                    "...   ." +
+                                    filename.split(".")[filename.split(".").length - 1]
+                                  : filename}
                               </Typography>
                             </Grid>
                             <Grid item>
@@ -773,7 +778,7 @@ const InitiatePSG = () => {
               xs={12}
               sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
             >
-              <Grid container alignItems="center" spacing={2}>
+              <Grid container alignItems="flex-start" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                     Select the Reviewer <span style={{ color: "red" }}>*</span>
@@ -816,7 +821,7 @@ const InitiatePSG = () => {
               xs={12}
               sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
             >
-              <Grid container alignItems="center" spacing={2}>
+              <Grid container alignItems="flex-start" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                     Select Approval committee members <span style={{ color: "red" }}>*</span>
@@ -888,7 +893,7 @@ const InitiatePSG = () => {
               xs={12}
               sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
             >
-              <Grid container alignItems="center" spacing={2}>
+              <Grid container alignItems="flex-start" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                     Select User Groups for publishing <span style={{ color: "red" }}>*</span>

@@ -27,10 +27,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import toast from "react-hot-toast";
 
 const ContentBox = styled("div")(({ theme }) => ({
-    margin: "20px",
-    [theme.breakpoints.down("sm")]: { margin: "16px" }
-  }));
-  
+  margin: "20px",
+  [theme.breakpoints.down("sm")]: { margin: "16px" }
+}));
 
 const StyledSelect = styled(Select)(() => ({
   width: "100%",
@@ -324,135 +323,144 @@ const InitiateCA = () => {
   return (
     <ContentBox className="analytics">
       <Card sx={{ px: 3, py: 3, height: "100%", width: "100%" }}>
-    <form onSubmit={handleSubmit}>
-      <Grid container spacing={2}>
-        <Grid item lg={12} md={12} sm={12} xs={12}>
-          <Typography
-            variant="h5"
-            sx={{
-              fontFamily: "sans-serif",
-              fontSize: "1.4rem",
-              marginLeft: { sm: 2, xs: 2 },
-              marginTop: { sm: 2, xs: 2 },
-              marginRight: { sm: 2, xs: 2 }
-            }}
-          >
-            Initiate a Circular or Advisory
-          </Typography>
-        </Grid>
-        <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 } }}>
-          <span style={{ fontSize: "0.7rem" }}>
-            Fields marked with (<span style={{ color: "red" }}>*</span>) are mandatory
-          </span>
-        </Grid>
-        <Grid
-          item
-          lg={12}
-          md={12}
-          sm={12}
-          xs={12}
-          sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
-        >
-          <Grid container alignItems="center" spacing={2}>
-            <Grid item xs={3} sm={3} md={3} lg={3}>
-              <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                Title <span style={{ color: "red" }}>*</span>
-              </Typography>
-            </Grid>
-            <Grid item xs={9} sm={9} md={9} lg={9}>
-              <Grid container alignItems="center" spacing={2}>
-                <Grid item xs>
-                  <TextField
-                    id="title"
-                    value={title}
-                    onChange={handleTitleChange}
-                    // multiline
-                    rows={1}
-                    maxRows={1}
-                    variant="outlined"
-                    fullWidth
-                    placeholder="Enter the title"
-                    // required
-                    inputProps={{ maxLength: 100 }}
-                    InputProps={{
-                      style: {
-                        fontFamily: "sans-serif",
-                        fontSize: "0.875rem",
-                        height: "30px"
-                      }
-                    }}
-                  />
-                </Grid>
-              </Grid>
-              <Grid item xs={12} sx={{ textAlign: "right", marginTop: 1 }}>
-                <Typography variant="body2" sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}>
-                  {title.length}/100 characters
-                </Typography>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid
-          item
-          lg={12}
-          md={12}
-          sm={12}
-          xs={12}
-          sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
-        >
-          <Grid container alignItems="center" spacing={2}>
-            <Grid item xs={3} sm={3} md={3} lg={3}>
-              <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                Description <span style={{ color: "red" }}>*</span>
-              </Typography>
-            </Grid>
-            <Grid item xs={9} sm={9} md={9} lg={9}>
-              <Grid container alignItems="center" spacing={2}>
-                <Grid item xs>
-                  <TextField
-                    id="description"
-                    value={description}
-                    onChange={handleDescriptionChange}
-                    multiline
-                    rows={2}
-                    maxRows={2}
-                    variant="outlined"
-                    fullWidth
-                    placeholder="Enter the description"
-                    // required
-                    inputProps={{ maxLength: 1000 }}
-                    InputProps={{
-                      style: {
-                        fontFamily: "sans-serif",
-                        fontSize: "0.875rem"
-                        // height: '30px',
-                      }
-                    }}
-                  />
-                </Grid>
-              </Grid>
-              <Grid item xs={12} sx={{ textAlign: "right", marginTop: 1 }}>
-                <Typography variant="body2" sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}>
-                  {description.length}/1000 characters
-                </Typography>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-        <Grid
-          item
-          lg={12}
-          md={12}
-          sm={12}
-          xs={12}
-          sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
-        >
-          <Grid container alignItems="flex-start" spacing={2}>
-            <Grid item xs={3} sm={3} md={3} lg={3}>
-              <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem",alignSelf: "flex-start"  }}>
-                Upload <span style={{ color: "red" }}>*</span>
-              </Typography>
+        <form onSubmit={handleSubmit}>
+          <Grid container spacing={2}>
+            <Grid item lg={12} md={12} sm={12} xs={12}>
               <Typography
+                variant="h5"
+                sx={{
+                  fontFamily: "sans-serif",
+                  fontSize: "1.4rem",
+                  marginLeft: { sm: 2, xs: 2 },
+                  marginTop: { sm: 2, xs: 2 },
+                  marginRight: { sm: 2, xs: 2 }
+                }}
+              >
+                Initiate a Circular or Advisory
+              </Typography>
+            </Grid>
+            <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 } }}>
+              <span style={{ fontSize: "0.7rem" }}>
+                Fields marked with (<span style={{ color: "red" }}>*</span>) are mandatory
+              </span>
+            </Grid>
+            <Grid
+              item
+              lg={12}
+              md={12}
+              sm={12}
+              xs={12}
+              sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
+            >
+              <Grid container alignItems="flex-start" spacing={2}>
+                <Grid item xs={3} sm={3} md={3} lg={3}>
+                  <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
+                    Title <span style={{ color: "red" }}>*</span>
+                  </Typography>
+                </Grid>
+                <Grid item xs={9} sm={9} md={9} lg={9}>
+                  <Grid container alignItems="center" spacing={2}>
+                    <Grid item xs>
+                      <TextField
+                        id="title"
+                        value={title}
+                        onChange={handleTitleChange}
+                        // multiline
+                        rows={1}
+                        maxRows={1}
+                        variant="outlined"
+                        fullWidth
+                        placeholder="Enter the title"
+                        // required
+                        inputProps={{ maxLength: 100 }}
+                        InputProps={{
+                          style: {
+                            fontFamily: "sans-serif",
+                            fontSize: "0.875rem",
+                            height: "30px"
+                          }
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                  <Grid item xs={12} sx={{ textAlign: "right", marginTop: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
+                    >
+                      {title.length}/100 characters
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid
+              item
+              lg={12}
+              md={12}
+              sm={12}
+              xs={12}
+              sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
+            >
+              <Grid container alignItems="flex-start" spacing={2}>
+                <Grid item xs={3} sm={3} md={3} lg={3}>
+                  <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
+                    Description <span style={{ color: "red" }}>*</span>
+                  </Typography>
+                </Grid>
+                <Grid item xs={9} sm={9} md={9} lg={9}>
+                  <Grid container alignItems="center" spacing={2}>
+                    <Grid item xs>
+                      <TextField
+                        id="description"
+                        value={description}
+                        onChange={handleDescriptionChange}
+                        multiline
+                        rows={2}
+                        maxRows={2}
+                        variant="outlined"
+                        fullWidth
+                        placeholder="Enter the description"
+                        // required
+                        inputProps={{ maxLength: 1000 }}
+                        InputProps={{
+                          style: {
+                            fontFamily: "sans-serif",
+                            fontSize: "0.875rem"
+                            // height: '30px',
+                          }
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                  <Grid item xs={12} sx={{ textAlign: "right", marginTop: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
+                    >
+                      {description.length}/1000 characters
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid
+              item
+              lg={12}
+              md={12}
+              sm={12}
+              xs={12}
+              sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
+            >
+              <Grid container alignItems="flex-start" spacing={2}>
+                <Grid item xs={3} sm={3} md={3} lg={3}>
+                  <Typography
+                    variant="h5"
+                    sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", alignSelf: "flex-start" }}
+                  >
+                    Upload <span style={{ color: "red" }}>*</span>
+                  </Typography>
+                  <Typography
                     variant="body2" // Use a smaller variant for the message
                     sx={{
                       fontFamily: "sans-serif",
@@ -485,170 +493,182 @@ const InitiateCA = () => {
                   >
                     Max file size 5Mb
                   </Typography>
-            </Grid>
-            <Grid item xs={9} sm={9} md={9} lg={9}>
-              <Grid container direction="column" spacing={1}>
-                <Grid item>
-                  <Grid container alignItems="center">
+                </Grid>
+                <Grid item xs={9} sm={9} md={9} lg={9}>
+                  <Grid container direction="column" spacing={1}>
                     <Grid item>
-                      <Button
-                        variant="contained"
-                        component="label"
-                        sx={{
-                          fontFamily: "sans-serif",
-                          fontSize: "0.875rem",
-                          height: "30px",
-                          backgroundColor: "#ee8812",
-                          "&:hover": {
-                            backgroundColor: "rgb(249, 83, 22)"
-                          }
-                        }}
-                      >
-                        Upload
-                        <input
-                          type="file"
-                          hidden
-                          accept=".doc, .docx, .pdf"
-                          multiple
-                          onChange={(e) => handleFileUpload(e)} // Handle file upload
-                        />
-                      </Button>
+                      <Grid container alignItems="center">
+                        <Grid item>
+                          <Button
+                            variant="contained"
+                            component="label"
+                            sx={{
+                              fontFamily: "sans-serif",
+                              fontSize: "0.875rem",
+                              height: "30px",
+                              backgroundColor: "#ee8812",
+                              "&:hover": {
+                                backgroundColor: "rgb(249, 83, 22)"
+                              }
+                            }}
+                          >
+                            Upload
+                            <input
+                              type="file"
+                              hidden
+                              accept=".doc, .docx, .pdf"
+                              multiple
+                              onChange={(e) => handleFileUpload(e)} // Handle file upload
+                            />
+                          </Button>
+                        </Grid>
+                      </Grid>
+                    </Grid>
+                    {/* Display uploaded filenames below the upload button */}
+                    <Grid item>
+                      <Grid container direction="column" spacing={0}>
+                        {uploadFilename.map((filename, index) => (
+                          <Grid
+                            item
+                            key={index}
+                            container
+                            alignItems="center"
+                            spacing={1}
+                            justifyContent="space-between"
+                          >
+                            <Grid item>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  cursor: "pointer",
+                                  fontFamily: "sans-serif",
+                                  fontSize: "0.875rem",
+                                  marginRight: 1 // Add some space between filename and close button
+                                }}
+                                onClick={() => openUploadedFile(index)} // Open specific file on click
+                              >
+                                {index + 1}.{" "}
+                                {filename.length > 40
+                                  ? filename.substring(0, 37) +
+                                    "...   ." +
+                                    filename.split(".")[filename.split(".").length - 1]
+                                  : filename}
+                              </Typography>
+                            </Grid>
+                            <Grid item>
+                              <IconButton
+                                onClick={() => handleRemoveFile(index)}
+                                aria-label="remove file"
+                                size="small"
+                              >
+                                <CloseIcon />
+                              </IconButton>
+                            </Grid>
+                            <Grid item xs={12}>
+                              <hr
+                                style={{
+                                  border: "none",
+                                  borderTop: "1px solid #ccc",
+                                  margin: "5px 0"
+                                }}
+                              />
+                            </Grid>
+                          </Grid>
+                        ))}
+                      </Grid>
                     </Grid>
                   </Grid>
                 </Grid>
-                {/* Display uploaded filenames below the upload button */}
-                <Grid item>
-                  <Grid container direction="column" spacing={0}>
-                    {uploadFilename.map((filename, index) => (
-                      <Grid item key={index} container alignItems="center" spacing={1} justifyContent="space-between">
-                        <Grid item>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              cursor: "pointer",
-                              fontFamily: "sans-serif",
-                              fontSize: "0.875rem",
-                              marginRight: 1 // Add some space between filename and close button
-                            }}
-                            onClick={() => openUploadedFile(index)} // Open specific file on click
-                          >
-                            {index+1}. {filename}
-                          </Typography>
-                        </Grid>
-                        <Grid item>
-                          <IconButton
-                            onClick={() => handleRemoveFile(index)}
-                            aria-label="remove file"
-                            size="small"
-                          >
-                            <CloseIcon />
-                          </IconButton>
-                        </Grid>
-                        <Grid item xs={12}>
-                          <hr
-                            style={{
-                              border: "none",
-                              borderTop: "1px solid #ccc",
-                              margin: "5px 0"
-                            }}
-                          />
-                        </Grid>
-                      </Grid>
-                    ))}
+              </Grid>
+            </Grid>
+            <Grid
+              item
+              lg={12}
+              md={12}
+              sm={12}
+              xs={12}
+              sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
+            >
+              <Grid container alignItems="flex-start" spacing={2}>
+                <Grid item xs={3} sm={3} md={3} lg={3}>
+                  <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
+                    Select User Groups for publishing <span style={{ color: "red" }}>*</span>
+                  </Typography>
+                </Grid>
+                <Grid item xs={9} sm={9} md={9} lg={9}>
+                  <Grid container alignItems="center" spacing={2}>
+                    <Grid item xs>
+                      <FormControl variant="outlined" fullWidth sx={{ position: "relative" }}>
+                        <Controller
+                          name="userGroups"
+                          control={control}
+                          render={({ field }) => (
+                            <StyledSelect
+                              labelId="user-groups-label"
+                              id="userGroups"
+                              value={selectedUserGroup}
+                              // required
+                              displayEmpty
+                              onChange={(e) => {
+                                setSelectedUserGroup(e.target.value);
+                              }}
+                            >
+                              <MenuItem value="" disabled>
+                                <ListItemText
+                                  style={{ color: "#bdbdbd" }}
+                                  primary="Select a user group"
+                                />
+                              </MenuItem>
+                              {userGroupOptions.map((option) => (
+                                <MenuItem key={option.value} value={option.value}>
+                                  <ListItemText primary={option.label} />
+                                </MenuItem>
+                              ))}
+                            </StyledSelect>
+                          )}
+                        />
+                      </FormControl>
+                    </Grid>
                   </Grid>
                 </Grid>
               </Grid>
             </Grid>
-          </Grid>
-        </Grid>
-        <Grid
-          item
-          lg={12}
-          md={12}
-          sm={12}
-          xs={12}
-          sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
-        >
-          <Grid container alignItems="center" spacing={2}>
-            <Grid item xs={3} sm={3} md={3} lg={3}>
-              <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                Select User Groups for publishing <span style={{ color: "red" }}>*</span>
-              </Typography>
-            </Grid>
-            <Grid item xs={9} sm={9} md={9} lg={9}>
-              <Grid container alignItems="center" spacing={2}>
-                <Grid item xs>
-                  <FormControl variant="outlined" fullWidth sx={{ position: "relative" }}>
-                    <Controller
-                      name="userGroups"
-                      control={control}
-                      render={({ field }) => (
-                        <StyledSelect
-                          labelId="user-groups-label"
-                          id="userGroups"
-                          value={selectedUserGroup}
-                          // required
-                          displayEmpty
-                          onChange={(e) => {
-                            setSelectedUserGroup(e.target.value);
-                          }}
-                        >
-                          <MenuItem value="" disabled>
-                            <ListItemText
-                              style={{ color: "#bdbdbd" }}
-                              primary="Select a user group"
-                            />
-                          </MenuItem>
-                          {userGroupOptions.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                              <ListItemText primary={option.label} />
-                            </MenuItem>
-                          ))}
-                        </StyledSelect>
-                      )}
-                    />
-                  </FormControl>
-                </Grid>
-              </Grid>
+            <Grid container justifyContent="center" alignItems="center" sx={{ marginTop: 2 }}>
+              <Button
+                type="submit"
+                disabled={isBtnDisabled}
+                variant="contained"
+                sx={{
+                  mb: 2,
+                  height: "30px",
+                  fontFamily: "sans-serif",
+                  fontSize: "0.875rem",
+                  backgroundColor: "#ee8812",
+                  "&:hover": { backgroundColor: "rgb(249, 83, 22)" }
+                }}
+              >
+                Submit
+              </Button>
             </Grid>
           </Grid>
-        </Grid>
-        <Grid container justifyContent="center" alignItems="center" sx={{ marginTop: 2 }}>
-          <Button
-            type="submit"
-            disabled={isBtnDisabled}
-            variant="contained"
-            sx={{
-              mb: 2,
-              height: "30px",
-              fontFamily: "sans-serif",
-              fontSize: "0.875rem",
-              backgroundColor: "#ee8812",
-              "&:hover": { backgroundColor: "rgb(249, 83, 22)" }
-            }}
+          <CustomDialog
+            open={dialogOpen}
+            onClose={handleDialogClose}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
           >
-            Submit
-          </Button>
-        </Grid>
-      </Grid>
-      <CustomDialog
-        open={dialogOpen}
-        onClose={handleDialogClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <CustomDialogTitle id="alert-dialog-title">{dialogtitle}</CustomDialogTitle>
-        <CustomDialogContent>
-          <Typography id="alert-dialog-description">{dialogMessage}</Typography>
-        </CustomDialogContent>
-        <CustomDialogActions>
-          <Button onClick={handleDialogClose} color="primary">
-            OK
-          </Button>
-        </CustomDialogActions>
-      </CustomDialog>
-    </form>
-    </Card>
+            <CustomDialogTitle id="alert-dialog-title">{dialogtitle}</CustomDialogTitle>
+            <CustomDialogContent>
+              <Typography id="alert-dialog-description">{dialogMessage}</Typography>
+            </CustomDialogContent>
+            <CustomDialogActions>
+              <Button onClick={handleDialogClose} color="primary">
+                OK
+              </Button>
+            </CustomDialogActions>
+          </CustomDialog>
+        </form>
+      </Card>
     </ContentBox>
   );
 };
