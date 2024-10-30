@@ -56,7 +56,6 @@ export default function CATable() {
   const [tabledata, setTableData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [count, setCount] = useState(0);
-  console.log("Count: ",count);
 
   const [psgList, setPsgList] = useState([]);
   const [userId, setUserId] = useState(null);
@@ -70,7 +69,6 @@ export default function CATable() {
   const userToken = useSelector((state)=>{
     return state.token;//.data;
   });
-  console.log("UserToken:",userToken);
 
   const fetchData = async (page, rows) => {
     setLoading(true);
@@ -98,12 +96,10 @@ export default function CATable() {
       }
   
       const countData = await countResponse.json();
-      console.log("Count data: ", countData);
 
       setCount(countData.count);
 
       const decodedToken = jwtDecode(userToken);
-      console.log('Decoded Token:', decodedToken.role_id);
       if (decodedToken.role_id) {
         setRoleId(decodedToken.role_id);
       }
@@ -116,11 +112,6 @@ export default function CATable() {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log('Current roleId:', roleId); // Log the roleId
-    console.log('Current userId:', userId); // Log the roleId
-  }, [roleId, userId]);
 
   const [searchValue, setSearchValue] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -179,7 +170,6 @@ export default function CATable() {
       }
   
       const countData = await countResponse.json();
-      console.log("Count data: ", countData);
       setCount(countData.count);
   
     } catch (error) {

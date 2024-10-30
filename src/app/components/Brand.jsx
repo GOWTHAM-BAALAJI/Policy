@@ -33,13 +33,11 @@ export default function Brand({ children }) {
   const userToken = useSelector((state)=>{
     return state.token;//.data;
     });
-  console.log("UserToken:",userToken);
 
   useEffect(() => {
     if (userToken) {
       try {
         const decodedToken = jwtDecode(userToken);
-        console.log('Decoded Token role_id:', decodedToken.role_id);
         if (decodedToken.role_id) {
           setRoleId(decodedToken.role_id);
         }

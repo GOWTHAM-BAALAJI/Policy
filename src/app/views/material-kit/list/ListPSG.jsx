@@ -123,7 +123,6 @@ export default function PSGTable() {
   const [pendingCount, setPendingCount] = useState(0);
   const [waitingForActionCount, setWaitingForActionCount] = useState(0);
   const [count, setCount] = useState(waitingForActionCount);
-  console.log("Count: ",count);
 
   useEffect(() => {
     if (waitingForActionCount > 0) {
@@ -142,7 +141,6 @@ export default function PSGTable() {
   }, [waitingForActionCount, approvedCount, rejectedCount, pendingCount]);
 
   const [selectedType, setSelectedType] = useState('');
-  console.log("Type: ",selectedType);
 
   const filteredData = selectedType ? psgList.filter(record => record.type === Number(selectedType)) : psgList;
 
@@ -154,7 +152,6 @@ export default function PSGTable() {
   const userToken = useSelector((state)=>{
     return state.token;//.data;
   });
-  console.log("UserToken:",userToken);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -166,9 +163,7 @@ export default function PSGTable() {
             Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
           },
         });
-        console.log(response);
         const data = await response.json();
-        console.log("Data:",data);
 
         if (data && data.status) {
           const approvedCount = data.approved;
@@ -179,10 +174,6 @@ export default function PSGTable() {
           setRejectedCount(rejectedCount || 0);
           setPendingCount(pendingCount || 0);
           setWaitingForActionCount(waitingForActionCount || 0);
-          console.log('Approved:', approvedCount);
-          console.log('Rejected:', rejectedCount);
-          console.log('Pending:', pendingCount);
-          console.log('Waiting for Action:', waitingForActionCount);
         }
 
         // setPsgList(formattedData);
@@ -208,7 +199,6 @@ export default function PSGTable() {
           Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
         },
       });
-      console.log("Tab: ",tab);
       const data = await response.json();
       setPsgList(data); // Adjust this based on your API response structure
       if (tab == 1){
@@ -223,10 +213,7 @@ export default function PSGTable() {
       else if (tab == 4){
         setCount(waitingForActionCount || 0);
       }
-      // console.log('Count for Tab:', count);
-      // console.log("Count: ",count);
       const decodedToken = jwtDecode(userToken);
-      console.log('Decoded Token:', decodedToken.role_id);
       if (decodedToken.role_id) {
         setRoleId(decodedToken.role_id);
       }
@@ -240,11 +227,6 @@ export default function PSGTable() {
     }
   };
 
-  useEffect(() => {
-    console.log('Current roleId:', roleId); // Log the roleId
-    console.log('Current userId:', userId); // Log the roleId
-  }, [roleId, userId]);
-
   const [searchValue, setSearchValue] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
@@ -255,7 +237,6 @@ export default function PSGTable() {
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
 
   const handleSearchType = async (tab, page, rows, searchValue, selectedType) => {
-    console.log("Selected type: ",selectedType);
     setLoading(true);
 
     setIsBtnDisabled(true);
@@ -265,11 +246,8 @@ export default function PSGTable() {
 
     setIsSearching(true);
     setSelectedType(selectedType);
-    console.log("Selected type: ",selectedType);
-    // setSearchValue(searchValue.trimStart());
   
     try {
-      // First API call: Fetch data based on searchValue
       const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
         method: 'GET',
         headers: {
@@ -280,7 +258,6 @@ export default function PSGTable() {
       const data = await response.json();
       setPsgList(data);
   
-      // Second API call: Fetch the count data based on searchValue
       const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, {
         method: 'GET',
         headers: {
@@ -294,9 +271,7 @@ export default function PSGTable() {
       }
   
       const countData = await countResponse.json();
-      console.log("Count data: ", countData);
   
-      // Check tab values and set the count based on the tab
       if (tab === "1") setCount(countData.approved);
       if (tab === "2") setCount(countData.rejected);
       if (tab === "3") setCount(countData.pending);
@@ -357,7 +332,6 @@ export default function PSGTable() {
       }
   
       const countData = await countResponse.json();
-      console.log("Count data: ", countData);
   
       // Check tab values and set the count based on the tab
       if (tab === "1") setCount(countData.approved);
@@ -375,7 +349,6 @@ export default function PSGTable() {
   const pendingApprover = selectedDocument?.Policy_status?.find(
     status => status.approver_id === selectedDocument?.pending_at_id
   );
-  console.log("Pending approved id: ",pendingApprover);
 
   // If pendingApprover is not found and pending_at_id is equal to initiator_id, set name to initiator's name
   const pendingApproverName = pendingApprover 
@@ -384,7 +357,6 @@ export default function PSGTable() {
           ? 'Initiator' 
           : 'No pending approver');
 
-  console.log("Pending approver name:", pendingApproverName);
 
   const getDisplayPolicyId = (policy_id) => {
     return "PL" + String(policy_id).padStart(7, "0");
@@ -502,7 +474,6 @@ export default function PSGTable() {
     // setRemarks('');
     // setUploadedFile(null);
     navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status, activeTab }});
-    console.log("Active tab: ",activeTab);
   };
 
 

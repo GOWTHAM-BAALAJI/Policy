@@ -221,12 +221,10 @@ export default function Login() {
       });
 
       const result = await response.json();
-      console.log("OTP Verification Result:", result);
 
       if (result?.status) {
         toast.success("Logged in successfully")
         const token           = result.jwt;
-        console.log("User defined token: ",token);
         // const loggedUser      = result.user_data;
         // const permissionList  = result.permissionList;
 

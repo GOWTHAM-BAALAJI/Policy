@@ -134,7 +134,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   const [pendingCount, setPendingCount] = useState(0);
   const [waitingForActionCount, setWaitingForActionCount] = useState(0);
   const [count, setCount] = useState(waitingForActionCount);
-  console.log("Count: ",count);
 
   useEffect(() => {
     if (waitingForActionCount > 0) {
@@ -155,8 +154,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   const [selectedType, setSelectedType] = useState('');
 
   const filteredData = selectedType ? psgList.filter(record => record.type === Number(selectedType)) : psgList;
-  console.log("PSG List: ",psgList);
-  console.log("Filtered data: ",filteredData);
 
   const handleSort = (column, sortDirection) => {
     setSortColumn(column.selector); // Store column to be sorted
@@ -166,7 +163,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   const userToken = useSelector((state)=>{
     return state.token;//.data;
   });
-  console.log("UserToken:",userToken);
 
   useEffect(() => {
     setActiveTab(initialTab);
@@ -182,9 +178,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
             Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
           },
         });
-        console.log(response);
         const data = await response.json();
-        console.log("Data:",data);
 
         if (data && data.status) {
           const approvedCount = data.approved;
@@ -195,10 +189,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
           setRejectedCount(rejectedCount || 0);
           setPendingCount(pendingCount || 0);
           setWaitingForActionCount(waitingForActionCount || 0);
-          console.log('Approved:', approvedCount);
-          console.log('Rejected:', rejectedCount);
-          console.log('Pending:', pendingCount);
-          console.log('Waiting for Action:', waitingForActionCount);
         }
 
         // setPsgList(formattedData);
@@ -224,7 +214,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
           Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
         },
       });
-      console.log("Tab: ",tab);
       const data = await response.json();
       setPsgList(data); // Adjust this based on your API response structure
       if (tab == 1){
@@ -239,15 +228,14 @@ const PSGTable = ({ initialTab, onTabChange }) => {
       else if (tab == 4){
         setCount(waitingForActionCount || 0);
       }
-      // console.log('Count for Tab:', count);
-      // console.log("Count: ",count);
+      if(userToken){
       const decodedToken = jwtDecode(userToken);
-      console.log('Decoded Token:', decodedToken.role_id);
       if (decodedToken.role_id) {
         setRoleId(decodedToken.role_id);
       }
       if (decodedToken.user_id) {
         setUserId(decodedToken.user_id);
+      }
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -255,11 +243,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    console.log('Current roleId:', roleId); // Log the roleId
-    console.log('Current userId:', userId); // Log the roleId
-  }, [roleId, userId]);
 
   const [searchValue, setSearchValue] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -271,7 +254,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
 
   const handleSearchType = async (tab, page, rows, searchValue, selectedType) => {
-    console.log("Selected type: ",selectedType);
     setLoading(true);
 
     setIsBtnDisabled(true);
@@ -281,7 +263,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
 
     setIsSearching(true);
     setSelectedType(selectedType);
-    console.log("Selected type: ",selectedType);
     // setSearchValue(searchValue.trimStart());
   
     try {
@@ -310,7 +291,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
       }
   
       const countData = await countResponse.json();
-      console.log("Count data: ", countData);
   
       // Check tab values and set the count based on the tab
       if (tab === "1") setCount(countData.approved);
@@ -373,7 +353,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
       }
   
       const countData = await countResponse.json();
-      console.log("Count data: ", countData);
   
       // Check tab values and set the count based on the tab
       if (tab === "1") setCount(countData.approved);
@@ -391,7 +370,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   const pendingApprover = selectedDocument?.Policy_status?.find(
     status => status.approver_id === selectedDocument?.pending_at_id
   );
-  console.log("Pending approved id: ",pendingApprover);
 
   // If pendingApprover is not found and pending_at_id is equal to initiator_id, set name to initiator's name
   const pendingApproverName = pendingApprover 
@@ -400,7 +378,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
           ? 'Initiator' 
           : 'No pending approver');
 
-  console.log("Pending approver name:", pendingApproverName);
 
   const getDisplayPolicyId = (policy_id) => {
     return "PL" + String(policy_id).padStart(7, "0");
@@ -501,7 +478,9 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   }, [activeTab, currentPage, rowsPerPage]);
 
   useEffect(() => {
+    if(userToken) {
     handleSearchType(activeTab, currentPage, rowsPerPage, searchValue, selectedType);
+    }
   }, [selectedType, activeTab, currentPage, rowsPerPage, searchValue]);
 
   const handleRowClick = (row) => {

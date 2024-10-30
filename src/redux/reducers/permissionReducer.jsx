@@ -4,7 +4,6 @@ export const CLEAR_PERMISSION_DATA = 'CLEAR_PERMISSION_DATA';
 const initialPermissionState = JSON.parse(localStorage.getItem('permissionData')) || {};
 
 export const permissionData = (state = initialPermissionState, action) => {
-    console.log('====== 123 456 ======', action);
     switch(action.type) {
         case SET_PERMISSION_DATA:
             return {

@@ -231,65 +231,15 @@ const InitiatePSG = () => {
   const userToken = useSelector((state) => {
     return state.token; //.data;
   });
-  console.log("UserToken:", userToken);
 
   const headers = {
     Accept: "application/json",
     "Content-Type": "multipart/form-data",
     Authorization: "Bearer " + userToken // Ensure userToken is defined
   };
-  console.log(headers);
   const headerData = {
     headers: headers
   };
-
-  // const userToken = useSelector((state)=>{
-  //     return state.token;//.data;
-  //   });
-  // const userToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NzEsImVtcF9pZCI6InNmMDAwMDAwMSIsImVtcF9uYW1lIjoidGVzdFVzZXIxIiwiZW1wX2VtYWlsIjoidGVzdHVzZXIxQHNwYW5kYW5hc3Bob29ydHkuY29tIiwicm9sZV9pZCI6MSwiaWF0IjoxNzI3OTU1NzMxLCJleHAiOjE3Mjc5NTkzMzF9.xTwc_7a9ZPjAMRkSBiTkwPcoS4H0uIfwD96rhV0m7rc";
-
-  //   const headers = {
-  //     "Content-Type": "application/json",
-  //     "Authorization": `Bearer ${userToken}`, // Add this if required
-  //   };
-
-  // const handleSubmit = () => {
-  //     const formData = new FormData(); // Create a FormData object
-
-  //     // Append files to FormData
-  //     uploadedFiles.forEach(file => {
-  //         formData.append("files[]", file); // Name the file array appropriately
-  //     });
-
-  //     // Append other data to FormData
-  //     formData.append("title", title);
-  //     formData.append("description", description);
-  //     formData.append("reviewer_id", selectedReviewer || null);
-  //     formData.append("approver_ids", JSON.stringify(selectedApprovalMembers || [])); // Convert array to string
-  //     formData.append("user_group", selectedUserGroup || null);
-
-  //     console.log("Request Data:", formData);
-
-  //     fetch(url, {
-  //         method: "POST",
-  //         headers: headers,
-  //         body: formData, // Send the FormData object
-  //     })
-  //     .then(response => response.json())
-  //     .then(data => {
-  //         console.log("Server Response:", data);
-  //         if (data.status) {
-  //             console.log("Successfully submitted");
-  //         } else {
-  //             console.log("Error");
-  //         }
-  //         setLoading(false); // Reset loading state
-  //     })
-  //     .catch(error => {
-  //         console.error("Submission error:", error);
-  //         setLoading(false); // Reset loading state
-  //     });
-  // };
 
   useEffect(() => {
     // Fetch reviewers from the API
@@ -450,9 +400,7 @@ const InitiatePSG = () => {
         return response.json();
       })
       .then((data) => {
-        console.log("Server Response: ", data);
         if (data.status) {
-          console.log("Successfully submitted");
           setIsBtnDisabled(false);
           setTimeout(() => {
             navigate("/list/psg");
