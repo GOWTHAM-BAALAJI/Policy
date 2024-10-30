@@ -533,29 +533,42 @@ const InitiateCA = () => {
                             key={index}
                             container
                             alignItems="center"
-                            spacing={1}
                             justifyContent="space-between"
+                            spacing={1}
                           >
-                            <Grid item>
+                            {/* Left side: Filename */}
+                            <Grid item xs>
                               <Typography
                                 variant="body2"
                                 sx={{
                                   cursor: "pointer",
                                   fontFamily: "sans-serif",
                                   fontSize: "0.875rem",
-                                  marginRight: 1 // Add some space between filename and close button
+                                  overflow: "hidden",
+                                  whiteSpace: "nowrap",
+                                  textOverflow: "ellipsis"
                                 }}
                                 onClick={() => openUploadedFile(index)} // Open specific file on click
                               >
                                 {index + 1}.{" "}
                                 {filename.length > 40
-                                  ? filename.substring(0, 37) +
-                                    "...   ." +
-                                    filename.split(".")[filename.split(".").length - 1]
+                                  ? filename.substring(0, 37) + "... ." + filename.split(".").pop()
                                   : filename}
                               </Typography>
                             </Grid>
-                            <Grid item>
+
+                            {/* Right side: Size and Remove Button */}
+                            <Grid
+                              item
+                              container
+                              direction="row"
+                              alignItems="center"
+                              justifyContent="flex-end"
+                              xs
+                            >
+                              <Typography sx={{ marginRight: 1, color: uploadedFile[index].size >= 5 * 1024 * 1024 ? "red" : "green"}}>
+                                {(uploadedFile[index].size / (1024 * 1024)).toFixed(2)} MB
+                              </Typography>
                               <IconButton
                                 onClick={() => handleRemoveFile(index)}
                                 aria-label="remove file"
@@ -564,6 +577,8 @@ const InitiateCA = () => {
                                 <CloseIcon />
                               </IconButton>
                             </Grid>
+
+                            {/* Horizontal line */}
                             <Grid item xs={12}>
                               <hr
                                 style={{

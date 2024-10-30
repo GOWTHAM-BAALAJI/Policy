@@ -2973,29 +2973,52 @@ export default function PolicyDetails() {
                                 key={index}
                                 container
                                 alignItems="center"
-                                spacing={1}
                                 justifyContent="space-between"
+                                spacing={1}
                               >
-                                <Grid item>
+                                {/* Left side: Filename */}
+                                <Grid item xs>
                                   <Typography
                                     variant="body2"
                                     sx={{
                                       cursor: "pointer",
                                       fontFamily: "sans-serif",
                                       fontSize: "0.875rem",
-                                      marginRight: 1 // Add some space between filename and close button
+                                      overflow: "hidden",
+                                      whiteSpace: "nowrap",
+                                      textOverflow: "ellipsis"
                                     }}
                                     onClick={() => openUploadedFile(index)} // Open specific file on click
                                   >
                                     {index + 1}.{" "}
                                     {filename.length > 40
                                       ? filename.substring(0, 37) +
-                                        "...   ." +
-                                        filename.split(".")[filename.split(".").length - 1]
+                                        "... ." +
+                                        filename.split(".").pop()
                                       : filename}
                                   </Typography>
                                 </Grid>
-                                <Grid item>
+
+                                {/* Right side: Size and Remove Button */}
+                                <Grid
+                                  item
+                                  container
+                                  direction="row"
+                                  alignItems="center"
+                                  justifyContent="flex-end"
+                                  xs
+                                >
+                                  <Typography
+                                    sx={{
+                                      marginRight: 1,
+                                      color:
+                                        uploadedFile[index].size >= 5 * 1024 * 1024
+                                          ? "red"
+                                          : "green"
+                                    }}
+                                  >
+                                    {(uploadedFile[index].size / (1024 * 1024)).toFixed(2)} MB
+                                  </Typography>
                                   <IconButton
                                     onClick={() => handleRemoveFile(index)}
                                     aria-label="remove file"
@@ -3004,6 +3027,8 @@ export default function PolicyDetails() {
                                     <CloseIcon />
                                   </IconButton>
                                 </Grid>
+
+                                {/* Horizontal line */}
                                 <Grid item xs={12}>
                                   <hr
                                     style={{
@@ -3017,6 +3042,7 @@ export default function PolicyDetails() {
                             ))}
                           </Grid>
                         </Grid>
+                        
                         <Typography
                           variant="h8"
                           sx={{ fontFamily: "sans-serif", display: "block", mt: 2 }}
@@ -3245,7 +3271,7 @@ export default function PolicyDetails() {
                                   "&:hover": {
                                     backgroundColor: "rgb(249, 83, 22)"
                                   },
-                                  mt:1
+                                  mt: 1
                                 }}
                               >
                                 Upload
@@ -3269,29 +3295,52 @@ export default function PolicyDetails() {
                                 key={index}
                                 container
                                 alignItems="center"
-                                spacing={1}
                                 justifyContent="space-between"
+                                spacing={1}
                               >
-                                <Grid item>
+                                {/* Left side: Filename */}
+                                <Grid item xs>
                                   <Typography
                                     variant="body2"
                                     sx={{
                                       cursor: "pointer",
                                       fontFamily: "sans-serif",
                                       fontSize: "0.875rem",
-                                      marginRight: 1 // Add some space between filename and close button
+                                      overflow: "hidden",
+                                      whiteSpace: "nowrap",
+                                      textOverflow: "ellipsis"
                                     }}
                                     onClick={() => openUploadedFile1(index)} // Open specific file on click
                                   >
                                     {index + 1}.{" "}
                                     {filename.length > 40
                                       ? filename.substring(0, 37) +
-                                        "...   ." +
-                                        filename.split(".")[filename.split(".").length - 1]
+                                        "... ." +
+                                        filename.split(".").pop()
                                       : filename}
                                   </Typography>
                                 </Grid>
-                                <Grid item>
+
+                                {/* Right side: Size and Remove Button */}
+                                <Grid
+                                  item
+                                  container
+                                  direction="row"
+                                  alignItems="center"
+                                  justifyContent="flex-end"
+                                  xs
+                                >
+                                  <Typography
+                                    sx={{
+                                      marginRight: 1,
+                                      color:
+                                        uploadedFile1[index].size >= 5 * 1024 * 1024
+                                          ? "red"
+                                          : "green"
+                                    }}
+                                  >
+                                    {(uploadedFile1[index].size / (1024 * 1024)).toFixed(2)} MB
+                                  </Typography>
                                   <IconButton
                                     onClick={() => handleRemoveFile1(index)}
                                     aria-label="remove file"
@@ -3300,6 +3349,8 @@ export default function PolicyDetails() {
                                     <CloseIcon />
                                   </IconButton>
                                 </Grid>
+
+                                {/* Horizontal line */}
                                 <Grid item xs={12}>
                                   <hr
                                     style={{
