@@ -384,6 +384,19 @@ const InitiatePSG = () => {
       }, 4000);
       return;
     }
+
+    const maxFileSizeMB = 5;
+    const maxFileSizeBytes = maxFileSizeMB * 1024 * 1024;
+
+    const oversizedFile = uploadedFiles.some(file => file.size > maxFileSizeBytes);
+    if (oversizedFile) {
+      toast.error(`Each file must be smaller than ${maxFileSizeMB} MB`);
+      setIsBtnDisabled(true);
+      setTimeout(() => {
+        setIsBtnDisabled(false);
+      }, 4000);
+      return;
+    }
     // setDialogTitle("Success");
     // setDialogMessage("Form submitted successfully");
     // setDialogOpen(true);
@@ -736,7 +749,7 @@ const InitiatePSG = () => {
                                 }}
                                 onClick={() => openUploadedFile(index)} // Open specific file on click
                               >
-                                {index + 1}. {filename}
+                                {index + 1}. {filename} {(uploadedFiles[index].size / (1024 * 1024)).toFixed(2)}MB
                               </Typography>
                             </Grid>
                             <Grid item>
