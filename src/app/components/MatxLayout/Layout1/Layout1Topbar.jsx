@@ -114,10 +114,15 @@ const Layout1Topbar = () => {
   console.log("Profile pic: ",profile_pic);
   const [profileImage, setProfileImage] = useState("");
   useEffect(() => {
+    const decodedToken = jwtDecode(userToken);
+    // Set profile image using decodedToken's profile_pic initially
+    setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
+
+    // If profile_pic exists, override with its value
     if (profile_pic) {
         setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
     }
-}, [profile_pic]);
+  }, [profile_pic, userToken]);
 
   useEffect(() => {
     if (userToken) {
@@ -129,9 +134,9 @@ const Layout1Topbar = () => {
         if (decodedToken.role_id) {
           setRoleId(decodedToken.role_id);
         }
-        if (decodedToken.profile_pic) {
-          setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
-        }
+        // if (decodedToken.profile_pic) {
+        //   setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
+        // }
       } catch (error) {
         console.error("Error decoding token:", error);
         setUsername(null); // Reset roleId if decoding fails

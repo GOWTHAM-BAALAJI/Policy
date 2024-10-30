@@ -103,7 +103,8 @@ export default function PSGTable() {
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
     setCurrentPage(1);
-    fetchData(newValue, currentPage, rowsPerPage);
+    // fetchData(newValue, currentPage, rowsPerPage);
+    handleSearchType(newValue, currentPage, rowsPerPage, searchValue, selectedType);
   };
 
   const [psgList, setPsgList] = useState([]);
@@ -122,7 +123,7 @@ export default function PSGTable() {
   const [pendingCount, setPendingCount] = useState(0);
   const [waitingForActionCount, setWaitingForActionCount] = useState(0);
   const [count, setCount] = useState(waitingForActionCount);
-  // console.log("Count: ",count);
+  console.log("Count: ",count);
 
   useEffect(() => {
     if (waitingForActionCount > 0) {
@@ -421,7 +422,7 @@ export default function PSGTable() {
     {
       name: 'Type',
       selector: row => row.type || 'N/A',
-      sortable: true,
+      // sortable: true,
       // center: true,
       width: '20%',
       cell: (row) => {
@@ -578,7 +579,7 @@ export default function PSGTable() {
           indicatorColor="secondary"
         >
           <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Approved" value="1" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Approved" value='1' sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
           <Tab label="Rejected" value="2" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
           <Tab label="Pending" value="3" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
         </Tabs>
@@ -587,6 +588,7 @@ export default function PSGTable() {
         <StyledTextField
           value={searchValue}
           onChange={handleInputChange}
+          placeholder="Search Policy ID or Title"
           sx={{ width: '300px', marginRight: 2 }}
         />
         {searchValue && (

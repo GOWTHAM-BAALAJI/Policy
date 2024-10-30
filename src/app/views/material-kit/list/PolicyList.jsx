@@ -106,11 +106,12 @@ const PSGTable = ({ initialTab, onTabChange }) => {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
-    if (onTabChange) {
-      onTabChange(newValue);
-    }
+    // if (onTabChange) {
+    //   onTabChange(newValue);
+    // }
     setCurrentPage(1);
-    fetchData(newValue, currentPage, rowsPerPage);
+    // fetchData(newValue, currentPage, rowsPerPage);
+    handleSearchType(newValue, currentPage, rowsPerPage, searchValue, selectedType);
   };
 
   const updateSelectedTab = (tabName) => {
@@ -154,6 +155,8 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   const [selectedType, setSelectedType] = useState('');
 
   const filteredData = selectedType ? psgList.filter(record => record.type === Number(selectedType)) : psgList;
+  console.log("PSG List: ",psgList);
+  console.log("Filtered data: ",filteredData);
 
   const handleSort = (column, sortDirection) => {
     setSortColumn(column.selector); // Store column to be sorted
@@ -267,31 +270,23 @@ const PSGTable = ({ initialTab, onTabChange }) => {
 
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
 
-  const handleSearchData = async (tab, page, rows, searchValue) => {
+  const handleSearchType = async (tab, page, rows, searchValue, selectedType) => {
+    console.log("Selected type: ",selectedType);
     setLoading(true);
 
     setIsBtnDisabled(true);
         setTimeout(() => {
             setIsBtnDisabled(false);
         }, 1000);
-  
-    // Check for empty search value and return early if invalid
-    if (!(searchValue.trimStart())) {
-      toast.error("Please provide some search words");
-      setLoading(false);
-      setIsBtnDisabled(true);
-        setTimeout(() => {
-            setIsBtnDisabled(false);
-        }, 1000);
-      return;
-    }
 
     setIsSearching(true);
-    setSearchValue((searchValue.trimStart()));
+    setSelectedType(selectedType);
+    console.log("Selected type: ",selectedType);
+    // setSearchValue(searchValue.trimStart());
   
     try {
       // First API call: Fetch data based on searchValue
-      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}`, {
+      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -302,7 +297,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
       setPsgList(data);
   
       // Second API call: Fetch the count data based on searchValue
-      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}`, {
+      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -328,7 +323,70 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }; 
+
+  const handleSearchData = async (tab, page, rows, searchValue, selectedType) => {
+    setLoading(true);
+
+    setIsBtnDisabled(true);
+        setTimeout(() => {
+            setIsBtnDisabled(false);
+        }, 1000);
+  
+    // Check for empty search value and return early if invalid
+    // if (!(searchValue.trimStart())) {
+    //   toast.error("Please provide some search words");
+    //   setLoading(false);
+    //   setIsBtnDisabled(true);
+    //     setTimeout(() => {
+    //         setIsBtnDisabled(false);
+    //     }, 1000);
+    //   return;
+    // }
+
+    setIsSearching(true);
+    setSearchValue(searchValue.trimStart());
+  
+    try {
+      // First API call: Fetch data based on searchValue
+      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      setPsgList(data);
+  
+      // Second API call: Fetch the count data based on searchValue
+      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+  
+      if (!countResponse.ok) {
+        throw new Error('Failed to fetch count data');
+      }
+  
+      const countData = await countResponse.json();
+      console.log("Count data: ", countData);
+  
+      // Check tab values and set the count based on the tab
+      if (tab === "1") setCount(countData.approved);
+      if (tab === "2") setCount(countData.rejected);
+      if (tab === "3") setCount(countData.pending);
+      if (tab === "4") setCount(countData.waitingForAction);
+  
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };  
 
   const pendingApprover = selectedDocument?.Policy_status?.find(
     status => status.approver_id === selectedDocument?.pending_at_id
@@ -352,7 +410,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     {
       name: 'Policy ID',
       selector: row => row.id || 'N/A',
-      sortable: true,
+      // sortable: true,
       // center: true,
       cell: (row) => (
         <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
@@ -442,6 +500,10 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     fetchData(activeTab, currentPage, rowsPerPage);
   }, [activeTab, currentPage, rowsPerPage]);
 
+  useEffect(() => {
+    handleSearchType(activeTab, currentPage, rowsPerPage, searchValue, selectedType);
+  }, [selectedType, activeTab, currentPage, rowsPerPage, searchValue]);
+
   const handleRowClick = (row) => {
     setSelectedDocument(row.title);
     setSelectedRow(row);
@@ -489,6 +551,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
           <Controller
             name="documentType"
             control={control}
+            value={selectedType}
             render={({ field }) => (
               <StyledSelect
                 labelId="document-type-label"
@@ -530,6 +593,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
         <StyledTextField
           value={searchValue}
           onChange={handleInputChange}
+          placeholder="Enter Policy ID or Title"
           sx={{ width: '300px', marginRight: 2 }}
         />
         {searchValue && (
@@ -544,15 +608,15 @@ const PSGTable = ({ initialTab, onTabChange }) => {
             <CloseIcon />
           </IconButton>
         )}
-        <Button
+        {/* <Button
           variant="contained"
           color="primary"
           disabled={isBtnDisabled}
           sx={{ marginTop: -2, textTransform: 'none', height: '30px', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }}
-          onClick={() => handleSearchData(activeTab, currentPage, rowsPerPage, searchValue)}
+          onClick={() => handleSearchData(activeTab, currentPage, rowsPerPage, searchValue, selectedType)}
         >
           Search
-        </Button>
+        </Button> */}
       </Grid>
       <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2 }}>
         <Box width="100%" overflow="auto">

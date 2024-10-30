@@ -129,14 +129,15 @@ const Profile = () => {
   }, [userToken]);
 
   useEffect(() => {
-    try{
-      if(profile_pic){
+    const decodedToken = jwtDecode(userToken);
+    // Set profile image using decodedToken's profile_pic initially
+    setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
+
+    // If profile_pic exists, override with its value
+    if (profile_pic) {
         setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
-      }
-    } catch(error){
-      console.error('Error:', error);
     }
-  })
+  }, [profile_pic, userToken]);
 
   useEffect(() => {
     if (userToken) {

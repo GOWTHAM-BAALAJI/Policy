@@ -140,15 +140,15 @@ export default function CATable() {
         }, 1000);
   
     // Check for empty search value and return early if invalid
-    if (!(searchValue.trimStart())) {
-      toast.error("Please provide some search words");
-      setLoading(false);
-      setIsBtnDisabled(true);
-        setTimeout(() => {
-            setIsBtnDisabled(false);
-        }, 1000);
-      return;
-    }
+    // if (!(searchValue.trimStart())) {
+    //   toast.error("Please provide some search words");
+    //   setLoading(false);
+    //   setIsBtnDisabled(true);
+    //     setTimeout(() => {
+    //         setIsBtnDisabled(false);
+    //     }, 1000);
+    //   return;
+    // }
 
     setIsSearching(true);
     setSearchValue((searchValue.trimStart()));
@@ -238,20 +238,33 @@ export default function CATable() {
 
   const columns = columns1;
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    fetchData(page, rowsPerPage);
+  const handlePageChange = (newPage) => {
+    if (isSearching) {
+      setCurrentPage(newPage);
+      handleSearchData( newPage, rowsPerPage, searchValue);
+    } else {
+      setCurrentPage(newPage);
+      fetchData(newPage, rowsPerPage);
+    }
   };
 
-  const handleRowsPerPageChange = (newRowsPerPage, page) => {
-    setRowsPerPage(newRowsPerPage);
-    setCurrentPage(1);
-    fetchData(1, newRowsPerPage);
+  const handleRowsPerPageChange = (newRowsPerPage) => {
+    if (isSearching) {
+      setRowsPerPage(newRowsPerPage);
+      handleSearchData(currentPage, newRowsPerPage, searchValue);  // Search API with updated rows per page
+    } else {
+      setRowsPerPage(newRowsPerPage);
+      fetchData(currentPage, newRowsPerPage);  // Default rows per page change
+    }
   };
 
   useEffect(() => {
     fetchData(currentPage, rowsPerPage);
   }, [currentPage, rowsPerPage]);
+
+  useEffect(() => {
+    handleSearchData(currentPage, rowsPerPage, searchValue);
+  }, [currentPage, rowsPerPage, searchValue]);
 
   const handleRowClick = async (row) => {
     setSelectedDocument(row.title);
@@ -312,7 +325,7 @@ export default function CATable() {
               fontSize: '0.875rem',
               textTransform: 'none',
               marginTop: { sm: 2, xs: 2 },
-              height: '30px',
+              height: '25px',
               backgroundColor: '#ee8812',
               '&:hover': {
                 backgroundColor: 'rgb(249, 83, 22)',
@@ -328,6 +341,7 @@ export default function CATable() {
         <StyledTextField
           value={searchValue}
           onChange={handleInputChange}
+          placeholder="Search Circular ID or Title"
           sx={{ width: '300px', marginRight: 2 }}
         />
         {searchValue && (
@@ -342,7 +356,7 @@ export default function CATable() {
             <CloseIcon />
           </IconButton>
         )}
-        <Button
+        {/* <Button
           variant="contained"
           color="primary"
           disabled={isBtnDisabled}
@@ -350,7 +364,7 @@ export default function CATable() {
           onClick={() => handleSearchData(currentPage, rowsPerPage, searchValue)}
         >
           Search
-        </Button>
+        </Button> */}
       </Grid>
       <Grid item lg={12} md={12} sm={12} xs={12}>
         <Box width="100%" overflow="auto">

@@ -91,8 +91,7 @@ const ApplicableTable = () => {
     const [sortColumn, setSortColumn] = useState(''); // Column being sorted
     const [sortDirection, setSortDirection] = useState('asc');
     const [selectedDocument, setSelectedDocument] = useState(null);
-    const [selectedDocumentTitle, setSelectedDocumentTitle] = useState(null);
-    const [error, setError] = useState(null);
+    const [selectedType, setSelectedType] = useState('');
 
     const handleSort = (column, sortDirection) => {
         setSortColumn(column.selector); // Store column to be sorted
@@ -178,7 +177,58 @@ const ApplicableTable = () => {
 
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
 
-  const handleSearchData = async (page, rows, searchValue) => {
+  const handleSearchType = async (page, rows, searchValue, selectedType) => {
+    console.log("Selected type: ",selectedType);
+    setLoading(true);
+
+    setIsBtnDisabled(true);
+        setTimeout(() => {
+            setIsBtnDisabled(false);
+        }, 1000);
+
+    setIsSearching(true);
+    setSelectedType(selectedType);
+    console.log("Selected type: ",selectedType);
+    // setSearchValue(searchValue.trimStart());
+  
+    try {
+      // First API call: Fetch data based on searchValue
+      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      setPsgList2(data);
+  
+      // Second API call: Fetch the count data based on searchValue
+      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+  
+      if (!countResponse.ok) {
+        throw new Error('Failed to fetch count data');
+      }
+  
+      const countData = await countResponse.json();
+      console.log("Count data: ", countData);
+  
+      setCount(countData.count);
+  
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }; 
+
+  const handleSearchData = async (page, rows, searchValue, selectedType) => {
     setLoading(true);
 
     setIsBtnDisabled(true);
@@ -187,15 +237,15 @@ const ApplicableTable = () => {
         }, 1000);
   
     // Check for empty search value and return early if invalid
-    if (!(searchValue.trimStart())) {
-      toast.error("Please provide some search words");
-      setLoading(false);
-      setIsBtnDisabled(true);
-        setTimeout(() => {
-            setIsBtnDisabled(false);
-        }, 1000);
-      return;
-    }
+    // if (!(searchValue.trimStart())) {
+    //   toast.error("Please provide some search words");
+    //   setLoading(false);
+    //   setIsBtnDisabled(true);
+    //     setTimeout(() => {
+    //         setIsBtnDisabled(false);
+    //     }, 1000);
+    //   return;
+    // }
 
     setIsSearching(true);
     setSearchValue((searchValue.trimStart()));
@@ -253,7 +303,7 @@ const ApplicableTable = () => {
               {getDisplayPolicyId(row.id) || 'N/A'}
             </div>
         ),
-        width: '20%',
+        width: '15%',
         },
         {
         name: 'Document Title',
@@ -272,11 +322,31 @@ const ApplicableTable = () => {
         ),
         },
         {
+          name: 'Type',
+          selector: row => row.type || 'N/A',
+          // sortable: true,
+          // center: true,
+          width: '20%',
+          cell: (row) => {
+            const typeMapping = {
+              1: 'Policy',
+              2: 'SOP',
+              3: 'Guidance Note'
+            };
+            const displayType = typeMapping[row.type] || 'N/A';
+            return (
+              <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
+                {displayType}
+              </div>
+            );
+          }
+        },
+        {
         name: 'Description',
         selector: row => row.description || 'N/A',
         sortable: true,
         // center: true,
-        width: '45%',
+        width: '30%',
         cell: (row) => (
             <Typography
             variant="body2"
@@ -295,6 +365,10 @@ const ApplicableTable = () => {
         ),
         },
     ];
+
+    useEffect(() => {
+      handleSearchType(currentPage, rowsPerPage, searchValue, selectedType);
+    }, [selectedType, currentPage, rowsPerPage, searchValue]);
 
     const handlePageChange = (newPage) => {
       if (isSearching) {
@@ -347,6 +421,7 @@ const ApplicableTable = () => {
       <Controller
         name="documentType"
         control={control}
+        value={selectedType}
         render={({ field }) => (
           <StyledSelect
             labelId="document-type-label"
@@ -357,14 +432,15 @@ const ApplicableTable = () => {
             }}
             onChange={(e) => {
               field.onChange(e);
+              setSelectedType(e.target.value);
             }}
           >
             <MenuItem value="">
               <em>None</em>
             </MenuItem>
             <MenuItem value={1}>Policy</MenuItem>
-            <MenuItem value={3}>SOP</MenuItem>
-            <MenuItem value={2}>Guidance Note</MenuItem>
+            <MenuItem value={2}>SOP</MenuItem>
+            <MenuItem value={3}>Guidance Note</MenuItem>
           </StyledSelect>
         )}
       />
@@ -374,6 +450,7 @@ const ApplicableTable = () => {
         <StyledTextField
           value={searchValue}
           onChange={handleInputChange}
+          placeholder="Search Policy ID or Title"
           sx={{ width: '300px', marginRight: 2 }}
         />
         {searchValue && (
@@ -388,7 +465,7 @@ const ApplicableTable = () => {
             <CloseIcon />
           </IconButton>
         )}
-        <Button
+        {/* <Button
           variant="contained"
           color="primary"
           disabled={isBtnDisabled}
@@ -396,7 +473,7 @@ const ApplicableTable = () => {
           onClick={() => handleSearchData(currentPage, rowsPerPage, searchValue)}
         >
           Search
-        </Button>
+        </Button> */}
       </Grid>
     <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2 }}>
       <Box width="100%" overflow="auto">

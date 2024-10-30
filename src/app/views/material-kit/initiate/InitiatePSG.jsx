@@ -495,7 +495,7 @@ const InitiatePSG = () => {
               xs={12}
               sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
             >
-              <Grid container alignItems="flex-start" spacing={2}>
+              <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                     Type of Document <span style={{ color: "red" }}>*</span>
@@ -518,7 +518,7 @@ const InitiatePSG = () => {
                         <MenuItem value="" disabled>
                           <ListItemText
                             style={{ color: "#bdbdbd" }}
-                            primary="Select document type"
+                            primary="Select a document type"
                           />
                         </MenuItem>
                         {types.map((option) => (
@@ -540,7 +540,7 @@ const InitiatePSG = () => {
               xs={12}
               sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
             >
-              <Grid container alignItems="flex-start" spacing={2}>
+              <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                     Title <span style={{ color: "red" }}>*</span>
@@ -559,7 +559,7 @@ const InitiatePSG = () => {
                         maxRows={1}
                         variant="outlined"
                         fullWidth
-                        placeholder="Enter title"
+                        placeholder="Enter the title"
                         // required
                         inputProps={{ maxLength: 100 }}
                         InputProps={{
@@ -577,7 +577,7 @@ const InitiatePSG = () => {
                       variant="body2"
                       sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
                     >
-                      {title.length}/100 characters
+                      {description.length}/1000 characters
                     </Typography>
                   </Grid>
                 </Grid>
@@ -591,7 +591,7 @@ const InitiatePSG = () => {
               xs={12}
               sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
             >
-              <Grid container alignItems="flex-start" spacing={2}>
+              <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                     Description <span style={{ color: "red" }}>*</span>
@@ -609,7 +609,7 @@ const InitiatePSG = () => {
                         maxRows={2}
                         variant="outlined"
                         fullWidth
-                        placeholder="Enter description"
+                        placeholder="Enter the description"
                         // required
                         inputProps={{ maxLength: 1000 }}
                         InputProps={{
@@ -736,12 +736,7 @@ const InitiatePSG = () => {
                                 }}
                                 onClick={() => openUploadedFile(index)} // Open specific file on click
                               >
-                                {index + 1}.{" "}
-                                {filename.length > 40
-                                  ? filename.substring(0, 37) +
-                                    "...   ." +
-                                    filename.split(".")[filename.split(".").length - 1]
-                                  : filename}
+                                {index + 1}. {filename}
                               </Typography>
                             </Grid>
                             <Grid item>
@@ -778,10 +773,10 @@ const InitiatePSG = () => {
               xs={12}
               sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
             >
-              <Grid container alignItems="flex-start" spacing={2}>
+              <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Select Reviewer <span style={{ color: "red" }}>*</span>
+                    Select the Reviewer <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -800,7 +795,7 @@ const InitiatePSG = () => {
                         }}
                       >
                         <MenuItem value="" disabled>
-                          <ListItemText style={{ color: "#bdbdbd" }} primary="Select reviewer" />
+                          <ListItemText style={{ color: "#bdbdbd" }} primary="Select a reviewer" />
                         </MenuItem>
                         {reviewers.map((option) => (
                           <MenuItem key={option.value} value={option.value}>
@@ -821,7 +816,7 @@ const InitiatePSG = () => {
               xs={12}
               sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
             >
-              <Grid container alignItems="flex-start" spacing={2}>
+              <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                     Select Approval committee members <span style={{ color: "red" }}>*</span>
@@ -849,7 +844,7 @@ const InitiatePSG = () => {
                                 if (selected.length === 0) {
                                   return (
                                     <span style={{ color: "#bdbdbd" }}>
-                                      Select approval commitee members
+                                      Select the approval members
                                     </span>
                                   ); // Placeholder text
                                 }
@@ -859,7 +854,7 @@ const InitiatePSG = () => {
                               <MenuItem value="" disabled>
                                 <ListItemText
                                   style={{ color: "#bdbdbd" }}
-                                  primary="Select approval members"
+                                  primary="Select the approval members"
                                 />
                               </MenuItem>
                               {filteredApprovalMembers.map((member) => (
@@ -893,7 +888,7 @@ const InitiatePSG = () => {
               xs={12}
               sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
             >
-              <Grid container alignItems="flex-start" spacing={2}>
+              <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                     Select User Groups for publishing <span style={{ color: "red" }}>*</span>
@@ -920,7 +915,7 @@ const InitiatePSG = () => {
                               <MenuItem value="" disabled>
                                 <ListItemText
                                   style={{ color: "#bdbdbd" }}
-                                  primary="Select user group"
+                                  primary="Select a user group"
                                 />
                               </MenuItem>
                               {userGroupOptions.map((option) => (

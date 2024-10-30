@@ -421,15 +421,6 @@ const handleMouseDownPassword = (event) => {
                         helperText={emailIdError || (touched.emailId && errors.emailId)}
                         error={Boolean(emailIdError || (errors.emailId && touched.emailId))}
                         sx={{ mb: 2 }}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton edge="end">
-                                <PersonOutlineIcon />
-                              </IconButton>
-                            </InputAdornment>
-                          ),
-                        }}
                       />
 
                       <TextField
