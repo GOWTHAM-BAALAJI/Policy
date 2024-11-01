@@ -748,7 +748,8 @@ const InitiatePSG = () => {
                                   fontSize: "0.875rem",
                                   overflow: "hidden",
                                   whiteSpace: "nowrap",
-                                  textOverflow: "ellipsis"
+                                  textOverflow: "ellipsis",
+                                  color: ((filename.slice(-4)=="docx"||filename.slice(-4)==".doc")?"green":"red")
                                 }}
                                 onClick={() => openUploadedFile(index)} // Open specific file on click
                               >
