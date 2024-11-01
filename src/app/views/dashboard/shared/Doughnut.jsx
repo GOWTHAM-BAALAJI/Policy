@@ -16,7 +16,6 @@ export default function DoughnutChart({ height = '100%', width = '100%', color =
   const userToken = useSelector((state)=>{
     return state.token;//.data;
   });
-  console.log("UserToken:",userToken);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,9 +27,7 @@ export default function DoughnutChart({ height = '100%', width = '100%', color =
             Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
           },
         });
-        console.log(response);
         const data = await response.json();
-        console.log("Data:",data);
 
         if (data && data.status) {
           const approvedCount = data.approved;
@@ -41,10 +38,6 @@ export default function DoughnutChart({ height = '100%', width = '100%', color =
           setRejectedCount(rejectedCount || 0);
           setPendingCount(pendingCount || 0);
           setWaitingForActionCount(waitingForActionCount || 0);
-          console.log('Approved:', approvedCount);
-          console.log('Rejected:', rejectedCount);
-          console.log('Pending:', pendingCount);
-          console.log('Waiting for Action:', waitingForActionCount);
         }
 
         // setPsgList(formattedData);

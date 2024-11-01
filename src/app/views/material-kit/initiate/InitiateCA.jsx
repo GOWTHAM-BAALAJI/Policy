@@ -145,7 +145,6 @@ const InitiateCA = () => {
   const userToken = useSelector((state) => {
     return state.token; //.data;
   });
-  console.log("UserToken:", userToken);
 
   const userGroupOptions = [
     { value: "2", label: "Field Staff" },
@@ -234,6 +233,19 @@ const InitiateCA = () => {
       }, 4000);
       return;
     }
+
+    const maxFileSizeMB = 5;
+    const maxFileSizeBytes = maxFileSizeMB * 1024 * 1024;
+
+    const oversizedFile = uploadedFile.some((file) => file.size > maxFileSizeBytes);
+    if (oversizedFile) {
+      toast.error(`Each file must be smaller than ${maxFileSizeMB} MB`);
+      setIsBtnDisabled(true);
+      setTimeout(() => {
+        setIsBtnDisabled(false);
+      }, 4000);
+      return;
+    }
     // setDialogTitle("Success");
     // setDialogMessage("Form submitted successfully");
     // setDialogOpen(true);
@@ -285,9 +297,7 @@ const InitiateCA = () => {
         return response.json();
       })
       .then((data) => {
-        console.log("Server Response: ", data);
         if (data.status) {
-          console.log("Successfully submitted");
           setTimeout(() => {
             navigate("/list/ca");
           }, 1000);
@@ -308,16 +318,6 @@ const InitiateCA = () => {
       success: (data) => `Circular Initiated Successfully`, // Adjust based on your API response
       error: (err) => `Error while Initiating`
     });
-    // console.log("Result:",result);
-    // if (response.ok && result?.status) {
-    //     console.log("Successfully submitted");
-    // } else {
-    //     // setPasswordError("Invalid employee ID or password");
-    // }
-    // } catch (error) {
-    // console.error(error);
-    // // setPasswordError("Failed to load, please try again later.");
-    // }
   };
 
   return (

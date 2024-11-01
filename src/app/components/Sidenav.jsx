@@ -50,7 +50,6 @@ export default function Sidenav({ children }) {
   const userToken = useSelector((state)=>{
     return state.token;//.data;
     });
-  console.log("UserToken:",userToken);
 
   useEffect(() => {
     if (userToken) {
@@ -58,7 +57,6 @@ export default function Sidenav({ children }) {
         const decodedToken = jwtDecode(userToken);
         if (decodedToken.role_id) {
           setRoleId(decodedToken.role_id);
-          console.log("Role Id: ",roleId);
         }
       } catch (error) {
         console.error("Error decoding token:", error);

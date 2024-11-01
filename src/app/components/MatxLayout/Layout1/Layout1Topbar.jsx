@@ -106,18 +106,16 @@ const Layout1Topbar = () => {
   const userToken = useSelector((state)=>{
     return state.token;//.data;
     });
-  console.log("UserToken:",userToken);
 
   const userProfile = useSelector((state) => state.userData);
-  console.log("User profile: ",userProfile);
   const { profile_pic } = userProfile;
-  console.log("Profile pic: ",profile_pic);
   const [profileImage, setProfileImage] = useState("");
   useEffect(() => {
+    if (userToken) {
     const decodedToken = jwtDecode(userToken);
     // Set profile image using decodedToken's profile_pic initially
     setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
-
+    }
     // If profile_pic exists, override with its value
     if (profile_pic) {
         setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);

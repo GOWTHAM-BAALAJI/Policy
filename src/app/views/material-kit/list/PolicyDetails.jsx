@@ -105,8 +105,6 @@ export default function PolicyDetails() {
   const { id } = useParams();
   const location = useLocation();
   const { title, status, activeTab } = location.state || {};
-  console.log("Document status: ", status);
-  console.log("Document tab: ", activeTab);
 
   const getDisplayPolicyId = (policy_id) => {
     return "PL" + String(policy_id).padStart(7, "0");
@@ -132,16 +130,12 @@ export default function PolicyDetails() {
 
   const [reviewersOptions, setReviewersOptions] = useState([]);
   const [approvalMembersOptions, setApprovalMembersOptions] = useState([]);
-
-  console.log("User id: ", userId);
-  console.log("Role id: ", roleId);
   const [sortColumn, setSortColumn] = useState(""); // Column being sorted
   const [sortDirection, setSortDirection] = useState("asc");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedDocument, setSelectedDocument] = useState(null);
-  console.log("Selected Document: ", selectedDocument);
   const [selectedDocumentTitle, setSelectedDocumentTitle] = useState(null);
 
   const [documentID, setDocumentID] = useState(selectedDocument?.id || "");
@@ -163,7 +157,6 @@ export default function PolicyDetails() {
     : approvalMembersOptions;
 
   const approvalMembers = approvalMembersWithPriority.map((member) => member.value.toString());
-  console.log("Approval members: ", approvalMembers);
 
   const handleDropdownOpen = () => {
     setIsDropdownOpen(true);
@@ -317,21 +310,15 @@ export default function PolicyDetails() {
     ? "Initiator"
     : "No pending approver";
 
-  console.log("Pending approver name:", pendingApproverName);
-
-  console.log("Selected Document:", selectedDocument);
-
   const latestPolicyStatus = selectedDocument?.Policy_status?.filter(
     (status) => status.decision !== 0
   ).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
-  console.log("Policy Status latest:", latestPolicyStatus);
 
   const latestPolicyLogEntry = selectedDocument?.Policy_status_log?.find(
     (log) =>
       log.approver_id === latestPolicyStatus?.approver_id && // Check latestPolicyStatus for null/undefined
       log.activity === latestPolicyStatus?.decision // Assuming decision corresponds to activity
   );
-  console.log("Latest: ", latestPolicyLogEntry);
 
   // Check if both are not null
   const latest_remarks =
@@ -427,7 +414,6 @@ export default function PolicyDetails() {
   const userToken = useSelector((state) => {
     return state.token; //.data;
   });
-  console.log("UserToken:", userToken);
 
   useEffect(() => {
     fetchDocumentDetails(id);
@@ -444,10 +430,6 @@ export default function PolicyDetails() {
     setError(null); // Reset error
 
     try {
-      // Replace with your actual API URL
-      //   console.log('isWaitingForAction:', isWaitingForAction);
-      //   console.log('isApproved:', isApproved);
-      //   console.log('isRejected:', isRejected);
       const response = await fetch(
         `https://policyuat.spandanasphoorty.com/policy_apis/policy/${documentId}`,
         {
@@ -459,18 +441,13 @@ export default function PolicyDetails() {
         }
       );
       const data = await response.json();
-      console.log("Response data:", data);
       setSelectedDocument(data.data); // Set the document data
       const decodedToken = jwtDecode(userToken);
-      console.log("Decoded Token roleid:", decodedToken.role_id);
-      console.log("Decoded Token userid:", decodedToken.user_id);
       if (decodedToken.role_id) {
         setRoleId(decodedToken.role_id);
-        // console.log("Role id: ",roleId);
       }
       if (decodedToken.user_id) {
         setUserId(decodedToken.user_id);
-        // console.log("User id: ",userId);
       }
     } catch (err) {
       setError("Failed to fetch document details.");
@@ -617,6 +594,29 @@ export default function PolicyDetails() {
       return;
     }
 
+    const maxFileSizeMB = 5;
+    const maxFileSizeBytes = maxFileSizeMB * 1024 * 1024;
+
+    const oversizedFile1 = uploadedFile1.some((file) => file.size > maxFileSizeBytes);
+    if (oversizedFile1) {
+      toast.error(`Each file must be smaller than ${maxFileSizeMB} MB`);
+      setIsBtnDisabled(true);
+      setTimeout(() => {
+        setIsBtnDisabled(false);
+      }, 4000);
+      return;
+    }
+
+    const oversizedFile = uploadedFile.some((file) => file.size > maxFileSizeBytes);
+    if (oversizedFile) {
+      toast.error(`Each file must be smaller than ${maxFileSizeMB} MB`);
+      setIsBtnDisabled(true);
+      setTimeout(() => {
+        setIsBtnDisabled(false);
+      }, 4000);
+      return;
+    }
+
     const isValidFileFormat1 = uploadedFile1.every(
       (file) => file.name.endsWith(".doc") || file.name.endsWith(".docx")
     );
@@ -663,19 +663,10 @@ export default function PolicyDetails() {
     // formData.append("files[]", uploadedFile1);
     formData.append("title", documentTitle.trimStart());
     formData.append("description", documentDescription.trimStart());
-    // formData.append("files[]", uploadedFile);
-    // const file1 = uploadedFile.files[0];
-    // console.log("File1: ",file1);
-    console.log("Success!");
-    console.log("File: ", uploadedFile);
     formData.append("reviewer_id", selectedReviewer);
     formData.append(
       "approver_ids",
       JSON.stringify(approvalMembersWithPriority.map((member) => member.value.toString()))
-    );
-    console.log(
-      "Approval members with priority: ",
-      approvalMembersWithPriority.map((member) => member.value.toString())
     );
     formData.append("user_group", selectedUserGroup);
 
@@ -693,9 +684,7 @@ export default function PolicyDetails() {
         return response.json();
       })
       .then((data) => {
-        console.log("Server Response: ", data);
         if (data.status) {
-          console.log("Successfully submitted");
           setTimeout(() => {
             navigate("/list/psg");
           }, 1000);
@@ -2993,7 +2982,7 @@ export default function PolicyDetails() {
                                   >
                                     {index + 1}.{" "}
                                     {filename.length > 40
-                                      ? filename.substring(0, 37) +
+                                      ? filename.substring(0, 32) +
                                         "... ." +
                                         filename.split(".").pop()
                                       : filename}
@@ -3316,7 +3305,7 @@ export default function PolicyDetails() {
                                   >
                                     {index + 1}.{" "}
                                     {filename.length > 40
-                                      ? filename.substring(0, 37) +
+                                      ? filename.substring(0, 32) +
                                         "... ." +
                                         filename.split(".").pop()
                                       : filename}

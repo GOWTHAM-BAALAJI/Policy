@@ -101,7 +101,6 @@ const ApplicableTable = () => {
     const userToken = useSelector((state)=>{
         return state.token;//.data;
     });
-    console.log("UserToken:",userToken);
 
     useEffect(() => {
       const fetchData = async () => {
@@ -113,9 +112,7 @@ const ApplicableTable = () => {
               Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
             },
           });
-          console.log(response);
           const data = await response.json();
-          console.log("Data:",data);
   
           if (data && data.status) {
             setCount(data.count);
@@ -145,7 +142,6 @@ const ApplicableTable = () => {
         const data = await response.json();
         setPsgList2(data); // Adjust this based on your API response structure
         const decodedToken = jwtDecode(userToken);
-        console.log('Decoded Token:', decodedToken.role_id);
         if (decodedToken.role_id) {
           setRoleId(decodedToken.role_id);
         }
@@ -163,11 +159,6 @@ const ApplicableTable = () => {
       fetchData(currentPage, rowsPerPage);
     }, [currentPage, rowsPerPage]);
 
-    useEffect(() => {
-        console.log('Current roleId:', roleId); // Log the roleId
-        console.log('Current userId:', userId); // Log the roleId
-    }, [roleId, userId]);
-
     const [searchValue, setSearchValue] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
@@ -178,7 +169,6 @@ const ApplicableTable = () => {
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
 
   const handleSearchType = async (page, rows, searchValue, selectedType) => {
-    console.log("Selected type: ",selectedType);
     setLoading(true);
 
     setIsBtnDisabled(true);
@@ -188,7 +178,6 @@ const ApplicableTable = () => {
 
     setIsSearching(true);
     setSelectedType(selectedType);
-    console.log("Selected type: ",selectedType);
     // setSearchValue(searchValue.trimStart());
   
     try {
@@ -217,7 +206,6 @@ const ApplicableTable = () => {
       }
   
       const countData = await countResponse.json();
-      console.log("Count data: ", countData);
   
       setCount(countData.count);
   
@@ -276,7 +264,6 @@ const ApplicableTable = () => {
       }
   
       const countData = await countResponse.json();
-      console.log("Count data: ", countData);
   
       // Check tab values and set the count based on the tab
       setCount(countData.count);

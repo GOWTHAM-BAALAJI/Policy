@@ -31,11 +31,9 @@ export default function Analytics() {
   const userToken = useSelector((state)=>{
     return state.token;//.data;
     });
-  console.log("UserToken:",userToken);
 
   useEffect(() => {
     if (!userToken) {
-      console.log("UserToken is missing.");
       navigate('/');
     }
   }, [userToken]);

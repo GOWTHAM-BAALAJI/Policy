@@ -82,18 +82,14 @@ const Profile = () => {
 
   const [storeImage, setStoreImage] = useState("");
   const userProfile = useSelector((state) => state.userData);
-  console.log("User profile: ",userProfile);
   const { profile_pic } = userProfile;
-  console.log("Profile pic: ",profile_pic);
   const [profileImage, setProfileImage] = useState("");
-  console.log("Profile image: ",profileImage);
 
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   // const [profileImage, setProfileImage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [newpassword, setNewPassword] = useState("");
-  console.log("New password: ",newpassword);
   const [confirmnewpassword, setConfirmNewPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
@@ -119,11 +115,9 @@ const Profile = () => {
   const userToken = useSelector((state)=>{
     return state.token;//.data;
     });
-  console.log("UserToken:",userToken);
 
   useEffect(() => {
     if (!userToken) {
-      console.log("UserToken is missing.");
       navigate('/');
     }
   }, [userToken]);
@@ -183,8 +177,6 @@ const Profile = () => {
           }, 4000);
         setSelectedFile(null);
         setProfileImage(storeImage);
-        // console.log("Profile image: ",storeImage);
-        // setLoading(false);
         return;
     }
     // if (isValidFileFormat) {
@@ -192,11 +184,9 @@ const Profile = () => {
       const reader = new FileReader();
       reader.onload = () => {
         const imageDataUrl = reader.result;
-        console.log("Image rendered correctly", imageDataUrl); // Verify that result is received
         setProfileImage(imageDataUrl); // Set the base64 URL for immediate rendering
         setStoreImage(imageDataUrl);   // Optionally store it elsewhere if needed
     };
-    console.log("11111111111111111111111111111111111111111111111111111111111");
       reader.readAsDataURL(file);
     // }
   };
@@ -237,19 +227,14 @@ const Profile = () => {
         return response.json();
     })
     .then((data) => {
-        console.log("Server Response: ", data);
         if (data.status) {
-            console.log("Successfully uploaded");
             const img = data.image;
-            console.log("User uploaded img: ",img);
             if(img){
               dispatch(setUserData({ profile_pic: img }));
             }
             // setTimeout(() => {
             //     navigate('/list/psg');
             // }, 1000);
-        } else {
-            console.log("Error");
         }
         setLoading(false); // Reset loading state
     })
@@ -303,7 +288,6 @@ const Profile = () => {
     const requestData = {
       newPassword: newpassword,
     };
-    console.log("Request data: ",requestData);
 
     const submitPromise2=fetch(url, {
       method: "POST",
@@ -315,13 +299,10 @@ const Profile = () => {
       body: JSON.stringify(requestData),
     })
     .then((response) => {
-      console.log("Response: ",response);
         return response.json();
     })
     .then((data) => {
-        console.log("Server Response: ", data);
         if (data.status) {
-            console.log("Successfully updated");
             setNewPassword("");
             setConfirmNewPassword("");
             setShowFields(false);
@@ -329,7 +310,6 @@ const Profile = () => {
             //     navigate('/list/psg');
             // }, 1000);
         } else {
-            console.log("Error");
             throw new Error("Updation failed");
         }
         setLoading(false); // Reset loading state
