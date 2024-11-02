@@ -180,7 +180,7 @@ export default function CATable() {
   };
 
   const getDisplayCircularId = (policy_id) => {
-    return "CL" + String(policy_id).padStart(7, "0");
+    return "CA" + String(policy_id).padStart(7, "0");
   };
 
   const columns1 = [

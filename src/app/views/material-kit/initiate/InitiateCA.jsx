@@ -137,6 +137,7 @@ const InitiateCA = () => {
   const [uploadFilename, setUploadFilename] = useState([]);
   const [uploadedFile, setUploadedFile] = useState([]);
   const [userGroupOptions, setUserGroupOptions] = useState([]);
+  console.log("User group options: ",userGroupOptions);
   const [selectedUserGroup, setSelectedUserGroup] = useState([]);
   const [selectedUserGroupSum, setSelectedUserGroupSum] = useState(0);
 
@@ -154,6 +155,26 @@ const InitiateCA = () => {
   //   { value: "1", label: "HO Staff" }
   //   // { value: '3', label: 'Both' },
   // ];
+
+  const handleCheckboxChange = (optionValue) => {
+    setSelectedUserGroup((prevSelected) => {
+      const updatedSelection = prevSelected.includes(optionValue)
+        ? prevSelected.filter((item) => item !== optionValue) // Deselect if already selected
+        : [...prevSelected, optionValue]; // Add if not selected
+
+      // Calculate the sum of selected values
+      const newTotalValue = updatedSelection.reduce((sum, value) => sum + value, 0);
+      console.log("New total value: ",newTotalValue);
+      setSelectedUserGroupSum(newTotalValue);
+      console.log("Selected User group total sum: ",selectedUserGroupSum);
+
+      return updatedSelection;
+    });
+  };
+
+  useEffect(() => {
+    console.log("Selected User group total sum:", selectedUserGroupSum);
+  }, [selectedUserGroupSum]);
 
   const handleSelectChangeUserGroups = (event) => {
     const value = event.target.value;
@@ -204,24 +225,41 @@ const InitiateCA = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/auth/get-user-groups", {
+      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", {
         headers: {
           Authorization: `Bearer ${userToken}`
         }
       })
       .then((response) => {
         if (response.data.status) {
-          const fetchedUserGroups = response.data.data.map((usergroup) => ({
-            value: usergroup.value,
-            label: usergroup.user_group
-          }));
-          setUserGroupOptions(fetchedUserGroups);
+          const categorizedGroups = response.data.data.reduce((acc, usergroup) => {
+            const category = usergroup.category;
+            const option = {
+              value: usergroup.value,
+              label: usergroup.user_group
+            };
+
+            if (!acc[category]) {
+              acc[category] = []; // Initialize array for a new category
+            }
+
+            acc[category].push(option);
+            return acc;
+          }, {});
+          console.log("Categorized groups: ",categorizedGroups);
+
+          setUserGroupOptions(categorizedGroups);
         }
       })
       .catch((error) => {
         console.error("Error fetching reviewers:", error);
       });
   }, []);
+
+  // const handleCheckboxChange = (category, value) => {
+  //   // Handle checkbox state changes here
+  //   console.log(`Checkbox for ${value} in ${category} category changed.`);
+  // };
 
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
 
@@ -296,7 +334,7 @@ const InitiateCA = () => {
       return;
     }
 
-    const url = "http://localhost:3000/circular-advisories/";
+    const url = "https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/";
     const formData = new FormData(); // Create a FormData object
 
     // Append files to FormData
@@ -641,45 +679,63 @@ const InitiateCA = () => {
                 <Grid item xs={9} sm={9} md={9} lg={9}>
                   <Grid container alignItems="center" spacing={2}>
                     <Grid item xs>
-                      <FormControl variant="outlined" fullWidth sx={{ position: "relative" }}>
-                        <Controller
-                          name="userGroups"
-                          control={control}
-                          render={({ field }) => (
-                            <StyledSelect
-                              labelId="user-groups-label"
-                              id="userGroups"
-                              value={selectedUserGroup}
-                              multiple
-                              displayEmpty
-                              onChange={(e) => {
-                                handleSelectChangeUserGroups(e);
-                                field.onChange(e);
-                              }}
-                              renderValue={(selected) =>
-                                selected.length > 0
-                                  ? selected
-                                      .map(
-                                        (value) =>
-                                          userGroupOptions.find((option) => option.value === value)?.label
-                                      )
-                                      .join(", ")
-                                  : <span style={{ color: "#bdbdbd" }}>Select a user group</span>
-                              }
-                            >
-                              <MenuItem value="" disabled>
-                                <ListItemText style={{ color: "#bdbdbd" }} primary="Select a user group" />
-                              </MenuItem>
-                              {userGroupOptions.map((option) => (
-                                <MenuItem key={option.value} value={option.value}>
-                                  <Checkbox checked={selectedUserGroup.indexOf(option.value) > -1} />
-                                  <ListItemText primary={option.label} />
+                    <FormControl variant="outlined" fullWidth sx={{ position: "relative" }}>
+                      <Controller
+                        name="userGroups"
+                        control={control}
+                        render={({ field }) => (
+                          <StyledSelect
+                            labelId="user-groups-label"
+                            id="userGroups"
+                            value={selectedUserGroup}
+                            multiple
+                            displayEmpty
+                            onChange={(e) => field.onChange(selectedUserGroup)} // Pass the current state directly
+                            renderValue={(selected) =>
+                              selected.length > 0
+                                ? selected
+                                    .map(
+                                      (value) =>
+                                        Object.values(userGroupOptions)
+                                          .flat()
+                                          .find((option) => option.value === value)?.label
+                                    )
+                                    .join(", ")
+                                : <span style={{ color: "#bdbdbd" }}>Select a user group</span>
+                            }
+                          >
+                            <MenuItem value="" disabled>
+                              <ListItemText style={{ color: "#bdbdbd" }} primary="Select a user group" />
+                            </MenuItem>
+                            {Object.entries(userGroupOptions).map(([category, options]) => (
+                              <div key={category}>
+                                {/* Category Header */}
+                                <MenuItem>
+                                  <Typography variant="h8" color="#ee8812" fontWeight="bolder">
+                                    {category}
+                                  </Typography>
                                 </MenuItem>
-                              ))}
-                            </StyledSelect>
-                          )}
-                        />
-                      </FormControl>
+                                {/* User Group Options */}
+                                {options.map((option) => (
+                                  <MenuItem key={option.value} value={option.value}>
+                                    <Checkbox
+                                      sx={{
+                                        '&.Mui-checked': {
+                                          color: '#ee8812', // Change this to your desired color
+                                        },
+                                      }}
+                                      checked={selectedUserGroup.includes(option.value)}
+                                      onChange={() => handleCheckboxChange(option.value)} // Use option.value directly
+                                    />
+                                    <ListItemText primary={option.label} />
+                                  </MenuItem>
+                                ))}
+                              </div>
+                            ))}
+                          </StyledSelect>
+                        )}
+                      />
+                    </FormControl>
                     </Grid>
                   </Grid>
                 </Grid>
