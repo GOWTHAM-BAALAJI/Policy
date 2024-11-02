@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { useForm, Controller } from "react-hook-form";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -135,7 +136,9 @@ const InitiateCA = () => {
   const [description, setDescription] = useState("");
   const [uploadFilename, setUploadFilename] = useState([]);
   const [uploadedFile, setUploadedFile] = useState([]);
+  const [userGroupOptions, setUserGroupOptions] = useState([]);
   const [selectedUserGroup, setSelectedUserGroup] = useState([]);
+  const [selectedUserGroupSum, setSelectedUserGroupSum] = useState(0);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogtitle, setDialogTitle] = useState("");
@@ -146,15 +149,19 @@ const InitiateCA = () => {
     return state.token; //.data;
   });
 
-  const userGroupOptions = [
-    { value: "2", label: "Field Staff" },
-    { value: "1", label: "HO Staff" }
-    // { value: '3', label: 'Both' },
-  ];
+  // const userGroupOptions = [
+  //   { value: "2", label: "Field Staff" },
+  //   { value: "1", label: "HO Staff" }
+  //   // { value: '3', label: 'Both' },
+  // ];
 
   const handleSelectChangeUserGroups = (event) => {
     const value = event.target.value;
+    console.log("User group values:", value);
+    const sum = value.reduce((acc, curr) => acc + curr, 0);
+    console.log("Sum of selected user group values:", sum);
     setSelectedUserGroup(value);
+    setSelectedUserGroupSum(sum);
   };
 
   const handleFileUpload = (e) => {
@@ -195,6 +202,27 @@ const InitiateCA = () => {
     setDialogOpen(false);
   };
 
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/auth/get-user-groups", {
+        headers: {
+          Authorization: `Bearer ${userToken}`
+        }
+      })
+      .then((response) => {
+        if (response.data.status) {
+          const fetchedUserGroups = response.data.data.map((usergroup) => ({
+            value: usergroup.value,
+            label: usergroup.user_group
+          }));
+          setUserGroupOptions(fetchedUserGroups);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching reviewers:", error);
+      });
+  }, []);
+
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
 
   const handleTitleChange = (e) => {
@@ -215,7 +243,7 @@ const InitiateCA = () => {
       !title.trimStart() ||
       !description.trimStart() ||
       uploadedFile.length === 0 ||
-      selectedUserGroup.length === 0
+      (selectedUserGroup.length === 0 && selectedUserGroupSum === 0)
     ) {
       toast.error("Please fill in all the required fields");
       setIsBtnDisabled(true);
@@ -268,7 +296,7 @@ const InitiateCA = () => {
       return;
     }
 
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/";
+    const url = "http://localhost:3000/circular-advisories/";
     const formData = new FormData(); // Create a FormData object
 
     // Append files to FormData
@@ -280,7 +308,7 @@ const InitiateCA = () => {
     formData.append("title", title.trimStart());
     formData.append("description", description.trimStart());
     // formData.append("files[]",uploadedFile);
-    formData.append("user_group", selectedUserGroup || null);
+    formData.append("user_group", selectedUserGroupSum || 0);
 
     const submitPromise = fetch(url, {
       method: "POST",
@@ -546,9 +574,7 @@ const InitiateCA = () => {
                                   fontSize: "0.875rem",
                                   overflow: "hidden",
                                   whiteSpace: "nowrap",
-                                  textOverflow: "ellipsis",
-                                  color: ((filename.slice(-4)=="docx"||filename.slice(-4)==".doc"||filename.slice(-4)==".pdf")?"green":"red")
-
+                                  textOverflow: "ellipsis"
                                 }}
                                 onClick={() => openUploadedFile(index)} // Open specific file on click
                               >
@@ -606,7 +632,7 @@ const InitiateCA = () => {
               xs={12}
               sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
             >
-              <Grid container alignItems="flex-start" spacing={2}>
+              <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                     Select User Groups for publishing <span style={{ color: "red" }}>*</span>
@@ -624,20 +650,29 @@ const InitiateCA = () => {
                               labelId="user-groups-label"
                               id="userGroups"
                               value={selectedUserGroup}
-                              // required
+                              multiple
                               displayEmpty
                               onChange={(e) => {
-                                setSelectedUserGroup(e.target.value);
+                                handleSelectChangeUserGroups(e);
+                                field.onChange(e);
                               }}
+                              renderValue={(selected) =>
+                                selected.length > 0
+                                  ? selected
+                                      .map(
+                                        (value) =>
+                                          userGroupOptions.find((option) => option.value === value)?.label
+                                      )
+                                      .join(", ")
+                                  : <span style={{ color: "#bdbdbd" }}>Select a user group</span>
+                              }
                             >
                               <MenuItem value="" disabled>
-                                <ListItemText
-                                  style={{ color: "#bdbdbd" }}
-                                  primary="Select user group"
-                                />
+                                <ListItemText style={{ color: "#bdbdbd" }} primary="Select a user group" />
                               </MenuItem>
                               {userGroupOptions.map((option) => (
                                 <MenuItem key={option.value} value={option.value}>
+                                  <Checkbox checked={selectedUserGroup.indexOf(option.value) > -1} />
                                   <ListItemText primary={option.label} />
                                 </MenuItem>
                               ))}

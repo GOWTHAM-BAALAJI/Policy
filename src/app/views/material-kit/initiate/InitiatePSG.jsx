@@ -147,7 +147,9 @@ const InitiatePSG = () => {
   const [approvalMembers, setApprovalMembers] = useState([]);
   const [selectedApprovalMembers, setSelectedApprovalMembers] = useState([]);
   const [priorityOrder, setPriorityOrder] = useState([]);
-  const [selectedUserGroup, setSelectedUserGroup] = useState("");
+  const [userGroupOptions, setUserGroupOptions] = useState([]);
+  const [selectedUserGroup, setSelectedUserGroup] = useState([]);
+  const [selectedUserGroupSum, setSelectedUserGroupSum] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -170,11 +172,11 @@ const InitiatePSG = () => {
   //     { value: '575', label: 'testUser5' },
   // ];
 
-  const userGroupOptions = [
-    { value: "1", label: "HO Staff" },
-    { value: "2", label: "Field Staff" }
-    // { value: '3', label: 'Both' },
-  ];
+  // const userGroupOptions = [
+  //   { value: "1", label: "HO Staff" },
+  //   { value: "2", label: "Field Staff" }
+  //   // { value: '3', label: 'Both' },
+  // ];
 
   const handleSelectChangeApprovalMembers = (event) => {
     const {
@@ -199,7 +201,11 @@ const InitiatePSG = () => {
 
   const handleSelectChangeUserGroups = (event) => {
     const value = event.target.value;
+    console.log("User group values:", value);
+    const sum = value.reduce((acc, curr) => acc + curr, 0);
+    console.log("Sum of selected user group values:", sum);
     setSelectedUserGroup(value);
+    setSelectedUserGroupSum(sum);
   };
 
   const handleFileUpload = (e) => {
@@ -242,16 +248,14 @@ const InitiatePSG = () => {
   };
 
   useEffect(() => {
-    // Fetch reviewers from the API
     axios
       .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer", {
         headers: {
-          Authorization: `Bearer ${userToken}` // Include the JWT token in the Authorization header
+          Authorization: `Bearer ${userToken}`
         }
       })
       .then((response) => {
         if (response.data.status) {
-          // Map the API response to format for dropdown (using emp_name as label and user_id as value)
           const fetchedReviewers = response.data.data.map((reviewer) => ({
             value: reviewer.user_id,
             label: reviewer.emp_name
@@ -265,21 +269,40 @@ const InitiatePSG = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch reviewers from the API
     axios
       .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover", {
         headers: {
-          Authorization: `Bearer ${userToken}` // Include the JWT token in the Authorization header
+          Authorization: `Bearer ${userToken}`
         }
       })
       .then((response) => {
         if (response.data.status) {
-          // Map the API response to format for dropdown (using emp_name as label and user_id as value)
           const fetchedApprovalMembers = response.data.data.map((approvalmember) => ({
             value: approvalmember.user_id,
             label: approvalmember.emp_name
           }));
           setApprovalMembers(fetchedApprovalMembers);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching reviewers:", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    axios
+      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", {
+        headers: {
+          Authorization: `Bearer ${userToken}`
+        }
+      })
+      .then((response) => {
+        if (response.data.status) {
+          const fetchedUserGroups = response.data.data.map((usergroup) => ({
+            value: usergroup.value,
+            label: usergroup.user_group
+          }));
+          setUserGroupOptions(fetchedUserGroups);
         }
       })
       .catch((error) => {
@@ -316,7 +339,7 @@ const InitiatePSG = () => {
       uploadedFiles.length === 0 ||
       !selectedReviewer ||
       selectedApprovalMembers.length === 0 ||
-      selectedUserGroup.length === 0
+      (selectedUserGroup.length === 0 && selectedUserGroupSum === 0)
     ) {
       toast.error("Please fill in all the required fields");
       setIsBtnDisabled(true);
@@ -383,7 +406,7 @@ const InitiatePSG = () => {
     // formData.append("files",uploadedFiles);
     formData.append("reviewer_id", selectedReviewer || null);
     formData.append("approver_ids", JSON.stringify(selectedApprovalMembers || [])); // Convert array to string
-    formData.append("user_group", selectedUserGroup || null);
+    formData.append("user_group", selectedUserGroupSum || 0);
 
     const submitPromise = fetch(url, {
       method: "POST",
@@ -538,7 +561,7 @@ const InitiatePSG = () => {
                       variant="body2"
                       sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
                     >
-                      {description.length}/1000 characters
+                      {title.length}/100 characters
                     </Typography>
                   </Grid>
                 </Grid>
@@ -696,8 +719,7 @@ const InitiatePSG = () => {
                                   fontSize: "0.875rem",
                                   overflow: "hidden",
                                   whiteSpace: "nowrap",
-                                  textOverflow: "ellipsis",
-                                  color: ((filename.slice(-4)=="docx"||filename.slice(-4)==".doc")?"green":"red")
+                                  textOverflow: "ellipsis"
                                 }}
                                 onClick={() => openUploadedFile(index)} // Open specific file on click
                               >
@@ -888,20 +910,29 @@ const InitiatePSG = () => {
                               labelId="user-groups-label"
                               id="userGroups"
                               value={selectedUserGroup}
-                              // required
+                              multiple
                               displayEmpty
                               onChange={(e) => {
-                                setSelectedUserGroup(e.target.value);
+                                handleSelectChangeUserGroups(e);
+                                field.onChange(e);
                               }}
+                              renderValue={(selected) =>
+                                selected.length > 0
+                                  ? selected
+                                      .map(
+                                        (value) =>
+                                          userGroupOptions.find((option) => option.value === value)?.label
+                                      )
+                                      .join(", ")
+                                  : <span style={{ color: "#bdbdbd" }}>Select a user group</span>
+                              }
                             >
                               <MenuItem value="" disabled>
-                                <ListItemText
-                                  style={{ color: "#bdbdbd" }}
-                                  primary="Select a user group"
-                                />
+                                <ListItemText style={{ color: "#bdbdbd" }} primary="Select a user group" />
                               </MenuItem>
                               {userGroupOptions.map((option) => (
                                 <MenuItem key={option.value} value={option.value}>
+                                  <Checkbox checked={selectedUserGroup.indexOf(option.value) > -1} />
                                   <ListItemText primary={option.label} />
                                 </MenuItem>
                               ))}

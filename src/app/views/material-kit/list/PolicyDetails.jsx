@@ -120,16 +120,17 @@ export default function PolicyDetails() {
   //     { value: '575', label: 'testUser5' },
   // ];
 
-  const userGroupOptions = [
-    { value: "1", label: "HO Staff" },
-    { value: "2", label: "Field Staff" }
-  ];
+  // const userGroupOptions = [
+  //   { value: "1", label: "HO Staff" },
+  //   { value: "2", label: "Field Staff" }
+  // ];
 
   const [userId, setUserId] = useState(null);
   const [roleId, setRoleId] = useState(null);
 
   const [reviewersOptions, setReviewersOptions] = useState([]);
   const [approvalMembersOptions, setApprovalMembersOptions] = useState([]);
+  const [userGroupOptions, setUserGroupOptions] = useState([]);
   const [sortColumn, setSortColumn] = useState(""); // Column being sorted
   const [sortDirection, setSortDirection] = useState("asc");
   const [loading, setLoading] = useState(true);
@@ -149,6 +150,7 @@ export default function PolicyDetails() {
   const [useDefaultValue, setUseDefaultValue] = useState(true);
   const [priorityOrder, setPriorityOrder] = useState([]);
   const [selectedUserGroup, setSelectedUserGroup] = useState(selectedDocument?.user_group || "");
+  const [userGroupMap, setUserGroupMap] = useState(new Map());
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -236,7 +238,7 @@ export default function PolicyDetails() {
   useEffect(() => {
     // Fetch reviewers from the API
     axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer", {
+      .get("http://localhost:3000/auth/getReviewer", {
         headers: {
           Authorization: `Bearer ${userToken}` // Include the JWT token in the Authorization header
         }
@@ -259,7 +261,7 @@ export default function PolicyDetails() {
   useEffect(() => {
     // Fetch reviewers from the API
     axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover", {
+      .get("http://localhost:3000/auth/getApprover", {
         headers: {
           Authorization: `Bearer ${userToken}` // Include the JWT token in the Authorization header
         }
@@ -278,6 +280,87 @@ export default function PolicyDetails() {
         console.error("Error fetching reviewers:", error);
       });
   }, []);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:3000/auth/get-user-groups", {
+        headers: {
+          Authorization: `Bearer ${userToken}`
+        }
+      })
+      .then((response) => {
+        if (response.data.status) {
+          const fetchedUserGroups = response.data.data.map((usergroup) => ({
+            value: usergroup.value,
+            label: usergroup.user_group
+          }));
+          setUserGroupOptions(fetchedUserGroups);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching reviewers:", error);
+      });
+  }, []);
+
+  const fetchUserGroup = async (user_group) => {
+    const valueMap = new Map();
+
+    let url = 'http://localhost:3000/auth/get-user-groups';
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userToken}`,
+      },
+    });
+    const data = await response.json();
+
+    const userGroupMasterData = await data.findAll();
+    let jsonObject = [];
+    
+    userGroupMasterData.forEach((seqObj) => {
+      jsonObject.push(seqObj.toJSON());
+    });
+  
+    jsonObject.forEach((item) => {
+      const logValue = Math.log2(parseInt(item["value"], 10));
+      valueMap.set(logValue, item["user_group"]);
+    });
+    
+    const userGroupBinString = user_group.toString(2);
+    let cUserGroupObj = {};
+  
+    jsonObject.forEach((_, index) => {
+      cUserGroupObj[valueMap.get(index)] = userGroupBinString[userGroupBinString.length - 1 - index] || '0';
+    });
+    
+    setUserGroupMap(valueMap); // Store the map in state
+  };
+  // fetchUserGroup(18448);
+
+  // const valueMap = new Map();
+  // const userGroupMasterData = await UserGroupMaster.findAll();
+  // let jsonObject = [];
+  // userGroupMasterData.forEach((seqObj)=>{
+  //   jsonObject.push(seqObj.toJSON());
+  // })
+  // console.log(jsonObject);
+  
+  // for(let i=0;i<jsonObject.length;i++){
+  //   console.log(Math.log2(parseInt(jsonObject[i]["value"])))
+  //   console.log(jsonObject[i]["user_group"])
+    
+  //   valueMap.set(Math.log2(parseInt(jsonObject[i]["value"])),jsonObject[i]["user_group"]);
+  // }
+  // console.log(valueMap);
+
+  // const userGroupBinString = user_group.toString(2);
+  // let cUserGroupObj={};
+  // for(let i=0;i<jsonObject.length;i++){
+  //   cUserGroupObj[valueMap.get(i)]=(userGroupBinString[userGroupBinString.length-1-i]!=null)?userGroupBinString[userGroupBinString.length-1-i]:'0';
+  // }
+  
+  // console.log(cUserGroupObj);
 
   const [decision, setDecision] = useState("");
   const [remarks, setRemarks] = useState("");
@@ -382,33 +465,10 @@ export default function PolicyDetails() {
     return bin[bin.length - 3] == "1";
   };
 
-  const initiators = [
-    { id: 583, name: "Mukesh kumar" },
-    { id: 584, name: "Prashant kumar" },
-    { id: 585, name: "Surendra kumar Mishra" },
-    { id: 586, name: "Jyoti Ranjan Behera" },
-    { id: 587, name: "Saloni Agrawal" },
-    { id: 588, name: "Bhavesh kukreja" },
-    { id: 589, name: "Pamli Ganguly" },
-    { id: 590, name: "Sarthak Nayak" }
-  ];
-
-  // Function to get the reviewer name by ID
-  const getInitiatorName = (id) => {
-    const initiator = initiators.find((initiator) => initiator.id === id);
-    return initiator ? initiator.name : "Unknown Initiator"; // Return a default value if not found
-  };
-
-  const reviewers = [
-    { id: 581, name: "Divaker Jha" },
-    { id: 582, name: "Vikram Kumar" },
-    { id: 584, name: "Prashant kumar" }
-  ];
-
-  // Function to get the reviewer name by ID
-  const getReviewerName = (id) => {
-    const reviewer = reviewers.find((reviewer) => reviewer.id === id);
-    return reviewer ? reviewer.name : "Unknown Reviewer"; // Return a default value if not found
+  const isAdmin = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 4] == "1";
   };
 
   const userToken = useSelector((state) => {
@@ -431,7 +491,7 @@ export default function PolicyDetails() {
 
     try {
       const response = await fetch(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/${documentId}`,
+        `http://localhost:3000/policy/${documentId}`,
         {
           method: "GET",
           headers: {
@@ -645,7 +705,7 @@ export default function PolicyDetails() {
       return;
     }
 
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/policy/update";
+    const url = "http://localhost:3000/policy/update";
     const formData = new FormData(); // Create a FormData object
 
     uploadedFile1.forEach((file) => {
@@ -1030,7 +1090,7 @@ export default function PolicyDetails() {
                                                 }}
                                               >
                                                 <a
-                                                  href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                  href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
                                                   download
@@ -1165,7 +1225,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -1306,7 +1366,7 @@ export default function PolicyDetails() {
                                                     }}
                                                   >
                                                     <a
-                                                      href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                      href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                       target="_blank"
                                                       rel="noopener noreferrer"
                                                       download
@@ -1426,7 +1486,7 @@ export default function PolicyDetails() {
                                                     }}
                                                   >
                                                     <a
-                                                      href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                      href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                       target="_blank"
                                                       rel="noopener noreferrer"
                                                       download
@@ -1562,7 +1622,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -1604,7 +1664,7 @@ export default function PolicyDetails() {
                                     </div>
                                     <div>
                                         <a
-                                        href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                        href={`http://localhost:3000/policy_document/${file.file_name}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         download
@@ -1724,7 +1784,7 @@ export default function PolicyDetails() {
                                                       }}
                                                     >
                                                       <a
-                                                        href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                        href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         download
@@ -1844,7 +1904,7 @@ export default function PolicyDetails() {
                                                       }}
                                                     >
                                                       <a
-                                                        href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                        href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         download
@@ -1981,7 +2041,7 @@ export default function PolicyDetails() {
                                                 }}
                                               >
                                                 <a
-                                                  href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                  href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
                                                   download
@@ -2101,7 +2161,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -2223,7 +2283,7 @@ export default function PolicyDetails() {
                                                 }}
                                               >
                                                 <a
-                                                  href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                  href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
                                                   download
@@ -2348,7 +2408,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -2465,7 +2525,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -2583,7 +2643,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -2697,7 +2757,7 @@ export default function PolicyDetails() {
                                         }}
                                       >
                                         <a
-                                          href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                          href={`http://localhost:3000/policy_document/${file.file_name}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           download
@@ -2975,8 +3035,7 @@ export default function PolicyDetails() {
                                       fontSize: "0.875rem",
                                       overflow: "hidden",
                                       whiteSpace: "nowrap",
-                                      textOverflow: "ellipsis",
-                                      color: ((filename.slice(-4)=="docx"||filename.slice(-4)==".doc")?"green":"red")
+                                      textOverflow: "ellipsis"
                                     }}
                                     onClick={() => openUploadedFile(index)} // Open specific file on click
                                   >
@@ -3115,11 +3174,13 @@ export default function PolicyDetails() {
                           value={selectedUserGroup || selectedDocument.user_group || ""}
                           onChange={(e) => setSelectedUserGroup(e.target.value)} // Handle change in selected user group
                           fullWidth
+                          displayEmpty
                           sx={{ mt: 1 }}
                         >
                           <MenuItem value="">Select a user group</MenuItem>
                           {userGroupOptions.map((option) => (
                             <MenuItem key={option.value} value={option.value}>
+                              <Checkbox checked={selectedUserGroup.indexOf(option.value) > -1} />
                               <ListItemText primary={option.label} />
                             </MenuItem>
                           ))}
@@ -3298,8 +3359,7 @@ export default function PolicyDetails() {
                                       fontSize: "0.875rem",
                                       overflow: "hidden",
                                       whiteSpace: "nowrap",
-                                      textOverflow: "ellipsis",
-                                      color: ((filename.slice(-4)=="docx"||filename.slice(-4)==".doc")?"green":"red")
+                                      textOverflow: "ellipsis"
                                     }}
                                     onClick={() => openUploadedFile1(index)} // Open specific file on click
                                   >

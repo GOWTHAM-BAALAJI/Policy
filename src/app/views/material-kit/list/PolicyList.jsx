@@ -559,7 +559,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
-          textColor="black"
+          textColor="inherit"
           indicatorColor="secondary"
         >
           <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />

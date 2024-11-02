@@ -6,7 +6,7 @@ import { jwtDecode } from "jwt-decode";
 
 import { MatxVerticalNav } from "app/components";
 import useSettings from "app/hooks/useSettings";
-import { navigations1, navigations2 } from "app/navigations";
+import { navigations1, navigations2, navigations3 } from "app/navigations";
 
 // STYLED COMPONENTS
 const StyledScrollBar = styled(Scrollbar)(() => ({
@@ -49,7 +49,13 @@ export default function Sidenav({ children }) {
 
   const userToken = useSelector((state)=>{
     return state.token;//.data;
-    });
+  });
+
+  const isAdmin = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 4] == "1";
+  };
 
   useEffect(() => {
     if (userToken) {
@@ -69,7 +75,7 @@ export default function Sidenav({ children }) {
     <Fragment>
       <StyledScrollBar options={{ suppressScrollX: true }}>
         {children}
-        <MatxVerticalNav items={roleId === 16 ? navigations2 : navigations1} />
+        <MatxVerticalNav items={roleId === 16 ? navigations2 : isAdmin(roleId) ? navigations3 : navigations1} />
       </StyledScrollBar>
 
       <SideNavMobile onClick={() => updateSidebarMode({ mode: "close" })} />
