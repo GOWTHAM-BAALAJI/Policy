@@ -612,7 +612,8 @@ const InitiateCA = () => {
                                   fontSize: "0.875rem",
                                   overflow: "hidden",
                                   whiteSpace: "nowrap",
-                                  textOverflow: "ellipsis"
+                                  textOverflow: "ellipsis",
+                                  color: ((filename.slice(-4)=="docx"||filename.slice(-4)==".doc"||filename.slice(-4)==".pdf")?"green":"red")
                                 }}
                                 onClick={() => openUploadedFile(index)} // Open specific file on click
                               >
@@ -715,7 +716,6 @@ const InitiateCA = () => {
                                     {category}
                                   </Typography>
                                 </MenuItem>
-                                {/* User Group Options */}
                                 {options.map((option) => (
                                   <MenuItem key={option.value} value={option.value}>
                                     <Checkbox

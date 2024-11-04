@@ -11,6 +11,7 @@ import {
   Icon,
   MenuItem,
   ListItemText,
+  ListSubheader,
   Paper,
   Select,
   Table,
@@ -131,6 +132,8 @@ export default function PolicyDetails() {
   const [reviewersOptions, setReviewersOptions] = useState([]);
   const [approvalMembersOptions, setApprovalMembersOptions] = useState([]);
   const [userGroupOptions, setUserGroupOptions] = useState([]);
+  const [categorizedUserGroupOptions, setCategorizedUserGroupOptions] = useState({});
+  console.log("User group options -------------------", userGroupOptions);
   const [sortColumn, setSortColumn] = useState(""); // Column being sorted
   const [sortDirection, setSortDirection] = useState("asc");
   const [loading, setLoading] = useState(true);
@@ -149,10 +152,62 @@ export default function PolicyDetails() {
   const [selectedApprovalMembers, setSelectedApprovalMembers] = useState([]);
   const [useDefaultValue, setUseDefaultValue] = useState(true);
   const [priorityOrder, setPriorityOrder] = useState([]);
-  const [selectedUserGroup, setSelectedUserGroup] = useState(selectedDocument?.user_group || "");
+  const [selectedUserGroup, setSelectedUserGroup] = useState([]);
+  const [selectedUserGroupSum, setSelectedUserGroupSum] = useState(0);
+  console.log("Initial selected user group from the useEffect: ",selectedUserGroup);
+
+  useEffect(() => {
+      if (selectedDocument?.user_group && userGroupOptions.length > 0) {
+          // Initialize selectedUserGroup based on selectedDocument.user_group
+          const initialSelectedGroups = userGroupOptions
+              .filter((group) => selectedDocument.user_group[group.label] === 1)  // Filter groups with value 1
+              .map((group) => group.label);                                       // Extract only labels
+          setSelectedUserGroup(initialSelectedGroups);
+          console.log("Initial selected usergroups: ",initialSelectedGroups);
+          const sum = initialSelectedGroups.reduce((acc, currentLabel) => {
+            // Find the corresponding group value based on the label
+            const group = userGroupOptions.find((group) => group.label === currentLabel);
+            const groupValue = group ? group.value : 0; // Default to 0 if not found
+            console.log("Current value being summed: ", groupValue); // Log current value
+            return acc + groupValue; // Add to the sum
+          }, 0);
+          setSelectedUserGroupSum(sum);
+      }
+  }, [selectedDocument, userGroupOptions]);
+
+  const handleSelectChange = (event) => {
+    const value = event.target.value; // Get selected value(s)
+    const newSelectedGroups = Array.isArray(value) ? value : [value]; // Ensure it's an array
+  
+    console.log("Selected groups before summation: ", newSelectedGroups);
+  
+    // Calculate the sum of selected user group values
+    const sum = newSelectedGroups.reduce((acc, currentLabel) => {
+      // Find the corresponding group value based on the label
+      const group = userGroupOptions.find((group) => group.label === currentLabel);
+      const groupValue = group ? group.value : 0; // Default to 0 if not found
+      console.log("Current value being summed: ", groupValue); // Log current value
+      return acc + groupValue; // Add to the sum
+    }, 0);
+  
+    setSelectedUserGroup(newSelectedGroups); // Update selected groups
+    setSelectedUserGroupSum(sum); // Update sum
+    console.log("User group: ", newSelectedGroups);
+    console.log("User group sum: ", sum);
+};
+
+
+  useEffect(() => {
+    console.log("Selected User group total sum:", selectedUserGroupSum);
+  }, [selectedUserGroupSum]);
+  
   const [userGroupMap, setUserGroupMap] = useState(new Map());
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const userToken = useSelector((state) => {
+    return state.token; //.data;
+  });
 
   const filteredApprovalMembers = selectedReviewer
     ? approvalMembersOptions.filter((member) => member.value !== selectedReviewer)
@@ -199,11 +254,38 @@ export default function PolicyDetails() {
 
   useEffect(() => {
     if (selectedDocument) {
+      console.log("Selected document: ",selectedDocument);
       setDocumentID(selectedDocument.id || "");
       setDocumentTitle(selectedDocument.title);
       setDocumentDescription(selectedDocument.description);
       setSelectedReviewer(selectedDocument.reviewer_id || "");
-      setSelectedUserGroup(selectedDocument.user_group || "");
+      // const userGroup = selectedDocument.user_group;
+      // if (userGroup) {
+      //   const formattedUserGroup = {
+      //     Audit: userGroup.Audit,
+      //     AVP: userGroup.AVP,
+      //     BM: userGroup.BM,
+      //     BQM: userGroup.BQM,
+      //     CBO: userGroup.CBO,
+      //     CM: userGroup.CM,
+      //     CRA: userGroup.CRA,
+      //     CRM: userGroup.CRM,
+      //     EVP: userGroup.EVP,
+      //     FICM: userGroup.FICM,
+      //     FIELD_ADMIN: userGroup.FIELD_ADMIN,
+      //     FIELD_HR: userGroup.FIELD_HR,
+      //     LO: userGroup.LO,
+      //     SVP: userGroup.SVP,
+      //     TRAINING_TEAM: userGroup.TRAINING_TEAM,
+      //     VP: userGroup.VP,
+      //     HO: userGroup.HO
+      //   };
+      //   setSelectedUserGroup(formattedUserGroup);
+      //   console.log("Selected user group: ", formattedUserGroup);
+      //   fetchUserGroup(formattedUserGroup);
+      // } else {
+      //   console.error("User group is not defined", userGroup);
+      // }
       if (Array.isArray(selectedDocument.Policy_status)) {
         const approvalMembers = selectedDocument.Policy_status.filter(
           (member) => member.priority > 2
@@ -292,51 +374,69 @@ export default function PolicyDetails() {
         if (response.data.status) {
           const fetchedUserGroups = response.data.data.map((usergroup) => ({
             value: usergroup.value,
-            label: usergroup.user_group
+            label: usergroup.user_group,
+            category: usergroup.category
           }));
+          
+          // Categorize user groups
+          const categorizedGroups = fetchedUserGroups.reduce((acc, usergroup) => {
+            const { category } = usergroup;
+            if (!acc[category]) {
+              acc[category] = [];
+            }
+            acc[category].push(usergroup);
+            return acc;
+          }, {});
+
+          // Set the state for both user group options and categorized user group options
           setUserGroupOptions(fetchedUserGroups);
+          setCategorizedUserGroupOptions(categorizedGroups);
+          
+          console.log("Fetched user groups from useEffect: ", fetchedUserGroups);
+          console.log("Categorized user groups: ", categorizedGroups);
         }
       })
       .catch((error) => {
-        console.error("Error fetching reviewers:", error);
+        console.error("Error fetching user groups:", error);
       });
-  }, []);
+  }, [userToken]);
 
   const fetchUserGroup = async (user_group) => {
     const valueMap = new Map();
-
-    let url = 'https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups';
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userToken}`,
-      },
-    });
-    const data = await response.json();
-
-    const userGroupMasterData = await data.findAll();
-    let jsonObject = [];
     
-    userGroupMasterData.forEach((seqObj) => {
-      jsonObject.push(seqObj.toJSON());
-    });
-  
+    // Mock data: typically this would be fetched from an API or database.
+    const jsonObject = Object.keys(user_group).map((key) => ({
+        user_group: key,
+        value: user_group[key] // directly use binary value from the object
+    }));
+
+    // Assuming values map directly (AVP=1, EVP=1, HO=1, SVP=1, VP=1), for example:
     jsonObject.forEach((item) => {
-      const logValue = Math.log2(parseInt(item["value"], 10));
-      valueMap.set(logValue, item["user_group"]);
+      const binaryValue = item["value"];
+      valueMap.set(item["user_group"], binaryValue);
     });
-    
-    const userGroupBinString = user_group.toString(2);
-    let cUserGroupObj = {};
-  
-    jsonObject.forEach((_, index) => {
-      cUserGroupObj[valueMap.get(index)] = userGroupBinString[userGroupBinString.length - 1 - index] || '0';
-    });
-    
+
+    // Resulting map: key-value pairs of each user group role to binary status (1 or 0)
     setUserGroupMap(valueMap); // Store the map in state
+
+    console.log(valueMap);
   };
-  // fetchUserGroup(18448);
+
+  const handleCheckboxChange = (optionValue) => {
+    setSelectedUserGroup((prevSelected) => {
+      const updatedSelection = prevSelected.includes(optionValue)
+        ? prevSelected.filter((item) => item !== optionValue) // Deselect if already selected
+        : [...prevSelected, optionValue]; // Add if not selected
+
+      // Calculate the sum of selected values
+      const newTotalValue = updatedSelection.reduce((sum, value) => sum + value, 0);
+      console.log("New total value: ",newTotalValue);
+      setSelectedUserGroupSum(newTotalValue);
+      console.log("Selected User group total sum: ",selectedUserGroupSum);
+
+      return updatedSelection;
+    });
+  };
 
   // const valueMap = new Map();
   // const userGroupMasterData = await UserGroupMaster.findAll();
@@ -471,10 +571,6 @@ export default function PolicyDetails() {
     return bin[bin.length - 4] == "1";
   };
 
-  const userToken = useSelector((state) => {
-    return state.token; //.data;
-  });
-
   useEffect(() => {
     fetchDocumentDetails(id);
   }, [id]);
@@ -560,7 +656,7 @@ export default function PolicyDetails() {
           uploadedFile.length === 0 ||
           !selectedReviewer ||
           approvalMembers.length === 0 ||
-          selectedUserGroup.length === 0
+          (selectedUserGroup.length === 0 && selectedUserGroupSum === 0)
         ) {
           toast.error("Please fill in all the required fields");
           setIsBtnDisabled(true);
@@ -728,7 +824,7 @@ export default function PolicyDetails() {
       "approver_ids",
       JSON.stringify(approvalMembersWithPriority.map((member) => member.value.toString()))
     );
-    formData.append("user_group", selectedUserGroup);
+    formData.append("user_group", selectedUserGroupSum || 0);
 
     const submitForm = fetch(url, {
       method: "POST",
@@ -3035,7 +3131,8 @@ export default function PolicyDetails() {
                                       fontSize: "0.875rem",
                                       overflow: "hidden",
                                       whiteSpace: "nowrap",
-                                      textOverflow: "ellipsis"
+                                      textOverflow: "ellipsis",
+                                      color: ((filename.slice(-4)=="docx"||filename.slice(-4)==".doc")?"green":"red")
                                     }}
                                     onClick={() => openUploadedFile(index)} // Open specific file on click
                                   >
@@ -3168,23 +3265,120 @@ export default function PolicyDetails() {
                             <span style={{ color: "red" }}>*</span> :
                           </b>
                         </Typography>
-                        <StyledSelect
-                          labelId="user-groups-label"
-                          id="userGroups"
-                          value={selectedUserGroup || selectedDocument.user_group || ""}
-                          onChange={(e) => setSelectedUserGroup(e.target.value)} // Handle change in selected user group
-                          fullWidth
-                          displayEmpty
-                          sx={{ mt: 1 }}
-                        >
-                          <MenuItem value="">Select a user group</MenuItem>
-                          {userGroupOptions.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                              <Checkbox checked={selectedUserGroup.indexOf(option.value) > -1} />
-                              <ListItemText primary={option.label} />
-                            </MenuItem>
-                          ))}
-                        </StyledSelect>
+                        <Controller
+                          name="userGroups"
+                          control={control}
+                          render={({ field }) => (
+                              <StyledSelect
+                                  labelId="user-groups-label"
+                                  id="userGroups"
+                                  value={selectedUserGroup}    // Use as array
+                                  multiple                     // Enable multiple selection
+                                  displayEmpty
+                                  onChange={handleSelectChange}
+                                  renderValue={(selected) =>
+                                      selected.length > 0
+                                          ? selected.join(", ")
+                                          : <span style={{ color: "#bdbdbd" }}>Select a user group</span>
+                                  }
+                              >
+                                  <MenuItem value="" disabled>
+                                      <ListItemText style={{ color: "#bdbdbd" }} primary="Select a user group" />
+                                  </MenuItem>
+                                  {/* {Object.entries(categorizedUserGroupOptions).map(([category,options]) => {
+                                    <div key={category}>
+                                      <MenuItem disabled>
+                                        <ListItemText primary={category} style={{ fontWeight: 'bold' }} />
+                                      </MenuItem>
+                                      {options.map((option) => (
+                                        <MenuItem key={option.label} value={option.label}>
+                                            <Checkbox
+                                                sx={{
+                                                    '&.Mui-checked': {
+                                                        color: '#ee8812',  // Set desired color
+                                                    },
+                                                }}
+                                                checked={selectedUserGroup.includes(option.label)}  // Check if selected
+                                            />
+                                            <ListItemText primary={option.label} />
+                                        </MenuItem>
+                                      ))}
+                                    </div>
+                                  })} */}
+                                  {/* {userGroupOptions.map((option) => (
+                                      <MenuItem key={option.label} value={option.label}>
+                                          <Checkbox
+                                              sx={{
+                                                  '&.Mui-checked': {
+                                                      color: '#ee8812',  // Set desired color
+                                                  },
+                                              }}
+                                              checked={selectedUserGroup.includes(option.label)}  // Check if selected
+                                          />
+                                          <ListItemText primary={option.label} />
+                                      </MenuItem>
+                                  ))} */}
+                                  {Object.entries(categorizedUserGroupOptions).map(([category, options]) => (
+                                    <div key={category}>
+                                        <MenuItem>
+                                          <Typography variant="h8" color="#ee8812" fontWeight="bolder">
+                                            {category}
+                                          </Typography>
+                                        </MenuItem>
+                                        {options.map((option) => (
+                                            <MenuItem key={option.label} value={option.label}>
+                                                <Checkbox
+                                                    sx={{
+                                                        '&.Mui-checked': {
+                                                            color: '#ee8812', // Set desired color
+                                                        },
+                                                    }}
+                                                    checked={selectedUserGroup.includes(option.label)} // Check if selected
+                                                    onChange={(event) => {
+                                                      const newSelectedUserGroup = [...selectedUserGroup];
+                                                      if (event.target.checked) {
+                                                        newSelectedUserGroup.push(option.label);
+                                                      } else {
+                                                        const index = newSelectedUserGroup.indexOf(option.label);
+                                                        newSelectedUserGroup.splice(index, 1);
+                                                      }
+                                                      const sum = newSelectedUserGroup.reduce((acc, currentLabel) => {
+                                                        // Find the corresponding group value based on the label
+                                                        const group = userGroupOptions.find((group) => group.label === currentLabel);
+                                                        const groupValue = group ? group.value : 0; // Default to 0 if not found
+                                                        console.log("Current value being summed: ", groupValue); // Log current value
+                                                        return acc + groupValue; // Add to the sum
+                                                      }, 0);
+                                                      setSelectedUserGroup(newSelectedUserGroup);
+                                                      setSelectedUserGroupSum(sum);
+                                                    }}
+                                                />
+                                                <ListItemText primary={option.label} />
+                                            </MenuItem>
+                                        ))}
+                                    </div>
+                                ))}
+                                {/* {Object.entries(categorizedUserGroupOptions).map(([category, options]) => (
+                                  <React.Fragment key={category}>
+                                    <ListSubheader>{category}</ListSubheader>
+                                    {options.map((option) => (
+                                      <MenuItem key={option.label} value={option.label}>
+                                        <Checkbox
+                                          sx={{
+                                            '&.Mui-checked': {
+                                              color: '#ee8812',
+                                            },
+                                          }}
+                                          checked={selectedUserGroup.includes(option.label)}
+                                        />
+                                        <ListItemText primary={option.label} />
+                                      </MenuItem>
+                                    ))}
+                                  </React.Fragment>
+                                ))} */}
+                              </StyledSelect>
+                          )}
+                      />
                       </>
                     )}
                   {/* </Box> */}
