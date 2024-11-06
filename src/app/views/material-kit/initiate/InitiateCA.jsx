@@ -335,14 +335,12 @@ const InitiateCA = () => {
     }
 
     const url = "https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/";
-    const formData = new FormData(); // Create a FormData object
+    const formData = new FormData();
 
-    // Append files to FormData
     uploadedFile.forEach((file) => {
-      formData.append("files[]", file); // Name the file array appropriately
+      formData.append("files[]", file);
     });
 
-    // Append other data to FormData
     formData.append("title", title.trimStart());
     formData.append("description", description.trimStart());
     // formData.append("files[]",uploadedFile);
@@ -351,8 +349,7 @@ const InitiateCA = () => {
     const submitPromise = fetch(url, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${userToken}` // Example header for token authentication
-        // Note: Do not include 'Content-Type: application/json' when sending FormData
+        Authorization: `Bearer ${userToken}`
       },
       body: formData
     })
@@ -370,18 +367,18 @@ const InitiateCA = () => {
         } else {
           throw new Error("Submission failed");
         }
-        setLoading(false); // Reset loading state
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Submission error:", error);
-        setLoading(false); // Reset loading state
+        setLoading(false);
         setIsBtnDisabled(false);
         throw error;
       });
 
     toast.promise(submitPromise, {
       loading: "Submitting...",
-      success: (data) => `Circular Initiated Successfully`, // Adjust based on your API response
+      success: (data) => `Circular Initiated Successfully`,
       error: (err) => `Error while Initiating`
     });
   };

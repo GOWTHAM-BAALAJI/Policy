@@ -56,7 +56,7 @@ export const navigations3 = [
     path: "/list/ca"
   },
   {
-    name: "Admin",
+    name: "Admin Portal",
     icon: "group",
     path: "/admin"
   }

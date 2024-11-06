@@ -424,14 +424,12 @@ const InitiatePSG = () => {
     }
 
     const url = "https://policyuat.spandanasphoorty.com/policy_apis/policy/";
-    const formData = new FormData(); // Create a FormData object
+    const formData = new FormData();
 
-    // Append files to FormData
     uploadedFiles.forEach((file) => {
-      formData.append("files[]", file); // Name the file array appropriately
+      formData.append("files[]", file);
     });
 
-    // Append other data to FormData
     formData.append("type", documentType);
     formData.append("title", title.trimStart());
     formData.append("description", description.trimStart());
@@ -443,8 +441,7 @@ const InitiatePSG = () => {
     const submitPromise = fetch(url, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${userToken}` // Example header for token authentication
-        // Note: Do not include 'Content-Type: application/json' when sending FormData
+        Authorization: `Bearer ${userToken}`
       },
       body: formData
     })
@@ -463,18 +460,18 @@ const InitiatePSG = () => {
         } else {
           throw new Error("Submission failed");
         }
-        setLoading(false); // Reset loading state
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Submission error:", error);
         setIsBtnDisabled(false);
-        setLoading(false); // Reset loading state
+        setLoading(false);
         throw error;
       });
 
     toast.promise(submitPromise, {
       loading: "Submitting...",
-      success: (data) => `Policy Initiated Successfully`, // Adjust based on your API response
+      success: (data) => `Policy Initiated Successfully`,
       error: (err) => `Error while Initiating`
     });
   };
