@@ -1,8 +1,8 @@
 import { memo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { clearJwtToken } from '../../../../redux/actions/authActions';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate  } from 'react-router-dom';
+import { clearJwtToken } from "../../../../redux/actions/authActions";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 import Profile from "app/views/profile/Profile";
@@ -18,7 +18,6 @@ import {
   useMediaQuery
 } from "@mui/material";
 
-
 // Remove useAuth import and related logic
 // import useAuth from "app/hooks/useAuth";
 import useSettings from "app/hooks/useSettings";
@@ -29,22 +28,16 @@ import { themeShadows } from "app/components/MatxTheme/themeColors";
 
 import { topBarHeight } from "app/utils/constant";
 
-import {
-  Home,
-  Menu,
-  Person,
-  PowerSettingsNew,
-  Settings,
-} from "@mui/icons-material";
+import { Home, Menu, Person, PowerSettingsNew, Settings } from "@mui/icons-material";
 
 // STYLED COMPONENTS
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
-  width: '55px',
-  height: '55px',
-  borderRadius: '50%',
+  width: "55px",
+  height: "55px",
+  borderRadius: "50%",
   color: theme.palette.text.primary,
-  '&:hover': {
-    boxShadow: 'none', // Remove any default shadow if needed
+  "&:hover": {
+    boxShadow: "none" // Remove any default shadow if needed
   }
 }));
 
@@ -103,22 +96,22 @@ const Layout1Topbar = () => {
   const { settings, updateSettings } = useSettings();
   const [roleId, setRoleId] = useState(null);
   const [userName, setUsername] = useState(null);
-  const userToken = useSelector((state)=>{
-    return state.token;//.data;
-    });
+  const userToken = useSelector((state) => {
+    return state.token; //.data;
+  });
 
   const userProfile = useSelector((state) => state.userData);
   const { profile_pic } = userProfile;
   const [profileImage, setProfileImage] = useState("");
   useEffect(() => {
     if (userToken) {
-    const decodedToken = jwtDecode(userToken);
-    // Set profile image using decodedToken's profile_pic initially
-    setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
+      const decodedToken = jwtDecode(userToken);
+      // Set profile image using decodedToken's profile_pic initially
+      setProfileImage(`http://localhost:3000/profile_image/${decodedToken.profile_pic}`);
     }
     // If profile_pic exists, override with its value
     if (profile_pic) {
-        setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
+      setProfileImage(`http://localhost:3000/profile_image/${profile_pic}`);
     }
   }, [profile_pic, userToken]);
 
@@ -133,7 +126,7 @@ const Layout1Topbar = () => {
           setRoleId(decodedToken.role_id);
         }
         // if (decodedToken.profile_pic) {
-        //   setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
+        //   setProfileImage(`http://localhost:3000/profile_image/${profile_pic}`);
         // }
       } catch (error) {
         console.error("Error decoding token:", error);
@@ -162,7 +155,7 @@ const Layout1Topbar = () => {
 
   const handleSignOut = () => {
     dispatch(clearJwtToken());
-    navigate('/');
+    navigate("/");
     toast.success("Logged out successfully");
   };
 
@@ -175,8 +168,15 @@ const Layout1Topbar = () => {
           <StyledIconButton onClick={handleSidebarToggle}>
             <Menu />
           </StyledIconButton>
-          <Link to={path} style={{ textDecoration: 'none', color: 'inherit' }}>
-            <p style={{ marginLeft: '8px', fontFamily: 'sans-serif', fontSize: '16px', fontWeight: 'bold' }}>
+          <Link to={path} style={{ textDecoration: "none", color: "inherit" }}>
+            <p
+              style={{
+                marginLeft: "8px",
+                fontFamily: "sans-serif",
+                fontSize: "16px",
+                fontWeight: "bold"
+              }}
+            >
               POLICIES & CIRCULARS
             </p>
           </Link>
@@ -188,26 +188,33 @@ const Layout1Topbar = () => {
               <UserMenu>
                 <Hidden mdDown>
                   <Span sx={{ fontSize: "16px", fontFamily: "sans-serif", fontWeight: "bold" }}>
-                    {userName || 'Guest'}
+                    {userName || "Guest"}
                   </Span>
                 </Hidden>
                 <Avatar src={profileImage} sx={{ cursor: "pointer" }} />
               </UserMenu>
             }
+          >
+            <Box
+              sx={{
+                minWidth: "100%",
+                width: "auto",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start"
+              }}
             >
+              <StyledItem>
+                <Link to="/profile">
+                  <Person />
+                  <Span sx={{ ml: "2px" }}>Profile</Span>
+                </Link>
+              </StyledItem>
 
-            <Box sx={{ minWidth: "100%", width: "auto", display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-            <StyledItem>
-              <Link to="/profile">
-                <Person />
-                <Span sx={{ ml: "2px"}}>Profile</Span>
-              </Link>
-            </StyledItem>
-
-            <StyledItem onClick={handleSignOut}>
-              <PowerSettingsNew />
-              <Span sx={{ ml: "2px"}}>Logout</Span>
-            </StyledItem>
+              <StyledItem onClick={handleSignOut}>
+                <PowerSettingsNew />
+                <Span sx={{ ml: "2px" }}>Logout</Span>
+              </StyledItem>
             </Box>
 
             {/* Remove or adjust the logout item */}

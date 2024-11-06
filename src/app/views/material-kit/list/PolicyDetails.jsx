@@ -154,33 +154,33 @@ export default function PolicyDetails() {
   const [priorityOrder, setPriorityOrder] = useState([]);
   const [selectedUserGroup, setSelectedUserGroup] = useState([]);
   const [selectedUserGroupSum, setSelectedUserGroupSum] = useState(0);
-  console.log("Initial selected user group from the useEffect: ",selectedUserGroup);
+  console.log("Initial selected user group from the useEffect: ", selectedUserGroup);
 
   useEffect(() => {
-      if (selectedDocument?.user_group && userGroupOptions.length > 0) {
-          // Initialize selectedUserGroup based on selectedDocument.user_group
-          const initialSelectedGroups = userGroupOptions
-              .filter((group) => selectedDocument.user_group[group.label] === 1)  // Filter groups with value 1
-              .map((group) => group.label);                                       // Extract only labels
-          setSelectedUserGroup(initialSelectedGroups);
-          console.log("Initial selected usergroups: ",initialSelectedGroups);
-          const sum = initialSelectedGroups.reduce((acc, currentLabel) => {
-            // Find the corresponding group value based on the label
-            const group = userGroupOptions.find((group) => group.label === currentLabel);
-            const groupValue = group ? group.value : 0; // Default to 0 if not found
-            console.log("Current value being summed: ", groupValue); // Log current value
-            return acc + groupValue; // Add to the sum
-          }, 0);
-          setSelectedUserGroupSum(sum);
-      }
+    if (selectedDocument?.user_group && userGroupOptions.length > 0) {
+      // Initialize selectedUserGroup based on selectedDocument.user_group
+      const initialSelectedGroups = userGroupOptions
+        .filter((group) => selectedDocument.user_group[group.label] === 1) // Filter groups with value 1
+        .map((group) => group.label); // Extract only labels
+      setSelectedUserGroup(initialSelectedGroups);
+      console.log("Initial selected usergroups: ", initialSelectedGroups);
+      const sum = initialSelectedGroups.reduce((acc, currentLabel) => {
+        // Find the corresponding group value based on the label
+        const group = userGroupOptions.find((group) => group.label === currentLabel);
+        const groupValue = group ? group.value : 0; // Default to 0 if not found
+        console.log("Current value being summed: ", groupValue); // Log current value
+        return acc + groupValue; // Add to the sum
+      }, 0);
+      setSelectedUserGroupSum(sum);
+    }
   }, [selectedDocument, userGroupOptions]);
 
   const handleSelectChange = (event) => {
     const value = event.target.value; // Get selected value(s)
     const newSelectedGroups = Array.isArray(value) ? value : [value]; // Ensure it's an array
-  
+
     console.log("Selected groups before summation: ", newSelectedGroups);
-  
+
     // Calculate the sum of selected user group values
     const sum = newSelectedGroups.reduce((acc, currentLabel) => {
       // Find the corresponding group value based on the label
@@ -189,18 +189,17 @@ export default function PolicyDetails() {
       console.log("Current value being summed: ", groupValue); // Log current value
       return acc + groupValue; // Add to the sum
     }, 0);
-  
+
     setSelectedUserGroup(newSelectedGroups); // Update selected groups
     setSelectedUserGroupSum(sum); // Update sum
     console.log("User group: ", newSelectedGroups);
     console.log("User group sum: ", sum);
-};
-
+  };
 
   useEffect(() => {
     console.log("Selected User group total sum:", selectedUserGroupSum);
   }, [selectedUserGroupSum]);
-  
+
   const [userGroupMap, setUserGroupMap] = useState(new Map());
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -254,7 +253,7 @@ export default function PolicyDetails() {
 
   useEffect(() => {
     if (selectedDocument) {
-      console.log("Selected document: ",selectedDocument);
+      console.log("Selected document: ", selectedDocument);
       setDocumentID(selectedDocument.id || "");
       setDocumentTitle(selectedDocument.title);
       setDocumentDescription(selectedDocument.description);
@@ -320,7 +319,7 @@ export default function PolicyDetails() {
   useEffect(() => {
     // Fetch reviewers from the API
     axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer", {
+      .get("http://localhost:3000/auth/getReviewer", {
         headers: {
           Authorization: `Bearer ${userToken}` // Include the JWT token in the Authorization header
         }
@@ -343,7 +342,7 @@ export default function PolicyDetails() {
   useEffect(() => {
     // Fetch reviewers from the API
     axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover", {
+      .get("http://localhost:3000/auth/getApprover", {
         headers: {
           Authorization: `Bearer ${userToken}` // Include the JWT token in the Authorization header
         }
@@ -365,7 +364,7 @@ export default function PolicyDetails() {
 
   useEffect(() => {
     axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", {
+      .get("http://localhost:3000/auth/get-user-groups", {
         headers: {
           Authorization: `Bearer ${userToken}`
         }
@@ -377,7 +376,7 @@ export default function PolicyDetails() {
             label: usergroup.user_group,
             category: usergroup.category
           }));
-          
+
           // Categorize user groups
           const categorizedGroups = fetchedUserGroups.reduce((acc, usergroup) => {
             const { category } = usergroup;
@@ -391,7 +390,7 @@ export default function PolicyDetails() {
           // Set the state for both user group options and categorized user group options
           setUserGroupOptions(fetchedUserGroups);
           setCategorizedUserGroupOptions(categorizedGroups);
-          
+
           console.log("Fetched user groups from useEffect: ", fetchedUserGroups);
           console.log("Categorized user groups: ", categorizedGroups);
         }
@@ -403,11 +402,11 @@ export default function PolicyDetails() {
 
   const fetchUserGroup = async (user_group) => {
     const valueMap = new Map();
-    
+
     // Mock data: typically this would be fetched from an API or database.
     const jsonObject = Object.keys(user_group).map((key) => ({
-        user_group: key,
-        value: user_group[key] // directly use binary value from the object
+      user_group: key,
+      value: user_group[key] // directly use binary value from the object
     }));
 
     // Assuming values map directly (AVP=1, EVP=1, HO=1, SVP=1, VP=1), for example:
@@ -430,9 +429,9 @@ export default function PolicyDetails() {
 
       // Calculate the sum of selected values
       const newTotalValue = updatedSelection.reduce((sum, value) => sum + value, 0);
-      console.log("New total value: ",newTotalValue);
+      console.log("New total value: ", newTotalValue);
       setSelectedUserGroupSum(newTotalValue);
-      console.log("Selected User group total sum: ",selectedUserGroupSum);
+      console.log("Selected User group total sum: ", selectedUserGroupSum);
 
       return updatedSelection;
     });
@@ -445,11 +444,11 @@ export default function PolicyDetails() {
   //   jsonObject.push(seqObj.toJSON());
   // })
   // console.log(jsonObject);
-  
+
   // for(let i=0;i<jsonObject.length;i++){
   //   console.log(Math.log2(parseInt(jsonObject[i]["value"])))
   //   console.log(jsonObject[i]["user_group"])
-    
+
   //   valueMap.set(Math.log2(parseInt(jsonObject[i]["value"])),jsonObject[i]["user_group"]);
   // }
   // console.log(valueMap);
@@ -459,7 +458,7 @@ export default function PolicyDetails() {
   // for(let i=0;i<jsonObject.length;i++){
   //   cUserGroupObj[valueMap.get(i)]=(userGroupBinString[userGroupBinString.length-1-i]!=null)?userGroupBinString[userGroupBinString.length-1-i]:'0';
   // }
-  
+
   // console.log(cUserGroupObj);
 
   const [decision, setDecision] = useState("");
@@ -586,16 +585,13 @@ export default function PolicyDetails() {
     setError(null); // Reset error
 
     try {
-      const response = await fetch(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/${documentId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-          }
+      const response = await fetch(`http://localhost:3000/policy/${documentId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}` // Include JWT token in the headers
         }
-      );
+      });
       const data = await response.json();
       setSelectedDocument(data.data); // Set the document data
       const decodedToken = jwtDecode(userToken);
@@ -801,7 +797,7 @@ export default function PolicyDetails() {
       return;
     }
 
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/policy/update";
+    const url = "http://localhost:3000/policy/update";
     const formData = new FormData(); // Create a FormData object
 
     uploadedFile1.forEach((file) => {
@@ -1186,7 +1182,7 @@ export default function PolicyDetails() {
                                                 }}
                                               >
                                                 <a
-                                                  href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                  href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
                                                   download
@@ -1321,7 +1317,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -1462,7 +1458,7 @@ export default function PolicyDetails() {
                                                     }}
                                                   >
                                                     <a
-                                                      href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                      href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                       target="_blank"
                                                       rel="noopener noreferrer"
                                                       download
@@ -1582,7 +1578,7 @@ export default function PolicyDetails() {
                                                     }}
                                                   >
                                                     <a
-                                                      href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                      href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                       target="_blank"
                                                       rel="noopener noreferrer"
                                                       download
@@ -1718,7 +1714,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -1760,7 +1756,7 @@ export default function PolicyDetails() {
                                     </div>
                                     <div>
                                         <a
-                                        href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                        href={`http://localhost:3000/policy_document/${file.file_name}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         download
@@ -1880,7 +1876,7 @@ export default function PolicyDetails() {
                                                       }}
                                                     >
                                                       <a
-                                                        href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                        href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         download
@@ -2000,7 +1996,7 @@ export default function PolicyDetails() {
                                                       }}
                                                     >
                                                       <a
-                                                        href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                        href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         download
@@ -2137,7 +2133,7 @@ export default function PolicyDetails() {
                                                 }}
                                               >
                                                 <a
-                                                  href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                  href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
                                                   download
@@ -2257,7 +2253,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -2379,7 +2375,7 @@ export default function PolicyDetails() {
                                                 }}
                                               >
                                                 <a
-                                                  href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                  href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
                                                   download
@@ -2504,7 +2500,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -2621,7 +2617,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -2739,7 +2735,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -2853,7 +2849,7 @@ export default function PolicyDetails() {
                                         }}
                                       >
                                         <a
-                                          href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                          href={`http://localhost:3000/policy_document/${file.file_name}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           download
@@ -3132,7 +3128,10 @@ export default function PolicyDetails() {
                                       overflow: "hidden",
                                       whiteSpace: "nowrap",
                                       textOverflow: "ellipsis",
-                                      color: ((filename.slice(-4)=="docx"||filename.slice(-4)==".doc")?"green":"red")
+                                      color:
+                                        filename.slice(-4) == "docx" || filename.slice(-4) == ".doc"
+                                          ? "green"
+                                          : "red"
                                     }}
                                     onClick={() => openUploadedFile(index)} // Open specific file on click
                                   >
@@ -3188,7 +3187,7 @@ export default function PolicyDetails() {
                             ))}
                           </Grid>
                         </Grid>
-                        
+
                         <Typography
                           variant="h8"
                           sx={{ fontFamily: "sans-serif", display: "block", mt: 2 }}
@@ -3269,23 +3268,28 @@ export default function PolicyDetails() {
                           name="userGroups"
                           control={control}
                           render={({ field }) => (
-                              <StyledSelect
-                                  labelId="user-groups-label"
-                                  id="userGroups"
-                                  value={selectedUserGroup}    // Use as array
-                                  multiple                     // Enable multiple selection
-                                  displayEmpty
-                                  onChange={handleSelectChange}
-                                  renderValue={(selected) =>
-                                      selected.length > 0
-                                          ? selected.join(", ")
-                                          : <span style={{ color: "#bdbdbd" }}>Select a user group</span>
-                                  }
-                              >
-                                  <MenuItem value="" disabled>
-                                      <ListItemText style={{ color: "#bdbdbd" }} primary="Select a user group" />
-                                  </MenuItem>
-                                  {/* {Object.entries(categorizedUserGroupOptions).map(([category,options]) => {
+                            <StyledSelect
+                              labelId="user-groups-label"
+                              id="userGroups"
+                              value={selectedUserGroup} // Use as array
+                              multiple // Enable multiple selection
+                              displayEmpty
+                              onChange={handleSelectChange}
+                              renderValue={(selected) =>
+                                selected.length > 0 ? (
+                                  selected.join(", ")
+                                ) : (
+                                  <span style={{ color: "#bdbdbd" }}>Select a user group</span>
+                                )
+                              }
+                            >
+                              <MenuItem value="" disabled>
+                                <ListItemText
+                                  style={{ color: "#bdbdbd" }}
+                                  primary="Select a user group"
+                                />
+                              </MenuItem>
+                              {/* {Object.entries(categorizedUserGroupOptions).map(([category,options]) => {
                                     <div key={category}>
                                       <MenuItem disabled>
                                         <ListItemText primary={category} style={{ fontWeight: 'bold' }} />
@@ -3305,7 +3309,7 @@ export default function PolicyDetails() {
                                       ))}
                                     </div>
                                   })} */}
-                                  {/* {userGroupOptions.map((option) => (
+                              {/* {userGroupOptions.map((option) => (
                                       <MenuItem key={option.label} value={option.label}>
                                           <Checkbox
                                               sx={{
@@ -3318,47 +3322,59 @@ export default function PolicyDetails() {
                                           <ListItemText primary={option.label} />
                                       </MenuItem>
                                   ))} */}
-                                  {Object.entries(categorizedUserGroupOptions).map(([category, options]) => (
-                                    <div key={category}>
-                                        <MenuItem>
-                                          <Typography variant="h8" color="#ee8812" fontWeight="bolder">
-                                            {category}
-                                          </Typography>
-                                        </MenuItem>
-                                        {options.map((option) => (
-                                            <MenuItem key={option.label} value={option.label}>
-                                                <Checkbox
-                                                    sx={{
-                                                        '&.Mui-checked': {
-                                                            color: '#ee8812', // Set desired color
-                                                        },
-                                                    }}
-                                                    checked={selectedUserGroup.includes(option.label)} // Check if selected
-                                                    onChange={(event) => {
-                                                      const newSelectedUserGroup = [...selectedUserGroup];
-                                                      if (event.target.checked) {
-                                                        newSelectedUserGroup.push(option.label);
-                                                      } else {
-                                                        const index = newSelectedUserGroup.indexOf(option.label);
-                                                        newSelectedUserGroup.splice(index, 1);
-                                                      }
-                                                      const sum = newSelectedUserGroup.reduce((acc, currentLabel) => {
-                                                        // Find the corresponding group value based on the label
-                                                        const group = userGroupOptions.find((group) => group.label === currentLabel);
-                                                        const groupValue = group ? group.value : 0; // Default to 0 if not found
-                                                        console.log("Current value being summed: ", groupValue); // Log current value
-                                                        return acc + groupValue; // Add to the sum
-                                                      }, 0);
-                                                      setSelectedUserGroup(newSelectedUserGroup);
-                                                      setSelectedUserGroupSum(sum);
-                                                    }}
-                                                />
-                                                <ListItemText primary={option.label} />
-                                            </MenuItem>
-                                        ))}
-                                    </div>
-                                ))}
-                                {/* {Object.entries(categorizedUserGroupOptions).map(([category, options]) => (
+                              {Object.entries(categorizedUserGroupOptions).map(
+                                ([category, options]) => (
+                                  <div key={category}>
+                                    <MenuItem>
+                                      <Typography variant="h8" color="#ee8812" fontWeight="bolder">
+                                        {category}
+                                      </Typography>
+                                    </MenuItem>
+                                    {options.map((option) => (
+                                      <MenuItem key={option.label} value={option.label}>
+                                        <Checkbox
+                                          sx={{
+                                            "&.Mui-checked": {
+                                              color: "#ee8812" // Set desired color
+                                            }
+                                          }}
+                                          checked={selectedUserGroup.includes(option.label)} // Check if selected
+                                          onChange={(event) => {
+                                            const newSelectedUserGroup = [...selectedUserGroup];
+                                            if (event.target.checked) {
+                                              newSelectedUserGroup.push(option.label);
+                                            } else {
+                                              const index = newSelectedUserGroup.indexOf(
+                                                option.label
+                                              );
+                                              newSelectedUserGroup.splice(index, 1);
+                                            }
+                                            const sum = newSelectedUserGroup.reduce(
+                                              (acc, currentLabel) => {
+                                                // Find the corresponding group value based on the label
+                                                const group = userGroupOptions.find(
+                                                  (group) => group.label === currentLabel
+                                                );
+                                                const groupValue = group ? group.value : 0; // Default to 0 if not found
+                                                console.log(
+                                                  "Current value being summed: ",
+                                                  groupValue
+                                                ); // Log current value
+                                                return acc + groupValue; // Add to the sum
+                                              },
+                                              0
+                                            );
+                                            setSelectedUserGroup(newSelectedUserGroup);
+                                            setSelectedUserGroupSum(sum);
+                                          }}
+                                        />
+                                        <ListItemText primary={option.label} />
+                                      </MenuItem>
+                                    ))}
+                                  </div>
+                                )
+                              )}
+                              {/* {Object.entries(categorizedUserGroupOptions).map(([category, options]) => (
                                   <React.Fragment key={category}>
                                     <ListSubheader>{category}</ListSubheader>
                                     {options.map((option) => (
@@ -3376,9 +3392,9 @@ export default function PolicyDetails() {
                                     ))}
                                   </React.Fragment>
                                 ))} */}
-                              </StyledSelect>
+                            </StyledSelect>
                           )}
-                      />
+                        />
                       </>
                     )}
                   {/* </Box> */}

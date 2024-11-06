@@ -1,15 +1,15 @@
-import React, { useState, useEffect }  from 'react';
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useForm, Controller } from 'react-hook-form';
-import * as Yup from 'yup';
+import { useForm, Controller } from "react-hook-form";
+import * as Yup from "yup";
 import { LoadingButton } from "@mui/lab";
 import { Formik } from "formik";
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-import axios from 'axios';
+import axios from "axios";
 import {
   Box,
   Button,
@@ -25,7 +25,7 @@ import {
   // RadioGroup,
   styled,
   TextField as MuiTextField,
-  Select as MuiSelect, 
+  Select as MuiSelect,
   MenuItem,
   FormControl,
   InputLabel,
@@ -33,34 +33,33 @@ import {
   Typography,
   TextField,
   IconButton
-} from '@mui/material';
-import Avatar from '@mui/material/Avatar';
-import { CameraAlt as CameraIcon } from '@mui/icons-material';
-import { Span } from '../../../app/components/Typography';
-import { setUserData } from '../../../redux/actions/userActions';
+} from "@mui/material";
+import Avatar from "@mui/material/Avatar";
+import { CameraAlt as CameraIcon } from "@mui/icons-material";
+import { Span } from "../../../app/components/Typography";
+import { setUserData } from "../../../redux/actions/userActions";
 // import '../../../src/App.css';
 
 const StyledTextField = styled(MuiTextField)(() => ({
-  width: '100%',
-  marginBottom: '16px',
-  '& .MuiInputLabel-root': {
-    textAlign: 'center',
-    position: 'absolute',
-    top: '-40%'
+  width: "100%",
+  marginBottom: "16px",
+  "& .MuiInputLabel-root": {
+    textAlign: "center",
+    position: "absolute",
+    top: "-40%"
   },
-  '& .MuiInputBase-root': {     
-  height: 28 // Adjust the height as needed 
-},
+  "& .MuiInputBase-root": {
+    height: 28 // Adjust the height as needed
+  }
 }));
 
 const validationSchema = Yup.object().shape({
   oldpw: Yup.string().required("Old Password is required"),
   newpw: Yup.string().required("New Password is required"),
-  confirmnewpw: Yup.string().required("Confirm New Password is required"),
+  confirmnewpw: Yup.string().required("Confirm New Password is required")
 });
 
 const Profile = () => {
-
   const {
     control,
     watch,
@@ -112,24 +111,24 @@ const Profile = () => {
   // const userProfile = useSelector((state) => state.userData);
   // const [profileImage, setProfileImage] = useState(localStorage.getItem('userData.profile_pic') || "");
 
-  const userToken = useSelector((state)=>{
-    return state.token;//.data;
-    });
+  const userToken = useSelector((state) => {
+    return state.token; //.data;
+  });
 
   useEffect(() => {
     if (!userToken) {
-      navigate('/');
+      navigate("/");
     }
   }, [userToken]);
 
   useEffect(() => {
     const decodedToken = jwtDecode(userToken);
     // Set profile image using decodedToken's profile_pic initially
-    setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
+    setProfileImage(`http://localhost:3000/profile_image/${decodedToken.profile_pic}`);
 
     // If profile_pic exists, override with its value
     if (profile_pic) {
-        setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
+      setProfileImage(`http://localhost:3000/profile_image/${profile_pic}`);
     }
   }, [profile_pic, userToken]);
 
@@ -153,47 +152,48 @@ const Profile = () => {
           setEmpDesignation(decodedToken.designation);
         }
         // if (decodedToken.profile_pic) {
-        //   setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
+        //   setProfileImage(`http://localhost:3000/profile_image/${profile_pic}`);
         // }
         // if (decodedToken.profile_pic) {
-        //   setStoreImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
+        //   setStoreImage(`http://localhost:3000/profile_image/${decodedToken.profile_pic}`);
         // }
       } catch (error) {
-        console.error('Invalid token:', error);
+        console.error("Invalid token:", error);
       }
     }
   }, [userToken]);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    
-    const isValidFileFormat =  file.name.endsWith(".jpeg") || file.name.endsWith(".jpg") || file.name.endsWith(".png");
+
+    const isValidFileFormat =
+      file.name.endsWith(".jpeg") || file.name.endsWith(".jpg") || file.name.endsWith(".png");
 
     if (!isValidFileFormat) {
-        toast.error("Please upload only .jpeg, .jpg or .png files");
-        setIsBtnDisabled1(true);
-        setTimeout(() => {
-            setIsBtnDisabled1(false);
-          }, 4000);
-        setSelectedFile(null);
-        setProfileImage(storeImage);
-        return;
+      toast.error("Please upload only .jpeg, .jpg or .png files");
+      setIsBtnDisabled1(true);
+      setTimeout(() => {
+        setIsBtnDisabled1(false);
+      }, 4000);
+      setSelectedFile(null);
+      setProfileImage(storeImage);
+      return;
     }
     // if (isValidFileFormat) {
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        const imageDataUrl = reader.result;
-        setProfileImage(imageDataUrl); // Set the base64 URL for immediate rendering
-        setStoreImage(imageDataUrl);   // Optionally store it elsewhere if needed
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const imageDataUrl = reader.result;
+      setProfileImage(imageDataUrl); // Set the base64 URL for immediate rendering
+      setStoreImage(imageDataUrl); // Optionally store it elsewhere if needed
     };
-      reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
     // }
   };
 
   const [isBtnDisabled1, setIsBtnDisabled1] = useState(false);
   const [isBtnDisabled2, setIsBtnDisabled2] = useState(false);
-  
+
   const handleFileUpload = async (event) => {
     event.preventDefault();
     setLoading(true);
@@ -203,51 +203,51 @@ const Profile = () => {
     if (!selectedFile) {
       toast.error("Please select a file");
       setIsBtnDisabled1(true);
-        setTimeout(() => {
-            setIsBtnDisabled1(false);
-        }, 4000);
+      setTimeout(() => {
+        setIsBtnDisabled1(false);
+      }, 4000);
       return;
     }
 
     // Prepare the form data for the API call
     const formData = new FormData();
-    formData.append('files[]', selectedFile);
+    formData.append("files[]", selectedFile);
 
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/updateProfile";
+    const url = "http://localhost:3000/auth/updateProfile";
 
-    const submitPromise1=fetch(url, {
+    const submitPromise1 = fetch(url, {
       method: "POST",
       headers: {
-          'Authorization': `Bearer ${userToken}`, // Example header for token authentication
-          // Note: Do not include 'Content-Type: application/json' when sending FormData
+        Authorization: `Bearer ${userToken}` // Example header for token authentication
+        // Note: Do not include 'Content-Type: application/json' when sending FormData
       },
-      body: formData,
+      body: formData
     })
-    .then((response) => {
+      .then((response) => {
         return response.json();
-    })
-    .then((data) => {
+      })
+      .then((data) => {
         if (data.status) {
-            const img = data.image;
-            if(img){
-              dispatch(setUserData({ profile_pic: img }));
-            }
-            // setTimeout(() => {
-            //     navigate('/list/psg');
-            // }, 1000);
+          const img = data.image;
+          if (img) {
+            dispatch(setUserData({ profile_pic: img }));
+          }
+          // setTimeout(() => {
+          //     navigate('/list/psg');
+          // }, 1000);
         }
         setLoading(false); // Reset loading state
-    })
-    .catch((error) => {
+      })
+      .catch((error) => {
         console.error("Submission error:", error);
         setIsBtnDisabled1(false);
         setLoading(false); // Reset loading state
-    });
+      });
 
     toast.promise(submitPromise1, {
-      loading: 'Uploading...',
+      loading: "Uploading...",
       success: (data) => `Profile Image Uploaded Successfully`, // Adjust based on your API response
-      error: (err) => `Error while Uploading`,
+      error: (err) => `Error while Uploading`
     });
   };
 
@@ -260,290 +260,396 @@ const Profile = () => {
     if (!newpassword || !confirmnewpassword) {
       toast.error("Please fill in all the required fields");
       setIsBtnDisabled2(true);
-        setTimeout(() => {
-            setIsBtnDisabled2(false);
-        }, 4000);
+      setTimeout(() => {
+        setIsBtnDisabled2(false);
+      }, 4000);
       return;
     }
 
-    if(newpassword.length < 6 || confirmnewpassword.length < 6) {
+    if (newpassword.length < 6 || confirmnewpassword.length < 6) {
       toast.error("New password must be atleast 6 characters long");
       setIsBtnDisabled2(true);
-        setTimeout(() => {
-            setIsBtnDisabled2(false);
-        }, 4000);
+      setTimeout(() => {
+        setIsBtnDisabled2(false);
+      }, 4000);
       return;
     }
 
     if (newpassword !== confirmnewpassword) {
       toast.error("New password must match with Confirm new password");
       setIsBtnDisabled2(true);
-        setTimeout(() => {
-            setIsBtnDisabled2(false);
-        }, 4000);
+      setTimeout(() => {
+        setIsBtnDisabled2(false);
+      }, 4000);
       return;
     }
 
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/updatePassword";
+    const url = "http://localhost:3000/auth/updatePassword";
     const requestData = {
-      newPassword: newpassword,
+      newPassword: newpassword
     };
 
-    const submitPromise2=fetch(url, {
+    const submitPromise2 = fetch(url, {
       method: "POST",
       headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`, // Example header for token authentication
-          // Note: Do not include 'Content-Type: application/json' when sending FormData
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${userToken}` // Example header for token authentication
+        // Note: Do not include 'Content-Type: application/json' when sending FormData
       },
-      body: JSON.stringify(requestData),
+      body: JSON.stringify(requestData)
     })
-    .then((response) => {
+      .then((response) => {
         return response.json();
-    })
-    .then((data) => {
+      })
+      .then((data) => {
         if (data.status) {
-            setNewPassword("");
-            setConfirmNewPassword("");
-            setShowFields(false);
-            // setTimeout(() => {
-            //     navigate('/list/psg');
-            // }, 1000);
+          setNewPassword("");
+          setConfirmNewPassword("");
+          setShowFields(false);
+          // setTimeout(() => {
+          //     navigate('/list/psg');
+          // }, 1000);
         } else {
-            throw new Error("Updation failed");
+          throw new Error("Updation failed");
         }
         setLoading(false); // Reset loading state
-    })
-    .catch((error) => {
+      })
+      .catch((error) => {
         console.error("Submission error:", error);
         setIsBtnDisabled2(false);
         setLoading(false); // Reset loading state
-    });
+      });
 
     toast.promise(submitPromise2, {
-      loading: 'Updating...',
+      loading: "Updating...",
       success: (data) => `New password updated successfully`, // Adjust based on your API response
-      error: (err) => `Error while updating`,
+      error: (err) => `Error while updating`
     });
   };
 
   return (
     <>
-    <Grid container sx={{ ml:1, p: 4 }}>
-    <Grid container
-      sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        // minHeight: '100vh', // Center vertically
-      }}
-    >
-      <Grid item xs={12}>
-        <Box
+      <Grid container sx={{ ml: 1, p: 4 }}>
+        <Grid
+          container
           sx={{
-            display: 'flex', // Use flex to arrange components horizontally
-            flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }, // Stack vertically on sm and xs, horizontally on md and lg
-            justifyContent: { md: 'space-between', lg: 'space-between' }, // Space between items for larger screens
-            // alignItems: { xs: 'center', sm: 'center', md: 'flex-start', lg: 'flex-start' },
-            border: '1px solid #e0e0e0',
-            boxShadow: '0px 0px 8px 2px rgba(0, 0, 0, 0.1)',
-            p: 4,
-            textAlign: 'center',
-            width: 'fit-content', // Border adjusts to content width
-            margin: '0 auto', // Centers the box horizontally
-            gap: 4
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+            // minHeight: '100vh', // Center vertically
           }}
         >
-        {/* Left Half: Profile Image and Upload Button */}
-        <form onSubmit={handleFileUpload} encType="multipart/form-data">
-        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-          <Avatar
-            src={profileImage} // Use the state for the image URL
-            alt="Profile Picture"
-            sx={{ width: 160, height: 162, borderRadius: '50%', border: '1px solid #000' }}
-          />
-          <input
-            accept=".jpeg,.jpg,.png"
-            id="upload-button-file"
-            type="file"
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-          <label htmlFor="upload-button-file">
-            <IconButton sx={{ color: "rgb(27,28,54)" }} component="span">
-              <CameraIcon />
-            </IconButton>
-          </label>
-          <Button variant="contained" disabled={isBtnDisabled1} type="submit" sx={{ marginTop: 1, marginBottom: 1, padding: '4px 8px', fontSize: '0.75rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)' }, }}>
-            Upload
-          </Button>
-          <Grid item xs={12} sx={{ textAlign: "right" }}>
-            <Typography
-              variant="body2"
-              sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
+          <Grid item xs={12}>
+            <Box
+              sx={{
+                display: "flex", // Use flex to arrange components horizontally
+                flexDirection: { xs: "column", sm: "column", md: "row", lg: "row" }, // Stack vertically on sm and xs, horizontally on md and lg
+                justifyContent: { md: "space-between", lg: "space-between" }, // Space between items for larger screens
+                // alignItems: { xs: 'center', sm: 'center', md: 'flex-start', lg: 'flex-start' },
+                border: "1px solid #e0e0e0",
+                boxShadow: "0px 0px 8px 2px rgba(0, 0, 0, 0.1)",
+                p: 4,
+                textAlign: "center",
+                width: "fit-content", // Border adjusts to content width
+                margin: "0 auto", // Centers the box horizontally
+                gap: 4
+              }}
             >
-              Max image size 5MB
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sx={{ textAlign: "right" }}>
-            <Typography
-              variant="body2"
-              sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
-            >
-              .jpg/.jpeg/.png allowed
-            </Typography>
-          </Grid>
-        </Box>
-        </form>
+              {/* Left Half: Profile Image and Upload Button */}
+              <form onSubmit={handleFileUpload} encType="multipart/form-data">
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center"
+                  }}
+                >
+                  <Avatar
+                    src={profileImage} // Use the state for the image URL
+                    alt="Profile Picture"
+                    sx={{ width: 160, height: 162, borderRadius: "50%", border: "1px solid #000" }}
+                  />
+                  <input
+                    accept=".jpeg,.jpg,.png"
+                    id="upload-button-file"
+                    type="file"
+                    style={{ display: "none" }}
+                    onChange={handleFileChange}
+                  />
+                  <label htmlFor="upload-button-file">
+                    <IconButton sx={{ color: "rgb(27,28,54)" }} component="span">
+                      <CameraIcon />
+                    </IconButton>
+                  </label>
+                  <Button
+                    variant="contained"
+                    disabled={isBtnDisabled1}
+                    type="submit"
+                    sx={{
+                      marginTop: 1,
+                      marginBottom: 1,
+                      padding: "4px 8px",
+                      fontSize: "0.75rem",
+                      backgroundColor: "#ee8812",
+                      "&:hover": { backgroundColor: "rgb(249, 83, 22)" }
+                    }}
+                  >
+                    Upload
+                  </Button>
+                  <Grid item xs={12} sx={{ textAlign: "right" }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
+                    >
+                      Max image size 5MB
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sx={{ textAlign: "right" }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
+                    >
+                      .jpg/.jpeg/.png allowed
+                    </Typography>
+                  </Grid>
+                </Box>
+              </form>
 
-        {/* Middle Section: Employee Details Table */}
-        <Box sx={{ p: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Table sx={{ width: 'auto' }}>
-            <TableBody>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', marginRight: '40px' }}><b>Employee ID:</b></Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem' }}>{empId}</Typography>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', marginRight: '40px' }}><b>Name:</b></Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem' }}>{empName}</Typography>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', marginRight: '40px' }}><b>Designation:</b></Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem' }}>{empDesignation}</Typography>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', marginRight: '40px' }}><b>Email:</b></Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem' }}>{empEmail}</Typography>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', marginRight: '40px' }}><b>Mobile:</b></Typography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="h6" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem' }}>{empMobile}</Typography>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </Box>
+              {/* Middle Section: Employee Details Table */}
+              <Box sx={{ p: 2, display: "flex", justifyContent: "center", alignItems: "center" }}>
+                <Table sx={{ width: "auto" }}>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontFamily: "sans-serif",
+                            fontSize: "0.875rem",
+                            marginRight: "40px"
+                          }}
+                        >
+                          <b>Employee ID:</b>
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}
+                        >
+                          {empId}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontFamily: "sans-serif",
+                            fontSize: "0.875rem",
+                            marginRight: "40px"
+                          }}
+                        >
+                          <b>Name:</b>
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}
+                        >
+                          {empName}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontFamily: "sans-serif",
+                            fontSize: "0.875rem",
+                            marginRight: "40px"
+                          }}
+                        >
+                          <b>Designation:</b>
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}
+                        >
+                          {empDesignation}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontFamily: "sans-serif",
+                            fontSize: "0.875rem",
+                            marginRight: "40px"
+                          }}
+                        >
+                          <b>Email:</b>
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}
+                        >
+                          {empEmail}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontFamily: "sans-serif",
+                            fontSize: "0.875rem",
+                            marginRight: "40px"
+                          }}
+                        >
+                          <b>Mobile:</b>
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}
+                        >
+                          {empMobile}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </Box>
 
-        {/* Right Half: Update Password Section */}
-        <form onSubmit={handlePasswordUpdate} encType="multipart/form-data">
-        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginTop: '50px', marginRight: '20px' }}>
-          <Button
-            variant="contained"
-            sx={{ marginBottom: 2, padding: '4px 8px', fontSize: '0.75rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)' }, }}
-            onClick={handleUpdatePasswordClick}
-          >
-            Update Password
-          </Button>
-          {showFields && (
-            <>
-              <TextField
-                id="newpassword"
-                type={showPassword ? 'text' : 'password'}
-                rows={1}
-                maxRows={1}
-                variant="outlined"
-                fullWidth
-                value={newpassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter the new password"
-                InputProps={{
-                  style: {
-                    fontFamily: 'sans-serif',
-                    fontSize: '0.875rem',
-                    height: '30px',
-                    marginBottom: '10px',
-                  },
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleTogglePasswordVisibility}
-                        edge="end"
-                        aria-label="toggle password visibility"
+              {/* Right Half: Update Password Section */}
+              <form onSubmit={handlePasswordUpdate} encType="multipart/form-data">
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginTop: "50px",
+                    marginRight: "20px"
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    sx={{
+                      marginBottom: 2,
+                      padding: "4px 8px",
+                      fontSize: "0.75rem",
+                      backgroundColor: "#ee8812",
+                      "&:hover": { backgroundColor: "rgb(249, 83, 22)" }
+                    }}
+                    onClick={handleUpdatePasswordClick}
+                  >
+                    Update Password
+                  </Button>
+                  {showFields && (
+                    <>
+                      <TextField
+                        id="newpassword"
+                        type={showPassword ? "text" : "password"}
+                        rows={1}
+                        maxRows={1}
+                        variant="outlined"
+                        fullWidth
+                        value={newpassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Enter the new password"
+                        InputProps={{
+                          style: {
+                            fontFamily: "sans-serif",
+                            fontSize: "0.875rem",
+                            height: "30px",
+                            marginBottom: "10px"
+                          },
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                onClick={handleTogglePasswordVisibility}
+                                edge="end"
+                                aria-label="toggle password visibility"
+                              >
+                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
+                      />
+                      <TextField
+                        id="newpassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        rows={1}
+                        maxRows={1}
+                        variant="outlined"
+                        fullWidth
+                        value={confirmnewpassword}
+                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        placeholder="Confirm the new password"
+                        InputProps={{
+                          style: {
+                            fontFamily: "sans-serif",
+                            fontSize: "0.875rem",
+                            height: "30px",
+                            marginBottom: "10px"
+                          },
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                onClick={handleToggleConfirmPasswordVisibility}
+                                edge="end"
+                                aria-label="toggle password visibility"
+                              >
+                                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
+                      />
+                      <Button
+                        variant="contained"
+                        disabled={isBtnDisabled2}
+                        type="submit"
+                        sx={{
+                          padding: "4px 8px",
+                          fontSize: "0.75rem",
+                          backgroundColor: "#ee8812",
+                          "&:hover": { backgroundColor: "rgb(249, 83, 22)" }
+                        }}
                       >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <TextField
-                id="newpassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                rows={1}
-                maxRows={1}
-                variant="outlined"
-                fullWidth
-                value={confirmnewpassword}
-                onChange={(e) => setConfirmNewPassword(e.target.value)}
-                placeholder="Confirm the new password"
-                InputProps={{
-                  style: {
-                    fontFamily: 'sans-serif',
-                    fontSize: '0.875rem',
-                    height: '30px',
-                    marginBottom: '10px',
-                  },
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleToggleConfirmPasswordVisibility}
-                        edge="end"
-                        aria-label="toggle password visibility"
-                      >
-                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <Button variant="contained" disabled={isBtnDisabled2} type="submit" sx={{ padding: '4px 8px', fontSize: '0.75rem', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)' }, }}>
-                Submit
-              </Button>
-            </>
-          )}
-        </Box>
-        </form>
-      </Box>
-    </Grid>
-    </Grid>
-    </Grid></>
+                        Submit
+                      </Button>
+                    </>
+                  )}
+                </Box>
+              </form>
+            </Box>
+          </Grid>
+        </Grid>
+      </Grid>
+    </>
   );
-}
+};
 
 export default Profile;
 
-
-
-
-
-
-
-
-
-
-
-
-{/* <div className='flex justify-center p-4'>
+{
+  /* <div className='flex justify-center p-4'>
       <div className='p-6 bg-orange-500 mt-10 w-full max-w-4xl flex flex-col md:flex-row md:items-center border border-gray-300 shadow-lg rounded-xl'>
         <img 
           src={"/assets/avatar.jpg"} 
@@ -561,4 +667,5 @@ export default Profile;
           <p className='my-1'><span className='font-bold'>Status :</span> Active</p>
         </div>
       </div>
-    </div> */}
+    </div> */
+}

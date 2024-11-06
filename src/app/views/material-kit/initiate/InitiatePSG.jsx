@@ -207,9 +207,9 @@ const InitiatePSG = () => {
 
       // Calculate the sum of selected values
       const newTotalValue = updatedSelection.reduce((sum, value) => sum + value, 0);
-      console.log("New total value: ",newTotalValue);
+      console.log("New total value: ", newTotalValue);
       setSelectedUserGroupSum(newTotalValue);
-      console.log("Selected User group total sum: ",selectedUserGroupSum);
+      console.log("Selected User group total sum: ", selectedUserGroupSum);
 
       return updatedSelection;
     });
@@ -269,7 +269,7 @@ const InitiatePSG = () => {
 
   useEffect(() => {
     axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer", {
+      .get("http://localhost:3000/auth/getReviewer", {
         headers: {
           Authorization: `Bearer ${userToken}`
         }
@@ -290,7 +290,7 @@ const InitiatePSG = () => {
 
   useEffect(() => {
     axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover", {
+      .get("http://localhost:3000/auth/getApprover", {
         headers: {
           Authorization: `Bearer ${userToken}`
         }
@@ -311,7 +311,7 @@ const InitiatePSG = () => {
 
   useEffect(() => {
     axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", {
+      .get("http://localhost:3000/auth/get-user-groups", {
         headers: {
           Authorization: `Bearer ${userToken}`
         }
@@ -332,7 +332,7 @@ const InitiatePSG = () => {
             acc[category].push(option);
             return acc;
           }, {});
-          console.log("Categorized groups: ",categorizedGroups);
+          console.log("Categorized groups: ", categorizedGroups);
 
           setUserGroupOptions(categorizedGroups);
         }
@@ -423,7 +423,7 @@ const InitiatePSG = () => {
       return;
     }
 
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/policy/";
+    const url = "http://localhost:3000/policy/";
     const formData = new FormData();
 
     uploadedFiles.forEach((file) => {
@@ -749,7 +749,10 @@ const InitiatePSG = () => {
                                   overflow: "hidden",
                                   whiteSpace: "nowrap",
                                   textOverflow: "ellipsis",
-                                  color: ((filename.slice(-4)=="docx"||filename.slice(-4)==".doc")?"green":"red")
+                                  color:
+                                    filename.slice(-4) == "docx" || filename.slice(-4) == ".doc"
+                                      ? "green"
+                                      : "red"
                                 }}
                                 onClick={() => openUploadedFile(index)} // Open specific file on click
                               >
@@ -769,7 +772,13 @@ const InitiatePSG = () => {
                               justifyContent="flex-end"
                               xs
                             >
-                              <Typography sx={{ marginRight: 1, color: uploadedFiles[index].size >= 5 * 1024 * 1024 ? "red" : "green"}}>
+                              <Typography
+                                sx={{
+                                  marginRight: 1,
+                                  color:
+                                    uploadedFiles[index].size >= 5 * 1024 * 1024 ? "red" : "green"
+                                }}
+                              >
                                 {(uploadedFiles[index].size / (1024 * 1024)).toFixed(2)} MB
                               </Typography>
                               <IconButton
@@ -931,21 +940,21 @@ const InitiatePSG = () => {
                 <Grid item xs={9} sm={9} md={9} lg={9}>
                   <Grid container alignItems="center" spacing={2}>
                     <Grid item xs>
-                    <FormControl variant="outlined" fullWidth sx={{ position: "relative" }}>
-                      <Controller
-                        name="userGroups"
-                        control={control}
-                        render={({ field }) => (
-                          <StyledSelect
-                            labelId="user-groups-label"
-                            id="userGroups"
-                            value={selectedUserGroup}
-                            multiple
-                            displayEmpty
-                            onChange={(e) => field.onChange(selectedUserGroup)} // Pass the current state directly
-                            renderValue={(selected) =>
-                              selected.length > 0
-                                ? selected
+                      <FormControl variant="outlined" fullWidth sx={{ position: "relative" }}>
+                        <Controller
+                          name="userGroups"
+                          control={control}
+                          render={({ field }) => (
+                            <StyledSelect
+                              labelId="user-groups-label"
+                              id="userGroups"
+                              value={selectedUserGroup}
+                              multiple
+                              displayEmpty
+                              onChange={(e) => field.onChange(selectedUserGroup)} // Pass the current state directly
+                              renderValue={(selected) =>
+                                selected.length > 0 ? (
+                                  selected
                                     .map(
                                       (value) =>
                                         Object.values(userGroupOptions)
@@ -953,41 +962,46 @@ const InitiatePSG = () => {
                                           .find((option) => option.value === value)?.label
                                     )
                                     .join(", ")
-                                : <span style={{ color: "#bdbdbd" }}>Select a user group</span>
-                            }
-                          >
-                            <MenuItem value="" disabled>
-                              <ListItemText style={{ color: "#bdbdbd" }} primary="Select a user group" />
-                            </MenuItem>
-                            {Object.entries(userGroupOptions).map(([category, options]) => (
-                              <div key={category}>
-                                {/* Category Header */}
-                                <MenuItem>
-                                  <Typography variant="h8" color="#ee8812" fontWeight="bolder">
-                                    {category}
-                                  </Typography>
-                                </MenuItem>
-                                {/* User Group Options */}
-                                {options.map((option) => (
-                                  <MenuItem key={option.value} value={option.value}>
-                                    <Checkbox
-                                      sx={{
-                                        '&.Mui-checked': {
-                                          color: '#ee8812', // Change this to your desired color
-                                        },
-                                      }}
-                                      checked={selectedUserGroup.includes(option.value)}
-                                      onChange={() => handleCheckboxChange(option.value)} // Use option.value directly
-                                    />
-                                    <ListItemText primary={option.label} />
+                                ) : (
+                                  <span style={{ color: "#bdbdbd" }}>Select a user group</span>
+                                )
+                              }
+                            >
+                              <MenuItem value="" disabled>
+                                <ListItemText
+                                  style={{ color: "#bdbdbd" }}
+                                  primary="Select a user group"
+                                />
+                              </MenuItem>
+                              {Object.entries(userGroupOptions).map(([category, options]) => (
+                                <div key={category}>
+                                  {/* Category Header */}
+                                  <MenuItem>
+                                    <Typography variant="h8" color="#ee8812" fontWeight="bolder">
+                                      {category}
+                                    </Typography>
                                   </MenuItem>
-                                ))}
-                              </div>
-                            ))}
-                          </StyledSelect>
-                        )}
-                      />
-                    </FormControl>
+                                  {/* User Group Options */}
+                                  {options.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>
+                                      <Checkbox
+                                        sx={{
+                                          "&.Mui-checked": {
+                                            color: "#ee8812" // Change this to your desired color
+                                          }
+                                        }}
+                                        checked={selectedUserGroup.includes(option.value)}
+                                        onChange={() => handleCheckboxChange(option.value)} // Use option.value directly
+                                      />
+                                      <ListItemText primary={option.label} />
+                                    </MenuItem>
+                                  ))}
+                                </div>
+                              ))}
+                            </StyledSelect>
+                          )}
+                        />
+                      </FormControl>
                     </Grid>
                   </Grid>
                 </Grid>

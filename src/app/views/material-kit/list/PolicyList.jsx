@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from "react";
-import AddIcon from '@mui/icons-material/Add';
-import { Box, Button, Grid, IconButton, MenuItem, Select, styled, Tabs, Tab, TextField, Typography } from "@mui/material";
-import { useForm, Controller } from 'react-hook-form';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useLocation } from 'react-router-dom';
-import DataTable from 'react-data-table-component';
+import AddIcon from "@mui/icons-material/Add";
+import {
+  Box,
+  Button,
+  Grid,
+  IconButton,
+  MenuItem,
+  Select,
+  styled,
+  Tabs,
+  Tab,
+  TextField,
+  Typography
+} from "@mui/material";
+import { useForm, Controller } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
+import DataTable from "react-data-table-component";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
-import CloseIcon from '@mui/icons-material/Close'
+import CloseIcon from "@mui/icons-material/Close";
 import DoughnutChart from "app/views/charts/echarts/Doughnut";
 
 const StyledTextField = styled(TextField)(() => ({
@@ -21,63 +33,63 @@ const StyledTextField = styled(TextField)(() => ({
     transform: "translateY(-50%)",
     fontFamily: "sans-serif",
     fontSize: "0.875rem",
-    transition: "top 0.2s ease-out, font-size 0.2s ease-out",
+    transition: "top 0.2s ease-out, font-size 0.2s ease-out"
   },
   "& .MuiInputLabel-shrink": {
     top: "2px", // Adjust this value to move the label to the border of the box outline
-    fontSize: "0.75rem", // Optional: Reduce font size when the label is shrunk
+    fontSize: "0.75rem" // Optional: Reduce font size when the label is shrunk
   },
-  '& .MuiInputBase-root': {
+  "& .MuiInputBase-root": {
     height: 30, // Adjust the height as needed
-    fontFamily: 'sans-serif',
-    fontSize: '0.875rem',
-    backgroundColor: 'transparent', // Default background color
+    fontFamily: "sans-serif",
+    fontSize: "0.875rem",
+    backgroundColor: "transparent" // Default background color
   },
 
   "& .MuiOutlinedInput-root": {
-    position: "relative", // Ensure the label is positioned relative to the input
+    position: "relative" // Ensure the label is positioned relative to the input
   },
 
   "& .MuiInputBase-input": {
     backgroundColor: "transparent", // Input remains transparent
     height: "100%", // Ensure input takes full height
-    boxSizing: "border-box",
-  },
+    boxSizing: "border-box"
+  }
 }));
 
 const StyledSelect = styled(Select)(() => ({
-    width: '100%',
-    height: '30px', // Ensure the select component itself has a defined height
-    fontFamily: 'sans-serif',
-    fontSize: '0.875rem',
-    '& .MuiInputBase-root': {
-      height: '30px', // Apply the height to the input base
-      alignItems: 'center', // Align the content vertically
-      fontFamily: 'sans-serif',
-      fontSize: '1.10rem'
-    },
-    '& .MuiInputLabel-root': {
-      lineHeight: '30px', // Set the line height to match the height of the input
-      top: '40', // Align the label at the top of the input
-      transform: 'none', // Ensure there's no unwanted transformation
-      left: '20px', // Add padding for better spacing
-      fontFamily: 'sans-serif',
-      fontSize: '0.875rem'
-    },
-    '& .MuiInputLabel-shrink': {
-      top: '-6px', // Move the label when focused or with content
-    },
+  width: "100%",
+  height: "30px", // Ensure the select component itself has a defined height
+  fontFamily: "sans-serif",
+  fontSize: "0.875rem",
+  "& .MuiInputBase-root": {
+    height: "30px", // Apply the height to the input base
+    alignItems: "center", // Align the content vertically
+    fontFamily: "sans-serif",
+    fontSize: "1.10rem"
+  },
+  "& .MuiInputLabel-root": {
+    lineHeight: "30px", // Set the line height to match the height of the input
+    top: "40", // Align the label at the top of the input
+    transform: "none", // Ensure there's no unwanted transformation
+    left: "20px", // Add padding for better spacing
+    fontFamily: "sans-serif",
+    fontSize: "0.875rem"
+  },
+  "& .MuiInputLabel-shrink": {
+    top: "-6px" // Move the label when focused or with content
+  }
 }));
 
 const customSort = (data, column, direction) => {
   return [...data].sort((a, b) => {
-    const aValue = a[column] || ''; // Handle undefined values
-    const bValue = b[column] || ''; // Handle undefined values
+    const aValue = a[column] || ""; // Handle undefined values
+    const bValue = b[column] || ""; // Handle undefined values
     if (aValue < bValue) {
-      return direction === 'asc' ? -1 : 1;
+      return direction === "asc" ? -1 : 1;
     }
     if (aValue > bValue) {
-      return direction === 'asc' ? 1 : -1;
+      return direction === "asc" ? 1 : -1;
     }
     return 0;
   });
@@ -89,7 +101,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   const location = useLocation();
 
   const queryParams = new URLSearchParams(location.search);
-  const queryTab = queryParams.get('tab') || '4';
+  const queryTab = queryParams.get("tab") || "4";
 
   const [activeTab, setActiveTab] = useState(initialTab || queryTab);
 
@@ -125,8 +137,8 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   const [loading, setLoading] = useState(true);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [sortColumn, setSortColumn] = useState(''); // Column being sorted
-  const [sortDirection, setSortDirection] = useState('asc');
+  const [sortColumn, setSortColumn] = useState(""); // Column being sorted
+  const [sortDirection, setSortDirection] = useState("asc");
   const [selectedDocument, setSelectedDocument] = useState(null);
 
   const [approvedCount, setApprovedCount] = useState(0);
@@ -138,30 +150,32 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   useEffect(() => {
     if (waitingForActionCount > 0) {
       setCount(waitingForActionCount);
-      setActiveTab('4');
+      setActiveTab("4");
     } else if (approvedCount > 0) {
       setCount(approvedCount);
-      setActiveTab('1');
+      setActiveTab("1");
     } else if (rejectedCount > 0) {
       setCount(rejectedCount);
-      setActiveTab('2');
+      setActiveTab("2");
     } else if (pendingCount > 0) {
       setCount(pendingCount);
-      setActiveTab('3');
+      setActiveTab("3");
     }
   }, [waitingForActionCount, approvedCount, rejectedCount, pendingCount]);
 
-  const [selectedType, setSelectedType] = useState('');
+  const [selectedType, setSelectedType] = useState("");
 
-  const filteredData = selectedType ? psgList.filter(record => record.type === Number(selectedType)) : psgList;
+  const filteredData = selectedType
+    ? psgList.filter((record) => record.type === Number(selectedType))
+    : psgList;
 
   const handleSort = (column, sortDirection) => {
     setSortColumn(column.selector); // Store column to be sorted
     setSortDirection(sortDirection); // Store sort direction
   };
 
-  const userToken = useSelector((state)=>{
-    return state.token;//.data;
+  const userToken = useSelector((state) => {
+    return state.token; //.data;
   });
 
   useEffect(() => {
@@ -171,12 +185,12 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count', {
-          method: 'GET',
+        const response = await fetch("http://localhost:3000/policy/user/count", {
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
-          },
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}` // Include JWT token in the headers
+          }
         });
         const data = await response.json();
 
@@ -193,7 +207,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
 
         // setPsgList(formattedData);
       } catch (error) {
-        console.error('Error fetching data', error);
+        console.error("Error fetching data", error);
       } finally {
         setLoading(false);
       }
@@ -206,45 +220,42 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   const fetchData = async (tab, page, rows) => {
     setLoading(true);
     try {
-      let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
+      let url = `http://localhost:3000/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
       const response = await fetch(url, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
-        },
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}` // Include JWT token in the headers
+        }
       });
       const data = await response.json();
       setPsgList(data); // Adjust this based on your API response structure
-      if (tab == 1){
+      if (tab == 1) {
         setCount(approvedCount || 0);
-      }
-      else if (tab == 2){
+      } else if (tab == 2) {
         setCount(rejectedCount || 0);
-      }
-      else if (tab == 3){
+      } else if (tab == 3) {
         setCount(pendingCount || 0);
-      }
-      else if (tab == 4){
+      } else if (tab == 4) {
         setCount(waitingForActionCount || 0);
       }
-      if(userToken){
-      const decodedToken = jwtDecode(userToken);
-      if (decodedToken.role_id) {
-        setRoleId(decodedToken.role_id);
-      }
-      if (decodedToken.user_id) {
-        setUserId(decodedToken.user_id);
-      }
+      if (userToken) {
+        const decodedToken = jwtDecode(userToken);
+        if (decodedToken.role_id) {
+          setRoleId(decodedToken.role_id);
+        }
+        if (decodedToken.user_id) {
+          setUserId(decodedToken.user_id);
+        }
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
   const handleInputChange = (event) => {
@@ -257,62 +268,67 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     setLoading(true);
 
     setIsBtnDisabled(true);
-        setTimeout(() => {
-            setIsBtnDisabled(false);
-        }, 1000);
+    setTimeout(() => {
+      setIsBtnDisabled(false);
+    }, 1000);
 
     setIsSearching(true);
     setSelectedType(selectedType);
     // setSearchValue(searchValue.trimStart());
-  
+
     try {
       // First API call: Fetch data based on searchValue
-      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:3000/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`
+          }
+        }
+      );
       const data = await response.json();
       setPsgList(data);
-  
+
       // Second API call: Fetch the count data based on searchValue
-      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
-  
+      const countResponse = await fetch(
+        `http://localhost:3000/policy/user/count?search=${searchValue}&type=${selectedType}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`
+          }
+        }
+      );
+
       if (!countResponse.ok) {
-        throw new Error('Failed to fetch count data');
+        throw new Error("Failed to fetch count data");
       }
-  
+
       const countData = await countResponse.json();
-  
+
       // Check tab values and set the count based on the tab
       if (tab === "1") setCount(countData.approved);
       if (tab === "2") setCount(countData.rejected);
       if (tab === "3") setCount(countData.pending);
       if (tab === "4") setCount(countData.waitingForAction);
-  
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
-  }; 
+  };
 
   const handleSearchData = async (tab, page, rows, searchValue, selectedType) => {
     setLoading(true);
 
     setIsBtnDisabled(true);
-        setTimeout(() => {
-            setIsBtnDisabled(false);
-        }, 1000);
-  
+    setTimeout(() => {
+      setIsBtnDisabled(false);
+    }, 1000);
+
     // Check for empty search value and return early if invalid
     // if (!(searchValue.trimStart())) {
     //   toast.error("Please provide some search words");
@@ -326,58 +342,62 @@ const PSGTable = ({ initialTab, onTabChange }) => {
 
     setIsSearching(true);
     setSearchValue(searchValue.trimStart());
-  
+
     try {
       // First API call: Fetch data based on searchValue
-      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:3000/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`
+          }
+        }
+      );
       const data = await response.json();
       setPsgList(data);
-  
+
       // Second API call: Fetch the count data based on searchValue
-      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
-  
+      const countResponse = await fetch(
+        `http://localhost:3000/policy/user/count?search=${searchValue}&type=${selectedType}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`
+          }
+        }
+      );
+
       if (!countResponse.ok) {
-        throw new Error('Failed to fetch count data');
+        throw new Error("Failed to fetch count data");
       }
-  
+
       const countData = await countResponse.json();
-  
+
       // Check tab values and set the count based on the tab
       if (tab === "1") setCount(countData.approved);
       if (tab === "2") setCount(countData.rejected);
       if (tab === "3") setCount(countData.pending);
       if (tab === "4") setCount(countData.waitingForAction);
-  
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   const pendingApprover = selectedDocument?.Policy_status?.find(
-    status => status.approver_id === selectedDocument?.pending_at_id
+    (status) => status.approver_id === selectedDocument?.pending_at_id
   );
 
   // If pendingApprover is not found and pending_at_id is equal to initiator_id, set name to initiator's name
-  const pendingApproverName = pendingApprover 
-      ? pendingApprover.approver_details?.emp_name 
-      : (selectedDocument?.pending_at_id === selectedDocument?.initiator_id 
-          ? 'Initiator' 
-          : 'No pending approver');
-
+  const pendingApproverName = pendingApprover
+    ? pendingApprover.approver_details?.emp_name
+    : selectedDocument?.pending_at_id === selectedDocument?.initiator_id
+    ? "Initiator"
+    : "No pending approver";
 
   const getDisplayPolicyId = (policy_id) => {
     return "PL" + String(policy_id).padStart(7, "0");
@@ -385,66 +405,77 @@ const PSGTable = ({ initialTab, onTabChange }) => {
 
   const columns1 = [
     {
-      name: 'Policy ID',
-      selector: row => row.id || 'N/A',
+      name: "Policy ID",
+      selector: (row) => row.id || "N/A",
       // sortable: true,
       // center: true,
       cell: (row) => (
-        <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
-          {getDisplayPolicyId(row.id) || 'N/A'}
+        <div style={{ textAlign: "left", width: "100%", paddingLeft: "8px" }}>
+          {getDisplayPolicyId(row.id) || "N/A"}
         </div>
       ),
-      width: '22%',
+      width: "22%"
     },
     {
-      name: 'Document Title',
-      selector: row => row.title || 'N/A',
+      name: "Document Title",
+      selector: (row) => row.title || "N/A",
       sortable: true,
       // center: true,
-      width: '35%',
+      width: "35%",
       cell: (row) => (
         <Typography
           variant="body2"
-          sx={{ textAlign: 'left', cursor: 'pointer', color: '#ee8812', textDecoration: 'none', paddingLeft: '8px', fontWeight: 'bold', fontSize: '16px' }}
+          sx={{
+            textAlign: "left",
+            cursor: "pointer",
+            color: "#ee8812",
+            textDecoration: "none",
+            paddingLeft: "8px",
+            fontWeight: "bold",
+            fontSize: "16px"
+          }}
           onClick={() => handleRowClick(row)}
         >
           {row.title}
         </Typography>
-      ),
+      )
     },
     {
-      name: 'Type',
-      selector: row => row.type || 'N/A',
+      name: "Type",
+      selector: (row) => row.type || "N/A",
       sortable: true,
       // center: true,
-      width: '15%',
+      width: "15%",
       cell: (row) => {
         const typeMapping = {
-          1: 'Policy',
-          2: 'SOP',
-          3: 'Guidance Note'
+          1: "Policy",
+          2: "SOP",
+          3: "Guidance Note"
         };
-        const displayType = typeMapping[row.type] || 'N/A';
+        const displayType = typeMapping[row.type] || "N/A";
         return (
-          <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
-            {displayType}
-          </div>
+          <div style={{ textAlign: "left", width: "100%", paddingLeft: "8px" }}>{displayType}</div>
         );
       }
     },
     {
-      name: activeTab == 3 ? 'Pending At' : 'Updated On', // Conditionally render the name
-      selector: row => activeTab == 3 ? row.pending_at_details?.emp_name || 'N/A' : new Date(row.updatedAt).toLocaleDateString() || 'N/A',
+      name: activeTab == 3 ? "Pending At" : "Updated On", // Conditionally render the name
+      selector: (row) =>
+        activeTab == 3
+          ? row.pending_at_details?.emp_name || "N/A"
+          : new Date(row.updatedAt).toLocaleDateString() || "N/A",
       sortable: true,
       cell: (row) => {
         return (
-          <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
-            {activeTab == 3 ? (row.pending_at_details?.emp_name || 'N/A') : new Date(row.updatedAt).toLocaleDateString() || 'N/A'}
+          <div style={{ textAlign: "left", width: "100%", paddingLeft: "8px" }}>
+            {activeTab == 3
+              ? row.pending_at_details?.emp_name || "N/A"
+              : new Date(row.updatedAt).toLocaleDateString() || "N/A"}
           </div>
         );
       },
-      width: '25%',
-    },
+      width: "25%"
+    }
   ];
 
   const columns = columns1;
@@ -466,10 +497,10 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   const handleRowsPerPageChange = (newRowsPerPage) => {
     if (isSearching) {
       setRowsPerPage(newRowsPerPage);
-      handleSearchData(activeTab, currentPage, newRowsPerPage, searchValue);  // Search API with updated rows per page
+      handleSearchData(activeTab, currentPage, newRowsPerPage, searchValue); // Search API with updated rows per page
     } else {
       setRowsPerPage(newRowsPerPage);
-      fetchData(activeTab, currentPage, newRowsPerPage);  // Default rows per page change
+      fetchData(activeTab, currentPage, newRowsPerPage); // Default rows per page change
     }
   };
 
@@ -478,8 +509,8 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   }, [activeTab, currentPage, rowsPerPage]);
 
   useEffect(() => {
-    if(userToken) {
-    handleSearchType(activeTab, currentPage, rowsPerPage, searchValue, selectedType);
+    if (userToken) {
+      handleSearchType(activeTab, currentPage, rowsPerPage, searchValue, selectedType);
     }
   }, [selectedType, activeTab, currentPage, rowsPerPage, searchValue]);
 
@@ -489,14 +520,23 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     // setDecision('');
     // setRemarks('');
     // setUploadedFile(null);
-    navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status, activeTab }});
+    navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status, activeTab } });
   };
-
 
   return (
     <Grid container spacing={2}>
       <Grid item lg={6} md={6} sm={6} xs={6}>
-        <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1rem', marginLeft: { sm: 2, xs: 2 }, marginTop: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontFamily: "sans-serif",
+            fontWeight: "bold",
+            fontSize: "1rem",
+            marginLeft: { sm: 2, xs: 2 },
+            marginTop: { sm: 2, xs: 2 },
+            marginRight: { sm: 2, xs: 2 }
+          }}
+        >
           Policies, SOPs and Guidance notes
         </Typography>
       </Grid>
@@ -506,25 +546,38 @@ const PSGTable = ({ initialTab, onTabChange }) => {
             variant="contained"
             startIcon={<AddIcon />}
             sx={{
-              fontFamily: 'sans-serif',
-              fontSize: '0.875rem',
-              textTransform: 'none',
+              fontFamily: "sans-serif",
+              fontSize: "0.875rem",
+              textTransform: "none",
               marginTop: { sm: 2, xs: 2 },
-              height: '30px',
-              backgroundColor: '#ee8812',
-              '&:hover': {
-                backgroundColor: 'rgb(249, 83, 22)',
-              },
+              height: "30px",
+              backgroundColor: "#ee8812",
+              "&:hover": {
+                backgroundColor: "rgb(249, 83, 22)"
+              }
             }}
-            onClick={() => navigate('/initiate/psg')}
+            onClick={() => navigate("/initiate/psg")}
           >
             New
           </Button>
         </Grid>
       )}
-      <Grid item lg={(roleId === 1 || roleId === 3 || roleId === 9) ? 3 : 6} md={(roleId === 1 || roleId === 3 || roleId === 9) ? 3 : 6} sm={(roleId === 1 || roleId === 3 || roleId === 9) ? 3 : 6} xs={(roleId === 1 || roleId === 3 || roleId === 9) ? 3 : 6}>
-        <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 2, mr: 2 }}>
-          <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2, mt: 0.5 }}>
+      <Grid
+        item
+        lg={roleId === 1 || roleId === 3 || roleId === 9 ? 3 : 6}
+        md={roleId === 1 || roleId === 3 || roleId === 9 ? 3 : 6}
+        sm={roleId === 1 || roleId === 3 || roleId === 9 ? 3 : 6}
+        xs={roleId === 1 || roleId === 3 || roleId === 9 ? 3 : 6}
+      >
+        <Grid
+          item
+          xs={12}
+          sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", mt: 2, mr: 2 }}
+        >
+          <Typography
+            variant="h5"
+            sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", mr: 2, mt: 0.5 }}
+          >
             Type
           </Typography>
           <Controller
@@ -537,7 +590,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
                 id="documentType"
                 {...field}
                 sx={{
-                  width: '180px',
+                  width: "180px"
                 }}
                 onChange={(e) => {
                   field.onChange(e);
@@ -562,23 +615,66 @@ const PSGTable = ({ initialTab, onTabChange }) => {
           textColor="inherit"
           indicatorColor="secondary"
         >
-          <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Approved" value="1" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Rejected" value="2" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Pending" value="3" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab
+            label="Waiting for Action"
+            value="4"
+            sx={{
+              fontFamily: "sans-serif",
+              fontSize: "1rem",
+              fontWeight: 100,
+              textTransform: "none"
+            }}
+          />
+          <Tab
+            label="Approved"
+            value="1"
+            sx={{
+              fontFamily: "sans-serif",
+              fontSize: "1rem",
+              fontWeight: 100,
+              textTransform: "none"
+            }}
+          />
+          <Tab
+            label="Rejected"
+            value="2"
+            sx={{
+              fontFamily: "sans-serif",
+              fontSize: "1rem",
+              fontWeight: 100,
+              textTransform: "none"
+            }}
+          />
+          <Tab
+            label="Pending"
+            value="3"
+            sx={{
+              fontFamily: "sans-serif",
+              fontSize: "1rem",
+              fontWeight: 100,
+              textTransform: "none"
+            }}
+          />
         </Tabs>
       </Grid>
-      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
+      <Grid
+        item
+        lg={12}
+        md={12}
+        sm={12}
+        xs={12}
+        sx={{ marginLeft: 2, display: "flex", alignItems: "center" }}
+      >
         <StyledTextField
           value={searchValue}
           onChange={handleInputChange}
           placeholder="Enter Policy ID or Title"
-          sx={{ width: '300px', marginRight: 2 }}
+          sx={{ width: "300px", marginRight: 2 }}
         />
         {searchValue && (
           <IconButton
             onClick={() => {
-              setSearchValue(''); // Clear the search field
+              setSearchValue(""); // Clear the search field
               setIsSearching(false); // Reset isSearching state
               fetchData(activeTab, currentPage, rowsPerPage); // Fetch data without search
             }}
@@ -613,29 +709,29 @@ const PSGTable = ({ initialTab, onTabChange }) => {
             customStyles={{
               table: {
                 style: {
-                  width: '100%',
+                  width: "100%",
                   autowidth: false,
                   scrollX: true,
                   responsive: true,
-                  tableLayout: 'fixed',
-                },
+                  tableLayout: "fixed"
+                }
               },
               headCells: {
                 style: {
-                  fontSize: '0.875rem',
-                  fontFamily: 'sans-serif',
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                },
+                  fontSize: "0.875rem",
+                  fontFamily: "sans-serif",
+                  fontWeight: "bold",
+                  textAlign: "center"
+                }
               },
               cells: {
                 style: {
-                  fontFamily: 'sans-serif',
-                  fontSize: '0.875rem',
-                  textAlign: 'center',
-                  padding: '8px',
-                },
-              },
+                  fontFamily: "sans-serif",
+                  fontSize: "0.875rem",
+                  textAlign: "center",
+                  padding: "8px"
+                }
+              }
             }}
           />
         </Box>

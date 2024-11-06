@@ -9,6 +9,7 @@ import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
 import toast from "react-hot-toast";
 import CloseIcon from '@mui/icons-material/Close';
+import useCustomFetch from "../../../hooks/useFetchWithAuth"
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
@@ -100,6 +101,8 @@ export default function PSGTable() {
   const [tabledata, setTableData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const customFetchWithAuth=useCustomFetch();
+
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
     setCurrentPage(1);
@@ -156,14 +159,15 @@ export default function PSGTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count', {
+        const response = await customFetchWithAuth('http://localhost:3000/policy/user/count', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
           },
         });
-        const data = await response.json();
+        //console.log("testing response - ",response);
+        const data =response;
 
         if (data && data.status) {
           const approvedCount = data.approved;
@@ -191,8 +195,8 @@ export default function PSGTable() {
   const fetchData = async (tab, page, rows) => {
     setLoading(true);
     try {
-      let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
-      const response = await fetch(url, {
+      let url = `http://localhost:3000/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
+      const response = await customFetchWithAuth(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -248,17 +252,17 @@ export default function PSGTable() {
     setSelectedType(selectedType);
   
     try {
-      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
+      const response = await customFetchWithAuth(`http://localhost:3000/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${userToken}`,
         },
       });
-      const data = await response.json();
+      const data =response;
       setPsgList(data);
   
-      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, {
+      const countResponse = await customFetchWithAuth(`http://localhost:3000/policy/user/count?search=${searchValue}&type=${selectedType}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -266,11 +270,11 @@ export default function PSGTable() {
         },
       });
   
-      if (!countResponse.ok) {
+      if (!countResponse.status) {
         throw new Error('Failed to fetch count data');
       }
   
-      const countData = await countResponse.json();
+      const countData = countResponse;
   
       if (tab === "1") setCount(countData.approved);
       if (tab === "2") setCount(countData.rejected);
@@ -308,18 +312,18 @@ export default function PSGTable() {
   
     try {
       // First API call: Fetch data based on searchValue
-      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
+      const response = await customFetchWithAuth(`http://localhost:3000/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${userToken}`,
         },
       });
-      const data = await response.json();
+      const data =  response;
       setPsgList(data);
   
       // Second API call: Fetch the count data based on searchValue
-      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, {
+      const countResponse = await customFetchWithAuth(`http://localhost:3000/policy/user/count?search=${searchValue}&type=${selectedType}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -327,11 +331,11 @@ export default function PSGTable() {
         },
       });
   
-      if (!countResponse.ok) {
+      if (!countResponse.status) {
         throw new Error('Failed to fetch count data');
       }
   
-      const countData = await countResponse.json();
+      const countData =  countResponse;
   
       // Check tab values and set the count based on the tab
       if (tab === "1") setCount(countData.approved);
