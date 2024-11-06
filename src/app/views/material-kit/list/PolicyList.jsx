@@ -185,7 +185,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:3000/policy/user/count", {
+        const response = await fetch("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -220,7 +220,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   const fetchData = async (tab, page, rows) => {
     setLoading(true);
     try {
-      let url = `http://localhost:3000/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
+      let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -279,7 +279,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     try {
       // First API call: Fetch data based on searchValue
       const response = await fetch(
-        `http://localhost:3000/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,
         {
           method: "GET",
           headers: {
@@ -293,7 +293,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
 
       // Second API call: Fetch the count data based on searchValue
       const countResponse = await fetch(
-        `http://localhost:3000/policy/user/count?search=${searchValue}&type=${selectedType}`,
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,
         {
           method: "GET",
           headers: {
@@ -346,7 +346,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     try {
       // First API call: Fetch data based on searchValue
       const response = await fetch(
-        `http://localhost:3000/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,
         {
           method: "GET",
           headers: {
@@ -360,7 +360,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
 
       // Second API call: Fetch the count data based on searchValue
       const countResponse = await fetch(
-        `http://localhost:3000/policy/user/count?search=${searchValue}&type=${selectedType}`,
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,
         {
           method: "GET",
           headers: {

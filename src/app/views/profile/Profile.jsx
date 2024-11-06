@@ -124,11 +124,11 @@ const Profile = () => {
   useEffect(() => {
     const decodedToken = jwtDecode(userToken);
     // Set profile image using decodedToken's profile_pic initially
-    setProfileImage(`http://localhost:3000/profile_image/${decodedToken.profile_pic}`);
+    setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
 
     // If profile_pic exists, override with its value
     if (profile_pic) {
-      setProfileImage(`http://localhost:3000/profile_image/${profile_pic}`);
+      setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
     }
   }, [profile_pic, userToken]);
 
@@ -152,10 +152,10 @@ const Profile = () => {
           setEmpDesignation(decodedToken.designation);
         }
         // if (decodedToken.profile_pic) {
-        //   setProfileImage(`http://localhost:3000/profile_image/${profile_pic}`);
+        //   setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
         // }
         // if (decodedToken.profile_pic) {
-        //   setStoreImage(`http://localhost:3000/profile_image/${decodedToken.profile_pic}`);
+        //   setStoreImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
         // }
       } catch (error) {
         console.error("Invalid token:", error);
@@ -213,7 +213,7 @@ const Profile = () => {
     const formData = new FormData();
     formData.append("files[]", selectedFile);
 
-    const url = "http://localhost:3000/auth/updateProfile";
+    const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/updateProfile";
 
     const submitPromise1 = fetch(url, {
       method: "POST",
@@ -284,7 +284,7 @@ const Profile = () => {
       return;
     }
 
-    const url = "http://localhost:3000/auth/updatePassword";
+    const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/updatePassword";
     const requestData = {
       newPassword: newpassword
     };

@@ -319,7 +319,7 @@ export default function PolicyDetails() {
   useEffect(() => {
     // Fetch reviewers from the API
     axios
-      .get("http://localhost:3000/auth/getReviewer", {
+      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer", {
         headers: {
           Authorization: `Bearer ${userToken}` // Include the JWT token in the Authorization header
         }
@@ -342,7 +342,7 @@ export default function PolicyDetails() {
   useEffect(() => {
     // Fetch reviewers from the API
     axios
-      .get("http://localhost:3000/auth/getApprover", {
+      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover", {
         headers: {
           Authorization: `Bearer ${userToken}` // Include the JWT token in the Authorization header
         }
@@ -364,7 +364,7 @@ export default function PolicyDetails() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/auth/get-user-groups", {
+      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", {
         headers: {
           Authorization: `Bearer ${userToken}`
         }
@@ -585,7 +585,7 @@ export default function PolicyDetails() {
     setError(null); // Reset error
 
     try {
-      const response = await fetch(`http://localhost:3000/policy/${documentId}`, {
+      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/${documentId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -797,7 +797,7 @@ export default function PolicyDetails() {
       return;
     }
 
-    const url = "http://localhost:3000/policy/update";
+    const url = "https://policyuat.spandanasphoorty.com/policy_apis/policy/update";
     const formData = new FormData(); // Create a FormData object
 
     uploadedFile1.forEach((file) => {
@@ -1182,7 +1182,7 @@ export default function PolicyDetails() {
                                                 }}
                                               >
                                                 <a
-                                                  href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                  href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
                                                   download
@@ -1317,7 +1317,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -1458,7 +1458,7 @@ export default function PolicyDetails() {
                                                     }}
                                                   >
                                                     <a
-                                                      href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                      href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                       target="_blank"
                                                       rel="noopener noreferrer"
                                                       download
@@ -1578,7 +1578,7 @@ export default function PolicyDetails() {
                                                     }}
                                                   >
                                                     <a
-                                                      href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                      href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                       target="_blank"
                                                       rel="noopener noreferrer"
                                                       download
@@ -1714,7 +1714,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -1756,7 +1756,7 @@ export default function PolicyDetails() {
                                     </div>
                                     <div>
                                         <a
-                                        href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                        href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         download
@@ -1876,7 +1876,7 @@ export default function PolicyDetails() {
                                                       }}
                                                     >
                                                       <a
-                                                        href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                        href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         download
@@ -1996,7 +1996,7 @@ export default function PolicyDetails() {
                                                       }}
                                                     >
                                                       <a
-                                                        href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                        href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         download
@@ -2133,7 +2133,7 @@ export default function PolicyDetails() {
                                                 }}
                                               >
                                                 <a
-                                                  href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                  href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
                                                   download
@@ -2253,7 +2253,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -2375,7 +2375,7 @@ export default function PolicyDetails() {
                                                 }}
                                               >
                                                 <a
-                                                  href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                  href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
                                                   download
@@ -2500,7 +2500,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -2617,7 +2617,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -2735,7 +2735,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -2849,7 +2849,7 @@ export default function PolicyDetails() {
                                         }}
                                       >
                                         <a
-                                          href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                          href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           download

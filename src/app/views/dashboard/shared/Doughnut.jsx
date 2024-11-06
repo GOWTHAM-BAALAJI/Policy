@@ -26,7 +26,7 @@ export default function DoughnutChart({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:3000/policy/user/count", {
+        const response = await fetch("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

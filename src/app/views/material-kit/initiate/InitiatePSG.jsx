@@ -269,7 +269,7 @@ const InitiatePSG = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/auth/getReviewer", {
+      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer", {
         headers: {
           Authorization: `Bearer ${userToken}`
         }
@@ -290,7 +290,7 @@ const InitiatePSG = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/auth/getApprover", {
+      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover", {
         headers: {
           Authorization: `Bearer ${userToken}`
         }
@@ -311,7 +311,7 @@ const InitiatePSG = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/auth/get-user-groups", {
+      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", {
         headers: {
           Authorization: `Bearer ${userToken}`
         }
@@ -423,7 +423,7 @@ const InitiatePSG = () => {
       return;
     }
 
-    const url = "http://localhost:3000/policy/";
+    const url = "https://policyuat.spandanasphoorty.com/policy_apis/policy/";
     const formData = new FormData();
 
     uploadedFiles.forEach((file) => {

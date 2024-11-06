@@ -117,7 +117,7 @@ const ApplicableTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:3000/policy/user/count?display=true", {
+        const response = await fetch("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -143,7 +143,7 @@ const ApplicableTable = () => {
   const fetchData = async (page, rows) => {
     setLoading(true);
     try {
-      let url = `http://localhost:3000/policy/user?display=true&page=${page}&rows=${rows}`;
+      let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}`;
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -195,7 +195,7 @@ const ApplicableTable = () => {
     try {
       // First API call: Fetch data based on searchValue
       const response = await fetch(
-        `http://localhost:3000/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,
         {
           method: "GET",
           headers: {
@@ -209,7 +209,7 @@ const ApplicableTable = () => {
 
       // Second API call: Fetch the count data based on searchValue
       const countResponse = await fetch(
-        `http://localhost:3000/policy/user/count?search=${searchValue}&type=${selectedType}`,
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,
         {
           method: "GET",
           headers: {
@@ -258,7 +258,7 @@ const ApplicableTable = () => {
     try {
       // First API call: Fetch data based on searchValue
       const response = await fetch(
-        `http://localhost:3000/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}`,
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}`,
         {
           method: "GET",
           headers: {
@@ -272,7 +272,7 @@ const ApplicableTable = () => {
 
       // Second API call: Fetch the count data based on searchValue
       const countResponse = await fetch(
-        `http://localhost:3000/policy/user/count?display=true&search=${searchValue}`,
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true&search=${searchValue}`,
         {
           method: "GET",
           headers: {

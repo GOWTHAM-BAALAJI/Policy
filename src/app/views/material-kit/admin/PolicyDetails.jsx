@@ -133,7 +133,6 @@ export default function PolicyDetails() {
   const [approvalMembersOptions, setApprovalMembersOptions] = useState([]);
   const [userGroupOptions, setUserGroupOptions] = useState([]);
   const [categorizedUserGroupOptions, setCategorizedUserGroupOptions] = useState({});
-  console.log("User group options -------------------", userGroupOptions);
   const [sortColumn, setSortColumn] = useState(""); // Column being sorted
   const [sortDirection, setSortDirection] = useState("asc");
   const [loading, setLoading] = useState(true);
@@ -153,104 +152,10 @@ export default function PolicyDetails() {
   const [selectedApprovalMembers, setSelectedApprovalMembers] = useState([]);
   const [useDefaultValue, setUseDefaultValue] = useState(true);
   const [priorityOrder, setPriorityOrder] = useState([]);
-  const [selectedUserGroup, setSelectedUserGroup] = useState([]);
-  const [selectedUserGroupSum, setSelectedUserGroupSum] = useState(0);
-  console.log("Initial selected user group from the useEffect: ", selectedUserGroup);
-
-  useEffect(() => {
-    if (selectedDocument?.user_group && userGroupOptions.length > 0) {
-      // Initialize selectedUserGroup based on selectedDocument.user_group
-      const initialSelectedGroups = userGroupOptions
-        .filter((group) => selectedDocument.user_group[group.label] === 1) // Filter groups with value 1
-        .map((group) => group.label); // Extract only labels
-      setSelectedUserGroup(initialSelectedGroups);
-      console.log("Initial selected usergroups: ", initialSelectedGroups);
-      const sum = initialSelectedGroups.reduce((acc, currentLabel) => {
-        // Find the corresponding group value based on the label
-        const group = userGroupOptions.find((group) => group.label === currentLabel);
-        const groupValue = group ? group.value : 0; // Default to 0 if not found
-        console.log("Current value being summed: ", groupValue); // Log current value
-        return acc + groupValue; // Add to the sum
-      }, 0);
-      setSelectedUserGroupSum(sum);
-    }
-  }, [selectedDocument, userGroupOptions]);
-
-  const handleSelectChange = (event) => {
-    const value = event.target.value; // Get selected value(s)
-    const newSelectedGroups = Array.isArray(value) ? value : [value]; // Ensure it's an array
-
-    console.log("Selected groups before summation: ", newSelectedGroups);
-
-    // Calculate the sum of selected user group values
-    const sum = newSelectedGroups.reduce((acc, currentLabel) => {
-      // Find the corresponding group value based on the label
-      const group = userGroupOptions.find((group) => group.label === currentLabel);
-      const groupValue = group ? group.value : 0; // Default to 0 if not found
-      console.log("Current value being summed: ", groupValue); // Log current value
-      return acc + groupValue; // Add to the sum
-    }, 0);
-
-    setSelectedUserGroup(newSelectedGroups); // Update selected groups
-    setSelectedUserGroupSum(sum); // Update sum
-    console.log("User group: ", newSelectedGroups);
-    console.log("User group sum: ", sum);
-  };
-
-  useEffect(() => {
-    console.log("Selected User group total sum:", selectedUserGroupSum);
-  }, [selectedUserGroupSum]);
-
-  const [userGroupMap, setUserGroupMap] = useState(new Map());
-
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const userToken = useSelector((state) => {
     return state.token; //.data;
   });
-
-  const filteredApprovalMembers = selectedReviewer
-    ? approvalMembersOptions.filter((member) => member.value !== selectedReviewer)
-    : approvalMembersOptions;
-
-  const approvalMembers = approvalMembersWithPriority.map((member) => member.value.toString());
-
-  const handleDropdownOpen = () => {
-    setIsDropdownOpen(true);
-    // Load fresh approvalMembersOptions here if needed
-  };
-
-  const handleDropdownClose = () => {
-    setIsDropdownOpen(false);
-  };
-
-  const handleSelectChangeApprovalMembers = (event) => {
-    const { value } = event.target;
-
-    // Ensure that we merge the existing selected members with the new selection
-    const updatedSelection = Array.isArray(value) ? [...value] : [];
-
-    // Filter only valid selected values from options to prevent unknowns
-    const validatedSelection = updatedSelection
-      .map((selectedValue) => {
-        const member = approvalMembersOptions.find((m) => m.value === selectedValue);
-        return member ? { value: selectedValue, label: member.label } : null; // Handle unknowns
-      })
-      .filter(Boolean); // Remove null (unknown) values
-
-    // Recalculate priority order starting from 1 after update
-    const newPriorityOrder = validatedSelection.map((member, index) => ({
-      value: member.value,
-      priority: index + 1, // Reset priority starting from 1
-      label: member.label
-    }));
-
-    // Update state: priority, selected members, and approval members with priority
-    setSelectedApprovalMembers(validatedSelection.map((member) => member.value)); // Update for dropdown and value tracking
-    setApprovalMembersWithPriority(newPriorityOrder); // Update for rendering in the field
-    setPriorityOrder(newPriorityOrder.map((member) => member.value)); // Set priority order list
-    setUseDefaultValue(false); // Disable default value tracking once updated
-  };
 
   useEffect(() => {
     if (selectedDocument) {
@@ -259,33 +164,6 @@ export default function PolicyDetails() {
       setDocumentTitle(selectedDocument.title);
       setDocumentDescription(selectedDocument.description);
       setSelectedReviewer(selectedDocument.reviewer_id || "");
-      // const userGroup = selectedDocument.user_group;
-      // if (userGroup) {
-      //   const formattedUserGroup = {
-      //     Audit: userGroup.Audit,
-      //     AVP: userGroup.AVP,
-      //     BM: userGroup.BM,
-      //     BQM: userGroup.BQM,
-      //     CBO: userGroup.CBO,
-      //     CM: userGroup.CM,
-      //     CRA: userGroup.CRA,
-      //     CRM: userGroup.CRM,
-      //     EVP: userGroup.EVP,
-      //     FICM: userGroup.FICM,
-      //     FIELD_ADMIN: userGroup.FIELD_ADMIN,
-      //     FIELD_HR: userGroup.FIELD_HR,
-      //     LO: userGroup.LO,
-      //     SVP: userGroup.SVP,
-      //     TRAINING_TEAM: userGroup.TRAINING_TEAM,
-      //     VP: userGroup.VP,
-      //     HO: userGroup.HO
-      //   };
-      //   setSelectedUserGroup(formattedUserGroup);
-      //   console.log("Selected user group: ", formattedUserGroup);
-      //   fetchUserGroup(formattedUserGroup);
-      // } else {
-      //   console.error("User group is not defined", userGroup);
-      // }
       if (Array.isArray(selectedDocument.Policy_status)) {
         const approvalMembers = selectedDocument.Policy_status.filter(
           (member) => member.priority > 2
@@ -320,7 +198,7 @@ export default function PolicyDetails() {
   useEffect(() => {
     // Fetch reviewers from the API
     axios
-      .get("http://localhost:3000/auth/getReviewer", {
+      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer", {
         headers: {
           Authorization: `Bearer ${userToken}` // Include the JWT token in the Authorization header
         }
@@ -343,7 +221,7 @@ export default function PolicyDetails() {
   useEffect(() => {
     // Fetch reviewers from the API
     axios
-      .get("http://localhost:3000/auth/getApprover", {
+      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover", {
         headers: {
           Authorization: `Bearer ${userToken}` // Include the JWT token in the Authorization header
         }
@@ -365,7 +243,7 @@ export default function PolicyDetails() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/auth/get-user-groups", {
+      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", {
         headers: {
           Authorization: `Bearer ${userToken}`
         }
@@ -401,86 +279,8 @@ export default function PolicyDetails() {
       });
   }, [userToken]);
 
-  const fetchUserGroup = async (user_group) => {
-    const valueMap = new Map();
-
-    // Mock data: typically this would be fetched from an API or database.
-    const jsonObject = Object.keys(user_group).map((key) => ({
-      user_group: key,
-      value: user_group[key] // directly use binary value from the object
-    }));
-
-    // Assuming values map directly (AVP=1, EVP=1, HO=1, SVP=1, VP=1), for example:
-    jsonObject.forEach((item) => {
-      const binaryValue = item["value"];
-      valueMap.set(item["user_group"], binaryValue);
-    });
-
-    // Resulting map: key-value pairs of each user group role to binary status (1 or 0)
-    setUserGroupMap(valueMap); // Store the map in state
-
-    console.log(valueMap);
-  };
-
-  const handleCheckboxChange = (optionValue) => {
-    setSelectedUserGroup((prevSelected) => {
-      const updatedSelection = prevSelected.includes(optionValue)
-        ? prevSelected.filter((item) => item !== optionValue) // Deselect if already selected
-        : [...prevSelected, optionValue]; // Add if not selected
-
-      // Calculate the sum of selected values
-      const newTotalValue = updatedSelection.reduce((sum, value) => sum + value, 0);
-      console.log("New total value: ", newTotalValue);
-      setSelectedUserGroupSum(newTotalValue);
-      console.log("Selected User group total sum: ", selectedUserGroupSum);
-
-      return updatedSelection;
-    });
-  };
-
-  // const valueMap = new Map();
-  // const userGroupMasterData = await UserGroupMaster.findAll();
-  // let jsonObject = [];
-  // userGroupMasterData.forEach((seqObj)=>{
-  //   jsonObject.push(seqObj.toJSON());
-  // })
-  // console.log(jsonObject);
-
-  // for(let i=0;i<jsonObject.length;i++){
-  //   console.log(Math.log2(parseInt(jsonObject[i]["value"])))
-  //   console.log(jsonObject[i]["user_group"])
-
-  //   valueMap.set(Math.log2(parseInt(jsonObject[i]["value"])),jsonObject[i]["user_group"]);
-  // }
-  // console.log(valueMap);
-
-  // const userGroupBinString = user_group.toString(2);
-  // let cUserGroupObj={};
-  // for(let i=0;i<jsonObject.length;i++){
-  //   cUserGroupObj[valueMap.get(i)]=(userGroupBinString[userGroupBinString.length-1-i]!=null)?userGroupBinString[userGroupBinString.length-1-i]:'0';
-  // }
-
-  // console.log(cUserGroupObj);
-
   const [decision, setDecision] = useState("");
-  const [remarks, setRemarks] = useState("");
-  const [uploadedFile, setUploadedFile] = useState([]);
-  const [uploadedFileName, setUploadedFileName] = useState([]);
-  const [uploadedFile1, setUploadedFile1] = useState([]);
-  const [uploadedFileName1, setUploadedFileName1] = useState([]);
-
-  const mapDecisionToNumber = (decision) => {
-    switch (decision) {
-      case "approved":
-        return 1;
-      case "reviewraised":
-        return 2;
-      case "rejected":
-        return 3;
-      default:
-        return "";
-    }
-  };
+  const [documentDecision, setDocumentDecision] = useState("");
 
   const pendingApprover = selectedDocument?.Policy_status?.find(
     (status) => status.approver_id === selectedDocument?.pending_at_id
@@ -515,65 +315,18 @@ export default function PolicyDetails() {
     }
   }, [selectedDocument?.status]);
 
-  useEffect(() => {
-    if (documentStatus === 1) {
-      setDecision("activate"); // Set default to "Deprecate this policy"
-    } else if (documentStatus === 3) {
-      setDecision("deprecate"); // Set default to "Approve this policy"
-    }
-  }, [documentStatus]);
+    useEffect(() => {
+        if (documentStatus === 1) {
+            setDecision("activate");
+            setDocumentDecision("activate");
+        } else if (documentStatus === 3) {
+            setDecision("deprecate");
+            setDocumentDecision("deprecate");
+        }
+    }, [documentStatus]);
 
   const handleDecisionChange = (event) => {
     setDecision(event.target.value);
-  };
-
-  const handleRemarksChange = (e) => {
-    if (!(remarks === "" && e.target.value === " ")) setRemarks(e.target.value);
-  };
-
-  const handleFileUpload1 = (e) => {
-    const files = Array.from(e.target.files);
-    if (uploadedFile1.length + files.length > 10) {
-      toast.error("You can only upload a maximum of 10 files.");
-      return;
-    }
-    files.forEach((file) => {
-      setUploadedFileName1((prev) => [...prev, file.name]); // Store the filenames in state
-      setUploadedFile1((prev) => [...prev, file]); // Store the file objects
-    });
-  };
-
-  const openUploadedFile1 = (index) => {
-    const fileURL = URL.createObjectURL(uploadedFile1[index]);
-    window.open(fileURL); // Open the file in a new tab
-  };
-
-  const handleRemoveFile1 = (index) => {
-    setUploadedFileName1((prev) => prev.filter((_, i) => i !== index)); // Remove the filename
-    setUploadedFile1((prev) => prev.filter((_, i) => i !== index)); // Remove the file object
-  };
-
-  const handleSort = (column, sortDirection) => {
-    setSortColumn(column.selector); // Store column to be sorted
-    setSortDirection(sortDirection); // Store sort direction
-  };
-
-  const isInitiator = (role_id) => {
-    let temp = Number(role_id);
-    const bin = temp.toString(2);
-    return bin[bin.length - 1] == "1";
-  };
-
-  const isReviewer = (role_id) => {
-    let temp = Number(role_id);
-    const bin = temp.toString(2);
-    return bin[bin.length - 2] == "1";
-  };
-
-  const isApprover = (role_id) => {
-    let temp = Number(role_id);
-    const bin = temp.toString(2);
-    return bin[bin.length - 3] == "1";
   };
 
   const isAdmin = (role_id) => {
@@ -597,7 +350,7 @@ export default function PolicyDetails() {
     setError(null); // Reset error
 
     try {
-      const response = await fetch(`http://localhost:3000/policy/${documentId}`, {
+      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/${documentId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -620,28 +373,6 @@ export default function PolicyDetails() {
     }
   };
 
-  const handleFileUpload = (e) => {
-    const files = Array.from(e.target.files);
-    if (uploadedFile.length + files.length > 10) {
-      toast.error("You can only upload a maximum of 10 files.");
-      return;
-    }
-    files.forEach((file) => {
-      setUploadedFileName((prev) => [...prev, file.name]); // Store the filenames in state
-      setUploadedFile((prev) => [...prev, file]); // Store the file objects
-    });
-  };
-
-  const openUploadedFile = (index) => {
-    const fileURL = URL.createObjectURL(uploadedFile[index]);
-    window.open(fileURL); // Open the file in a new tab
-  };
-
-  const handleRemoveFile = (index) => {
-    setUploadedFileName((prev) => prev.filter((_, i) => i !== index)); // Remove the filename
-    setUploadedFile((prev) => prev.filter((_, i) => i !== index)); // Remove the file object
-  };
-
   const handleBackClick = () => {
     navigate(-1); // Navigates to the previous page
   };
@@ -654,192 +385,20 @@ export default function PolicyDetails() {
 
     setIsBtnDisabled(true);
 
-    const mappedDecision = mapDecisionToNumber(decision);
+    // const mappedDecision = mapDecisionToNumber(decision);
 
-    if (isInitiator(roleId) && activeTab == 4) {
-      if (selectedDocument.initiator_id === userId) {
-        if (
-          !documentTitle.trimStart() ||
-          !documentDescription.trimStart() ||
-          uploadedFile.length === 0 ||
-          !selectedReviewer ||
-          approvalMembers.length === 0 ||
-          (selectedUserGroup.length === 0 && selectedUserGroupSum === 0)
-        ) {
-          toast.error("Please fill in all the required fields");
-          setIsBtnDisabled(true);
-          setTimeout(() => {
-            setIsBtnDisabled(false);
-          }, 4000);
-          return;
-        }
-      } else {
-        if (!mappedDecision) {
-          toast.error("Please fill the decision");
-          setIsBtnDisabled(true);
-          setTimeout(() => {
-            setIsBtnDisabled(false);
-          }, 4000);
-          return;
-        } else {
-          if (mappedDecision === 2) {
-            if (!remarks.trimStart() || uploadedFile1.length === 0) {
-              toast.error("Please fill the remarks and upload a file");
-              setIsBtnDisabled(true);
-              setTimeout(() => {
-                setIsBtnDisabled(false);
-              }, 4000);
-              return;
-            }
-          } else if (mappedDecision === 3) {
-            if (!remarks.trimStart()) {
-              toast.error("Please fill the remarks");
-              setIsBtnDisabled(true);
-              setTimeout(() => {
-                setIsBtnDisabled(false);
-              }, 4000);
-              return;
-            }
-          }
-        }
-      }
+    const url = documentDecision == "activate" ? "https://policyuat.spandanasphoorty.com/policy_apis/admin/depricate-policy" : "https://policyuat.spandanasphoorty.com/policy_apis/admin/reactivate-policy";
+
+    const formData = {
+        id: documentID
     }
-
-    if (
-      (isApprover(roleId) || isReviewer(roleId)) &&
-      selectedDocument.initiator_id !== userId &&
-      activeTab == 4
-    ) {
-      if (!mappedDecision) {
-        toast.error("Please fill the decision");
-        setIsBtnDisabled(true);
-        setTimeout(() => {
-          setIsBtnDisabled(false);
-        }, 4000);
-        return;
-      } else {
-        if (mappedDecision === 2) {
-          if (!remarks.trimStart() || uploadedFile1.length === 0) {
-            toast.error("Please fill the remarks and upload a file");
-            setIsBtnDisabled(true);
-            setTimeout(() => {
-              setIsBtnDisabled(false);
-            }, 4000);
-            return;
-          }
-        } else if (mappedDecision === 3) {
-          if (!remarks.trimStart()) {
-            toast.error("Please fill the remarks");
-            setIsBtnDisabled(true);
-            setTimeout(() => {
-              setIsBtnDisabled(false);
-            }, 4000);
-            return;
-          }
-        }
-      }
-    }
-
-    if (uploadedFile1.length > 10) {
-      toast.error("You can upload a maximum of 10 files only");
-      setIsBtnDisabled(true);
-      setTimeout(() => {
-        setIsBtnDisabled(false);
-      }, 4000);
-      return;
-    }
-
-    if (uploadedFile.length > 10) {
-      toast.error("You can upload a maximum of 10 files only");
-      setIsBtnDisabled(true);
-      setTimeout(() => {
-        setIsBtnDisabled(false);
-      }, 4000);
-      return;
-    }
-
-    const maxFileSizeMB = 5;
-    const maxFileSizeBytes = maxFileSizeMB * 1024 * 1024;
-
-    const oversizedFile1 = uploadedFile1.some((file) => file.size > maxFileSizeBytes);
-    if (oversizedFile1) {
-      toast.error(`Each file must be smaller than ${maxFileSizeMB} MB`);
-      setIsBtnDisabled(true);
-      setTimeout(() => {
-        setIsBtnDisabled(false);
-      }, 4000);
-      return;
-    }
-
-    const oversizedFile = uploadedFile.some((file) => file.size > maxFileSizeBytes);
-    if (oversizedFile) {
-      toast.error(`Each file must be smaller than ${maxFileSizeMB} MB`);
-      setIsBtnDisabled(true);
-      setTimeout(() => {
-        setIsBtnDisabled(false);
-      }, 4000);
-      return;
-    }
-
-    const isValidFileFormat1 = uploadedFile1.every(
-      (file) => file.name.endsWith(".doc") || file.name.endsWith(".docx")
-    );
-
-    if (!isValidFileFormat1) {
-      toast.error("Please upload only .doc or .docx files");
-      setIsBtnDisabled(true);
-      setTimeout(() => {
-        setIsBtnDisabled(false);
-      }, 4000);
-      // setLoading(false);
-      return;
-    }
-
-    const isValidFileFormat = uploadedFile.every(
-      (file) => file.name.endsWith(".doc") || file.name.endsWith(".docx")
-    );
-
-    if (!isValidFileFormat) {
-      toast.error("Please upload only .doc or .docx files");
-      setIsBtnDisabled(true);
-      setTimeout(() => {
-        setIsBtnDisabled(false);
-      }, 4000);
-      // setLoading(false);
-      return;
-    }
-
-    const url = "http://localhost:3000/policy/update";
-    const formData = new FormData(); // Create a FormData object
-
-    uploadedFile1.forEach((file) => {
-      formData.append("files[]", file); // Name the file array appropriately
-    });
-
-    uploadedFile.forEach((file) => {
-      formData.append("files[]", file); // Name the file array appropriately
-    });
-
-    // Append other data to FormData
-    formData.append("policy_id", selectedDocument.id);
-    formData.append("decision", mappedDecision);
-    formData.append("remarks", remarks.trimStart());
-    // formData.append("files[]", uploadedFile1);
-    formData.append("title", documentTitle.trimStart());
-    formData.append("description", documentDescription.trimStart());
-    formData.append("reviewer_id", selectedReviewer);
-    formData.append(
-      "approver_ids",
-      JSON.stringify(approvalMembersWithPriority.map((member) => member.value.toString()))
-    );
-    formData.append("user_group", selectedUserGroupSum || 0);
-
     const submitForm = fetch(url, {
       method: "POST",
       headers: {
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${userToken}` // Example header for token authentication
       },
-      body: formData
+      body: JSON.stringify(formData),
     })
       .then((response) => {
         if (!response.ok) {
@@ -850,7 +409,7 @@ export default function PolicyDetails() {
       .then((data) => {
         if (data.status) {
           setTimeout(() => {
-            navigate("/list/psg");
+            navigate("/admin");
           }, 1000);
         } else {
           throw new Error("Submission failed");
@@ -865,19 +424,10 @@ export default function PolicyDetails() {
       });
 
     toast.promise(submitForm, {
-      loading: "Saving...",
-      success: (data) => `Response saved successfully`, // Adjust based on your API response
-      error: (err) => `Error while filling the response`
+      loading: "Updating...",
+      success: (data) => `Decision updated successfully`, // Adjust based on your API response
+      error: (err) => `Error while updating the decision`
     });
-  };
-
-  const handleTitleChange = (e) => {
-    if (!(documentTitle === "" && e.target.value === " ")) setDocumentTitle(e.target.value);
-  };
-
-  const handleDescriptionChange = (e) => {
-    if (!(documentDescription === "" && e.target.value === " "))
-      setDocumentDescription(e.target.value);
   };
 
   return (
@@ -1089,7 +639,7 @@ export default function PolicyDetails() {
                                                   }}
                                                 >
                                                   <a
-                                                    href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                    href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     download
@@ -1221,7 +771,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -1365,7 +915,7 @@ export default function PolicyDetails() {
                                               }}
                                             >
                                               <a
-                                                href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 download
@@ -1481,7 +1031,7 @@ export default function PolicyDetails() {
                                         }}
                                       >
                                         <a
-                                          href={`http://localhost:3000/policy_document/${file.file_name}`}
+                                          href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           download
@@ -1524,6 +1074,7 @@ export default function PolicyDetails() {
               </>
             )}
           </Grid>
+          {selectedDocument && (selectedDocument.status == 1 || selectedDocument.status == 3) && (
           <Grid
             item
             lg={5}
@@ -1565,28 +1116,31 @@ export default function PolicyDetails() {
                 <form onSubmit={handleSubmit} encType="multipart/form-data">
                   {/* <Box sx={{ width: '600px', margin: '0 auto',}}> */}
                   {(selectedDocument.status == 1 || selectedDocument.status == 3) && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="h8" sx={{ fontFamily: "sans-serif", display: "block" }}>
-                        <b>
-                          Decision <span style={{ color: "red" }}>*</span> :
-                        </b>
-                      </Typography>
-                      <StyledSelect
-                        value={decision}
-                        onChange={handleDecisionChange}
-                        // onBlur={handleBlur}
-                        fullWidth
-                        variant="outlined"
-                        sx={{ mt: 1 }}
-                      >
-                        <MenuItem value="">
-                          <em>None</em>
-                        </MenuItem>
-                        <MenuItem value="activate">Activate</MenuItem>
-                        <MenuItem value="deprecate">Deprecate</MenuItem>
-                      </StyledSelect>
-                    </Box>
-                  )}
+                      <Box sx={{ mt: 2 }}>
+                        <Typography
+                          variant="h8"
+                          sx={{ fontFamily: "sans-serif", display: "block" }}
+                        >
+                          <b>
+                            Decision <span style={{ color: "red" }}>*</span> :
+                          </b>
+                        </Typography>
+                        <StyledSelect
+                          value={decision}
+                          onChange={handleDecisionChange}
+                          // onBlur={handleBlur}
+                          fullWidth
+                          variant="outlined"
+                          sx={{ mt: 1 }}
+                        >
+                          <MenuItem value="">
+                            <em>None</em>
+                          </MenuItem>
+                          <MenuItem value="activate" disabled={documentDecision === "activate"}>Activate</MenuItem>
+                          <MenuItem value="deprecate" disabled={documentDecision === "deprecate"}>Deprecate</MenuItem>
+                        </StyledSelect>
+                      </Box>
+                    )}
                   {/* </Box> */}
 
                   {(selectedDocument.status == 1 || selectedDocument.status == 3) && (
@@ -1616,6 +1170,7 @@ export default function PolicyDetails() {
               <Typography>Loading...</Typography>
             )}
           </Grid>
+          )}
         </Grid>
       </Card>
     </ContentBox>

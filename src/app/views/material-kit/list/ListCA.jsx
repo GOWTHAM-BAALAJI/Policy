@@ -87,7 +87,7 @@ export default function CATable() {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:3000/circular-advisories?page=${page}&rows=${rows}`,
+        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}`,
         {
           method: "GET",
           headers: {
@@ -99,7 +99,7 @@ export default function CATable() {
       const data = await response.json();
       setPsgList(data.data); // Adjust this based on your API response structure
 
-      const countResponse = await fetch(`http://localhost:3000/circular-advisories/count`, {
+      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/count`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -163,7 +163,7 @@ export default function CATable() {
     try {
       // First API call: Fetch data based on searchValue
       const response = await fetch(
-        `http://localhost:3000/circular-advisories?page=${page}&rows=${rows}&search=${searchValue}`,
+        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}&search=${searchValue}`,
         {
           method: "GET",
           headers: {
@@ -177,7 +177,7 @@ export default function CATable() {
 
       // Second API call: Fetch the count data based on searchValue
       const countResponse = await fetch(
-        `http://localhost:3000/circular-advisories/count?search=${searchValue}`,
+        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/count?search=${searchValue}`,
         {
           method: "GET",
           headers: {
@@ -290,7 +290,7 @@ export default function CATable() {
     setSelectedRow(row);
 
     try {
-      const response = await fetch(`http://localhost:3000/circular-advisories/${row.id}`, {
+      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/${row.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -302,7 +302,7 @@ export default function CATable() {
 
       if (data.status && data.data.file_name) {
         const fileResponse = await fetch(
-          `http://localhost:3000/CA_document/${data.data.file_name}`,
+          `https://policyuat.spandanasphoorty.com/policy_apis/CA_document/${data.data.file_name}`,
           {
             method: "GET",
             headers: {

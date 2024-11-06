@@ -225,7 +225,7 @@ const InitiateCA = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/auth/get-user-groups", {
+      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", {
         headers: {
           Authorization: `Bearer ${userToken}`
         }
@@ -334,7 +334,7 @@ const InitiateCA = () => {
       return;
     }
 
-    const url = "http://localhost:3000/circular-advisories/";
+    const url = "https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/";
     const formData = new FormData();
 
     uploadedFile.forEach((file) => {
