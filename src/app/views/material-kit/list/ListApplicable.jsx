@@ -20,6 +20,7 @@ import DataTable from "react-data-table-component";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 import CloseIcon from "@mui/icons-material/Close";
+import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "20px",
@@ -90,6 +91,8 @@ const ApplicableTable = () => {
   const { control } = useForm();
   const navigate = useNavigate();
 
+  const customFetchWithAuth=useCustomFetch();
+
   const [psgList2, setPsgList2] = useState([]);
   const [userId, setUserId] = useState(null);
   const [roleId, setRoleId] = useState(null);
@@ -117,7 +120,7 @@ const ApplicableTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true", {
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true","GET",{} ,{
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -144,7 +147,7 @@ const ApplicableTable = () => {
     setLoading(true);
     try {
       let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}`;
-      const response = await fetch(url, {
+      const response = await customFetchWithAuth(url,"GET",{}, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -153,13 +156,6 @@ const ApplicableTable = () => {
       });
       const data = await response.json();
       setPsgList2(data); // Adjust this based on your API response structure
-      const decodedToken = jwtDecode(userToken);
-      if (decodedToken.role_id) {
-        setRoleId(decodedToken.role_id);
-      }
-      if (decodedToken.user_id) {
-        setUserId(decodedToken.user_id);
-      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -170,6 +166,19 @@ const ApplicableTable = () => {
   useEffect(() => {
     fetchData(currentPage, rowsPerPage);
   }, [currentPage, rowsPerPage]);
+
+  useEffect(() => {
+    if (userToken) {
+      const decodedToken = jwtDecode(userToken);
+      console.log("Decoded role ID ------------",decodedToken.role_id);
+      if (decodedToken.role_id) {
+        setRoleId(decodedToken.role_id);
+      }
+      if (decodedToken.user_id) {
+        setUserId(decodedToken.user_id);
+      }
+    }
+  }, [userToken, roleId, userId]);
 
   const [searchValue, setSearchValue] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -194,8 +203,8 @@ const ApplicableTable = () => {
 
     try {
       // First API call: Fetch data based on searchValue
-      const response = await fetch(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,
+      const response = await customFetchWithAuth(
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",{},
         {
           method: "GET",
           headers: {
@@ -208,8 +217,8 @@ const ApplicableTable = () => {
       setPsgList2(data);
 
       // Second API call: Fetch the count data based on searchValue
-      const countResponse = await fetch(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,
+      const countResponse = await customFetchWithAuth(
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",{},
         {
           method: "GET",
           headers: {
@@ -257,8 +266,8 @@ const ApplicableTable = () => {
 
     try {
       // First API call: Fetch data based on searchValue
-      const response = await fetch(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}`,
+      const response = await customFetchWithAuth(
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}`,"GET",{},
         {
           method: "GET",
           headers: {
@@ -271,8 +280,8 @@ const ApplicableTable = () => {
       setPsgList2(data);
 
       // Second API call: Fetch the count data based on searchValue
-      const countResponse = await fetch(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true&search=${searchValue}`,
+      const countResponse = await customFetchWithAuth(
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true&search=${searchValue}`,"GET",{},
         {
           method: "GET",
           headers: {

@@ -10,6 +10,8 @@ const ListCA = Loadable(lazy(() => import("./list/ListCA")));
 const PolicyDetails = Loadable(lazy(() => import("./list/PolicyDetails")));
 const Admin = Loadable(lazy(() => import("./admin/AdminPage")));
 const AdminPolicyDetails = Loadable(lazy(() => import("./admin/PolicyDetails")));
+const AdminUserDetails = Loadable(lazy(() => import("./admin/UserDetails")));
+const AdminAddUser = Loadable(lazy(() => import("./admin/AddNewUser")));
 
 const materialRoutes = [
   { path: "/initiate/psg", element: <PrivateRoute element={<InitiatePSG />} /> },
@@ -19,8 +21,9 @@ const materialRoutes = [
   { path: "/list/ca", element: <PrivateRoute element={<ListCA />} /> },
   { path: "/policy/:id", element: <PrivateRoute element={<PolicyDetails />} /> },
   { path: "/admin", element: <PrivateRoute element={<Admin />} /> },
-  { path: "/admin/user/:emp_id", element: <PrivateRoute element={<PolicyDetails />} /> },
+  { path: "/admin/user/:user_id", element: <PrivateRoute element={<AdminUserDetails />} /> },
   { path: "/admin/policy/:id", element: <PrivateRoute element={<AdminPolicyDetails />} /> },
+  { path: "/admin/user/add", element: <PrivateRoute element={<AdminAddUser />} /> },
 ];
 
 export default materialRoutes;

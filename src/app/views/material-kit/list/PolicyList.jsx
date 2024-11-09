@@ -21,6 +21,7 @@ import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 import CloseIcon from "@mui/icons-material/Close";
 import DoughnutChart from "app/views/charts/echarts/Doughnut";
+import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
 const StyledTextField = styled(TextField)(() => ({
   width: "100%",
@@ -105,6 +106,8 @@ const PSGTable = ({ initialTab, onTabChange }) => {
 
   const [activeTab, setActiveTab] = useState(initialTab || queryTab);
 
+  const customFetchWithAuth=useCustomFetch();
+
   useEffect(() => {
     // If the queryTab exists and is different from initialTab, update activeTab
     if (queryTab && queryTab == initialTab) {
@@ -185,7 +188,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count", {
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count", "GET",{},{
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -221,7 +224,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     setLoading(true);
     try {
       let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
-      const response = await fetch(url, {
+      const response = await customFetchWithAuth(url, "GET",{},{
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -238,15 +241,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
         setCount(pendingCount || 0);
       } else if (tab == 4) {
         setCount(waitingForActionCount || 0);
-      }
-      if (userToken) {
-        const decodedToken = jwtDecode(userToken);
-        if (decodedToken.role_id) {
-          setRoleId(decodedToken.role_id);
-        }
-        if (decodedToken.user_id) {
-          setUserId(decodedToken.user_id);
-        }
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -278,8 +272,8 @@ const PSGTable = ({ initialTab, onTabChange }) => {
 
     try {
       // First API call: Fetch data based on searchValue
-      const response = await fetch(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,
+      const response = await customFetchWithAuth(
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",{},
         {
           method: "GET",
           headers: {
@@ -292,8 +286,8 @@ const PSGTable = ({ initialTab, onTabChange }) => {
       setPsgList(data);
 
       // Second API call: Fetch the count data based on searchValue
-      const countResponse = await fetch(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,
+      const countResponse = await customFetchWithAuth(
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",{},
         {
           method: "GET",
           headers: {
@@ -345,8 +339,8 @@ const PSGTable = ({ initialTab, onTabChange }) => {
 
     try {
       // First API call: Fetch data based on searchValue
-      const response = await fetch(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,
+      const response = await customFetchWithAuth(
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",{},
         {
           method: "GET",
           headers: {
@@ -359,8 +353,8 @@ const PSGTable = ({ initialTab, onTabChange }) => {
       setPsgList(data);
 
       // Second API call: Fetch the count data based on searchValue
-      const countResponse = await fetch(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,
+      const countResponse = await customFetchWithAuth(
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",{},
         {
           method: "GET",
           headers: {
@@ -478,6 +472,31 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     }
   ];
 
+  const isInitiator = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 1] == "1";
+  };
+  console.log("Check initiator: ", isInitiator(roleId));
+
+  const isReviewer = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 2] == "1";
+  };
+
+  const isApprover = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 3] == "1";
+  };
+
+  const isAdmin = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 4] == "1";
+  };
+
   const columns = columns1;
 
   const handlePageChange = (newPage) => {
@@ -503,6 +522,19 @@ const PSGTable = ({ initialTab, onTabChange }) => {
       fetchData(activeTab, currentPage, newRowsPerPage); // Default rows per page change
     }
   };
+
+  useEffect(() => {
+    if (userToken) {
+      const decodedToken = jwtDecode(userToken);
+      console.log("Decoded role ID ------------",decodedToken.role_id);
+      if (decodedToken.role_id) {
+        setRoleId(decodedToken.role_id);
+      }
+      if (decodedToken.user_id) {
+        setUserId(decodedToken.user_id);
+      }
+    }
+  }, [userToken, roleId, userId]);
 
   useEffect(() => {
     fetchData(activeTab, currentPage, rowsPerPage);
@@ -540,7 +572,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
           Policies, SOPs and Guidance notes
         </Typography>
       </Grid>
-      {(roleId === 1 || roleId === 3 || roleId === 9) && (
+      {(isInitiator(roleId)) && (
         <Grid item lg={3} md={3} sm={3} xs={3}>
           <Button
             variant="contained"
@@ -550,7 +582,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
               fontSize: "0.875rem",
               textTransform: "none",
               marginTop: { sm: 2, xs: 2 },
-              height: "30px",
+              height: "25px",
               backgroundColor: "#ee8812",
               "&:hover": {
                 backgroundColor: "rgb(249, 83, 22)"
@@ -564,10 +596,10 @@ const PSGTable = ({ initialTab, onTabChange }) => {
       )}
       <Grid
         item
-        lg={roleId === 1 || roleId === 3 || roleId === 9 ? 3 : 6}
-        md={roleId === 1 || roleId === 3 || roleId === 9 ? 3 : 6}
-        sm={roleId === 1 || roleId === 3 || roleId === 9 ? 3 : 6}
-        xs={roleId === 1 || roleId === 3 || roleId === 9 ? 3 : 6}
+        lg={(isInitiator(roleId)) ? 3 : 6}
+        md={(isInitiator(roleId)) ? 3 : 6}
+        sm={(isInitiator(roleId)) ? 3 : 6}
+        xs={(isInitiator(roleId)) ? 3 : 6}
       >
         <Grid
           item

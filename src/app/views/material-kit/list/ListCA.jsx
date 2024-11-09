@@ -21,6 +21,7 @@ import DataTable from "react-data-table-component";
 import { jwtDecode } from "jwt-decode";
 import CloseIcon from "@mui/icons-material/Close";
 import toast from "react-hot-toast";
+import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "20px",
@@ -66,6 +67,8 @@ export default function CATable() {
   const { control } = useForm();
   const navigate = useNavigate();
 
+  const customFetchWithAuth=useCustomFetch();
+
   const [tabledata, setTableData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [count, setCount] = useState(0);
@@ -86,8 +89,8 @@ export default function CATable() {
   const fetchData = async (page, rows) => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}`,
+      const response = await customFetchWithAuth(
+        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}`,"GET",{},
         {
           method: "GET",
           headers: {
@@ -99,7 +102,7 @@ export default function CATable() {
       const data = await response.json();
       setPsgList(data.data); // Adjust this based on your API response structure
 
-      const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/count`, {
+      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/count`,"GET",{}, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -114,14 +117,6 @@ export default function CATable() {
       const countData = await countResponse.json();
 
       setCount(countData.count);
-
-      const decodedToken = jwtDecode(userToken);
-      if (decodedToken.role_id) {
-        setRoleId(decodedToken.role_id);
-      }
-      if (decodedToken.user_id) {
-        setUserId(decodedToken.user_id);
-      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -162,8 +157,8 @@ export default function CATable() {
 
     try {
       // First API call: Fetch data based on searchValue
-      const response = await fetch(
-        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}&search=${searchValue}`,
+      const response = await customFetchWithAuth(
+        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}&search=${searchValue}`,"GET",{},
         {
           method: "GET",
           headers: {
@@ -176,8 +171,8 @@ export default function CATable() {
       setPsgList(data.data);
 
       // Second API call: Fetch the count data based on searchValue
-      const countResponse = await fetch(
-        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/count?search=${searchValue}`,
+      const countResponse = await customFetchWithAuth(
+        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/count?search=${searchValue}`,"GET",{},
         {
           method: "GET",
           headers: {
@@ -255,6 +250,30 @@ export default function CATable() {
     }
   ];
 
+  const isInitiator = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 1] == "1";
+  };
+
+  const isReviewer = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 2] == "1";
+  };
+
+  const isApprover = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 3] == "1";
+  };
+
+  const isAdmin = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 4] == "1";
+  };
+
   const columns = columns1;
 
   const handlePageChange = (newPage) => {
@@ -278,6 +297,19 @@ export default function CATable() {
   };
 
   useEffect(() => {
+    if (userToken) {
+      const decodedToken = jwtDecode(userToken);
+      console.log("Decoded role ID ------------",decodedToken.role_id);
+      if (decodedToken.role_id) {
+        setRoleId(decodedToken.role_id);
+      }
+      if (decodedToken.user_id) {
+        setUserId(decodedToken.user_id);
+      }
+    }
+  }, [userToken, roleId, userId]);
+
+  useEffect(() => {
     fetchData(currentPage, rowsPerPage);
   }, [currentPage, rowsPerPage]);
 
@@ -290,7 +322,7 @@ export default function CATable() {
     setSelectedRow(row);
 
     try {
-      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/${row.id}`, {
+      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/${row.id}`,"GET",{}, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -301,8 +333,8 @@ export default function CATable() {
       const data = await response.json();
 
       if (data.status && data.data.file_name) {
-        const fileResponse = await fetch(
-          `https://policyuat.spandanasphoorty.com/policy_apis/CA_document/${data.data.file_name}`,
+        const fileResponse = await customFetchWithAuth(
+          `https://policyuat.spandanasphoorty.com/policy_apis/CA_document/${data.data.file_name}`,"GET",{},
           {
             method: "GET",
             headers: {
@@ -346,7 +378,7 @@ export default function CATable() {
               Circulars and Advisories
             </Typography>
           </Grid>
-          {(roleId === 1 || roleId === 3 || roleId === 9) && (
+          {(isInitiator(roleId)) && (
             <Grid
               item
               lg={6}

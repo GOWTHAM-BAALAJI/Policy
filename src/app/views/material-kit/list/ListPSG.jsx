@@ -9,7 +9,7 @@ import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
 import toast from "react-hot-toast";
 import CloseIcon from '@mui/icons-material/Close';
-import useCustomFetch from "../../../hooks/useFetchWithAuth"
+import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
@@ -159,7 +159,7 @@ export default function PSGTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await customFetchWithAuth('https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count', {
+        const response = await customFetchWithAuth('https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count', "GET",{},{
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -167,7 +167,7 @@ export default function PSGTable() {
           },
         });
         //console.log("testing response - ",response);
-        const data =response;
+        const data =await response.json();
 
         if (data && data.status) {
           const approvedCount = data.approved;
@@ -196,14 +196,16 @@ export default function PSGTable() {
     setLoading(true);
     try {
       let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
-      const response = await customFetchWithAuth(url, {
+      const response = await customFetchWithAuth(url,"GET",{}, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
         },
       });
+      console.log("Response ----------- ",response);
       const data = await response.json();
+      console.log("data    --- ",data);
       setPsgList(data); // Adjust this based on your API response structure
       if (tab == 1){
         setCount(approvedCount || 0);
@@ -216,13 +218,6 @@ export default function PSGTable() {
       }
       else if (tab == 4){
         setCount(waitingForActionCount || 0);
-      }
-      const decodedToken = jwtDecode(userToken);
-      if (decodedToken.role_id) {
-        setRoleId(decodedToken.role_id);
-      }
-      if (decodedToken.user_id) {
-        setUserId(decodedToken.user_id);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -252,17 +247,17 @@ export default function PSGTable() {
     setSelectedType(selectedType);
   
     try {
-      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
+      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",{}, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${userToken}`,
         },
       });
-      const data =response;
+      const data =await response.json();
       setPsgList(data);
   
-      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, {
+      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, "GET",{},{
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -274,7 +269,7 @@ export default function PSGTable() {
         throw new Error('Failed to fetch count data');
       }
   
-      const countData = countResponse;
+      const countData = await countResponse.json();
   
       if (tab === "1") setCount(countData.approved);
       if (tab === "2") setCount(countData.rejected);
@@ -312,18 +307,18 @@ export default function PSGTable() {
   
     try {
       // First API call: Fetch data based on searchValue
-      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
+      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, "GET",{},{
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${userToken}`,
         },
       });
-      const data =  response;
+      const data = await  response.json();
       setPsgList(data);
   
       // Second API call: Fetch the count data based on searchValue
-      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, {
+      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",{}, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -335,7 +330,7 @@ export default function PSGTable() {
         throw new Error('Failed to fetch count data');
       }
   
-      const countData =  countResponse;
+      const countData =await  countResponse.json();
   
       // Check tab values and set the count based on the tab
       if (tab === "1") setCount(countData.approved);
@@ -430,6 +425,33 @@ export default function PSGTable() {
     },
   ];
 
+  const isInitiator = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 1] == "1";
+  };
+  console.log("Token ----------", userToken);
+  console.log("Role id ------------",roleId);
+  console.log("Check initiator: ", isInitiator(roleId));
+
+  const isReviewer = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 2] == "1";
+  };
+
+  const isApprover = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 3] == "1";
+  };
+
+  const isAdmin = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 4] == "1";
+  };
+
   const columns = columns1;
 
   const handlePageChange = (newPage) => {
@@ -462,6 +484,18 @@ export default function PSGTable() {
   //   setCurrentPage(1);
   //   fetchData(activeTab, 1, newRowsPerPage);
   // };
+  useEffect(() => {
+    if (userToken) {
+      const decodedToken = jwtDecode(userToken);
+      console.log("Decoded role ID ------------",decodedToken.role_id);
+      if (decodedToken.role_id) {
+        setRoleId(decodedToken.role_id);
+      }
+      if (decodedToken.user_id) {
+        setUserId(decodedToken.user_id);
+      }
+    }
+  }, [userToken, roleId, userId]);
 
   useEffect(() => {
     fetchData(activeTab, currentPage, rowsPerPage);
@@ -490,7 +524,7 @@ export default function PSGTable() {
           Policies, SOPs and Guidance notes
         </Typography>
       </Grid>
-      {(roleId === 1 || roleId === 3 || roleId === 9) && (
+      {(isInitiator(roleId)) && (
         <Grid item lg={3} md={3} sm={3} xs={3}>
           <Button
             variant="contained"
@@ -512,7 +546,7 @@ export default function PSGTable() {
           </Button>
         </Grid>
       )}
-      <Grid item lg={(roleId === 1 || roleId === 3 || roleId === 9) ? 3 : 6} md={(roleId === 1 || roleId === 3 || roleId === 9) ? 3 : 6} sm={(roleId === 1 || roleId === 3 || roleId === 9) ? 3 : 6} xs={(roleId === 1 || roleId === 3 || roleId === 9) ? 3 : 6}>
+      <Grid item lg={(isInitiator(roleId)) ? 3 : 6} md={(isInitiator(roleId)) ? 3 : 6} sm={(isInitiator(roleId)) ? 3 : 6} xs={(isInitiator(roleId)) ? 3 : 6}>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 2, mr: 2 }}>
           <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2, mt: 0.5 }}>
             Type

@@ -26,6 +26,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
+import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "20px",
@@ -132,6 +133,7 @@ const InitiatePSG = () => {
     formState: { errors }
   } = useForm();
   const navigate = useNavigate();
+  const customFetchWithAuth=useCustomFetch();
 
   const [documentType, setDocumentType] = useState("");
   const [title, setTitle] = useState("");
@@ -268,57 +270,69 @@ const InitiatePSG = () => {
   };
 
   useEffect(() => {
-    axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer", {
-        headers: {
-          Authorization: `Bearer ${userToken}`
-        }
-      })
-      .then((response) => {
-        if (response.data.status) {
-          const fetchedReviewers = response.data.data.map((reviewer) => ({
+    const fetchReviewers = async() => {
+      try{
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer","GET",{},{
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${userToken}`
+          }
+        });
+        const data = await response.json();
+        if (data.status) {
+          const fetchedReviewers = data.data.map((reviewer) => ({
             value: reviewer.user_id,
             label: reviewer.emp_name
           }));
           setReviewers(fetchedReviewers);
         }
-      })
-      .catch((error) => {
-        console.error("Error fetching reviewers:", error);
-      });
-  }, []);
+      } catch (error) {
+        console.error('Error fetching data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReviewers();
+  }, [userToken]);
 
   useEffect(() => {
-    axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover", {
-        headers: {
-          Authorization: `Bearer ${userToken}`
-        }
-      })
-      .then((response) => {
-        if (response.data.status) {
-          const fetchedApprovalMembers = response.data.data.map((approvalmember) => ({
+    const fetchApprovers = async() => {
+      try{
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover","GET",{},{
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${userToken}`
+          }
+        });
+        const data = await response.json();
+        if (data.status) {
+          const fetchedApprovalMembers = data.data.map((approvalmember) => ({
             value: approvalmember.user_id,
             label: approvalmember.emp_name
           }));
           setApprovalMembers(fetchedApprovalMembers);
         }
-      })
-      .catch((error) => {
-        console.error("Error fetching reviewers:", error);
-      });
-  }, []);
+      } catch (error) {
+        console.error('Error fetching data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchApprovers();
+  }, [userToken]);
 
   useEffect(() => {
-    axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", {
-        headers: {
-          Authorization: `Bearer ${userToken}`
-        }
-      })
-      .then((response) => {
-        if (response.data.status) {
-          const categorizedGroups = response.data.data.reduce((acc, usergroup) => {
+    const fetchUserGroups = async() => {
+      try{
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",{},{
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${userToken}`
+          }
+        });
+        const data = await response.json();
+        if (data.status) {
+          const categorizedGroups = data.data.reduce((acc, usergroup) => {
             const category = usergroup.category;
             const option = {
               value: usergroup.value,
@@ -336,11 +350,14 @@ const InitiatePSG = () => {
 
           setUserGroupOptions(categorizedGroups);
         }
-      })
-      .catch((error) => {
-        console.error("Error fetching reviewers:", error);
-      });
-  }, []);
+      } catch (error) {
+        console.error('Error fetching data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserGroups();
+  }, [userToken]);
 
   const filteredApprovalMembers = selectedReviewer
     ? approvalMembers.filter((member) => member.value !== selectedReviewer)
@@ -354,6 +371,19 @@ const InitiatePSG = () => {
 
   const handleDescriptionChange = (e) => {
     if (!(description === "" && e.target.value === " ")) setDescription(e.target.value);
+  };
+
+  const getSuccessMessage = () => {
+    switch (documentType) {
+      case "1":
+        return "Policy initiated successfully";
+      case "2":
+        return "SOP initiated successfully";
+      case "3":
+        return "Guidance Note initiated successfully";
+      default:
+        return "Document initiated successfully";
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -438,7 +468,7 @@ const InitiatePSG = () => {
     formData.append("approver_ids", JSON.stringify(selectedApprovalMembers || [])); // Convert array to string
     formData.append("user_group", selectedUserGroupSum || 0);
 
-    const submitPromise = fetch(url, {
+    const submitPromise = customFetchWithAuth(url, "POST", formData, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${userToken}`
@@ -471,7 +501,7 @@ const InitiatePSG = () => {
 
     toast.promise(submitPromise, {
       loading: "Submitting...",
-      success: (data) => `Policy Initiated Successfully`,
+      success: (data) => getSuccessMessage(),
       error: (err) => `Error while Initiating`
     });
   };

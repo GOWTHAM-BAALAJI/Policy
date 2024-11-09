@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import useCustomFetch from "../../hooks/useFetchWithAuth";
 
 import axios from "axios";
 import {
@@ -78,6 +79,7 @@ const Profile = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const customFetchWithAuth=useCustomFetch();
 
   const [storeImage, setStoreImage] = useState("");
   const userProfile = useSelector((state) => state.userData);
@@ -215,7 +217,7 @@ const Profile = () => {
 
     const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/updateProfile";
 
-    const submitPromise1 = fetch(url, {
+    const submitPromise1 = customFetchWithAuth(url,"POST",formData, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${userToken}` // Example header for token authentication
@@ -289,7 +291,7 @@ const Profile = () => {
       newPassword: newpassword
     };
 
-    const submitPromise2 = fetch(url, {
+    const submitPromise2 = customFetchWithAuth(url,"POST",JSON.stringify(requestData), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

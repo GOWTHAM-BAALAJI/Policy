@@ -26,6 +26,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import toast from "react-hot-toast";
+import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "20px",
@@ -131,6 +132,7 @@ const InitiateCA = () => {
     formState: { errors }
   } = useForm();
   const navigate = useNavigate();
+  const customFetchWithAuth=useCustomFetch();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -224,15 +226,17 @@ const InitiateCA = () => {
   };
 
   useEffect(() => {
-    axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", {
-        headers: {
-          Authorization: `Bearer ${userToken}`
-        }
-      })
-      .then((response) => {
-        if (response.data.status) {
-          const categorizedGroups = response.data.data.reduce((acc, usergroup) => {
+    const fetchUserGroups = async() => {
+      try{
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",{},{
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${userToken}`
+          }
+        })
+        const data = await response.json();
+        if (data.status) {
+          const categorizedGroups = data.data.reduce((acc, usergroup) => {
             const category = usergroup.category;
             const option = {
               value: usergroup.value,
@@ -250,11 +254,14 @@ const InitiateCA = () => {
 
           setUserGroupOptions(categorizedGroups);
         }
-      })
-      .catch((error) => {
-        console.error("Error fetching reviewers:", error);
-      });
-  }, []);
+      } catch (error) {
+        console.error('Error fetching data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserGroups();
+  }, [userToken]);
 
   // const handleCheckboxChange = (category, value) => {
   //   // Handle checkbox state changes here
@@ -346,7 +353,7 @@ const InitiateCA = () => {
     // formData.append("files[]",uploadedFile);
     formData.append("user_group", selectedUserGroupSum || 0);
 
-    const submitPromise = fetch(url, {
+    const submitPromise = customFetchWithAuth(url,"POST",formData, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${userToken}`

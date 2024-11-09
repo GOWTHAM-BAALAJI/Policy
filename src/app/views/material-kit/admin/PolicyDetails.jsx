@@ -35,6 +35,7 @@ import { useNavigate } from "react-router-dom";
 import CloseIcon from "@mui/icons-material/Close";
 import toast from "react-hot-toast";
 import img1 from "../../../assets/download_file_icon.png";
+import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "20px",
@@ -105,6 +106,7 @@ export default function PolicyDetails() {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
+  const customFetchWithAuth=useCustomFetch();
   const { title, status, activeTab } = location.state || {};
 
   const getDisplayPolicyId = (policy_id) => {
@@ -196,61 +198,17 @@ export default function PolicyDetails() {
   }, [selectedDocument]);
 
   useEffect(() => {
-    // Fetch reviewers from the API
-    axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer", {
-        headers: {
-          Authorization: `Bearer ${userToken}` // Include the JWT token in the Authorization header
-        }
-      })
-      .then((response) => {
-        if (response.data.status) {
-          // Map the API response to format for dropdown (using emp_name as label and user_id as value)
-          const fetchedReviewers = response.data.data.map((reviewer) => ({
-            value: reviewer.user_id,
-            label: reviewer.emp_name
-          }));
-          setReviewersOptions(fetchedReviewers);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching reviewers:", error);
-      });
-  }, []);
-
-  useEffect(() => {
-    // Fetch reviewers from the API
-    axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover", {
-        headers: {
-          Authorization: `Bearer ${userToken}` // Include the JWT token in the Authorization header
-        }
-      })
-      .then((response) => {
-        if (response.data.status) {
-          // Map the API response to format for dropdown (using emp_name as label and user_id as value)
-          const fetchedApprovalMembers = response.data.data.map((approvalmember) => ({
-            value: approvalmember.user_id,
-            label: approvalmember.emp_name
-          }));
-          setApprovalMembersOptions(fetchedApprovalMembers);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching reviewers:", error);
-      });
-  }, []);
-
-  useEffect(() => {
-    axios
-      .get("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", {
-        headers: {
-          Authorization: `Bearer ${userToken}`
-        }
-      })
-      .then((response) => {
-        if (response.data.status) {
-          const fetchedUserGroups = response.data.data.map((usergroup) => ({
+    const fetchUserGroups = async() => {
+      try{
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",{},{
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${userToken}`
+          }
+        })
+        const data = await response.json();
+        if (data.status) {
+          const fetchedUserGroups = data.data.map((usergroup) => ({
             value: usergroup.value,
             label: usergroup.user_group,
             category: usergroup.category
@@ -273,10 +231,13 @@ export default function PolicyDetails() {
           console.log("Fetched user groups from useEffect: ", fetchedUserGroups);
           console.log("Categorized user groups: ", categorizedGroups);
         }
-      })
-      .catch((error) => {
-        console.error("Error fetching user groups:", error);
-      });
+      } catch (error) {
+        console.error('Error fetching data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserGroups();
   }, [userToken]);
 
   const [decision, setDecision] = useState("");
@@ -339,6 +300,19 @@ export default function PolicyDetails() {
     fetchDocumentDetails(id);
   }, [id]);
 
+  useEffect(() => {
+    if (userToken) {
+      const decodedToken = jwtDecode(userToken);
+      console.log("Decoded role ID ------------",decodedToken.role_id);
+      if (decodedToken.role_id) {
+        setRoleId(decodedToken.role_id);
+      }
+      if (decodedToken.user_id) {
+        setUserId(decodedToken.user_id);
+      }
+    }
+  }, [userToken, roleId, userId]);
+
   // useEffect(() => {
   //     if (activeTab) {
   //         fetchDocumentDetails(activeTab); // Replace with your API call to fetch data
@@ -350,7 +324,7 @@ export default function PolicyDetails() {
     setError(null); // Reset error
 
     try {
-      const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/${documentId}`, {
+      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/${documentId}`,"GET",{}, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -359,13 +333,6 @@ export default function PolicyDetails() {
       });
       const data = await response.json();
       setSelectedDocument(data.data); // Set the document data
-      const decodedToken = jwtDecode(userToken);
-      if (decodedToken.role_id) {
-        setRoleId(decodedToken.role_id);
-      }
-      if (decodedToken.user_id) {
-        setUserId(decodedToken.user_id);
-      }
     } catch (err) {
       setError("Failed to fetch document details.");
     } finally {
@@ -392,7 +359,7 @@ export default function PolicyDetails() {
     const formData = {
         id: documentID
     }
-    const submitForm = fetch(url, {
+    const submitForm = customFetchWithAuth(url,"POST",JSON.stringify(formData), {
       method: "POST",
       headers: {
         'Content-Type': 'application/json',
@@ -1106,11 +1073,19 @@ export default function PolicyDetails() {
                 Fields marked with (<span style={{ color: "red" }}>*</span>) are mandatory
               </span>
             </div>
-            <Typography variant="h8" sx={{ fontFamily: "sans-serif" }}>
+            <Typography sx={{ fontFamily: "sans-serif" }}>
               <strong>Current Status: </strong>{" "}
-              {documentStatus === 1 ? "Active" : documentStatus === 3 ? "Deprecated" : "Unknown"}
+              <Box 
+                component="span"
+                sx={{
+                  fontSize: '24px',
+                  fontWeight: "bold",
+                  color: documentStatus === 1 ? "green" : documentStatus === 3 ? "red" : "inherit"
+                }}
+              >
+                {documentStatus === 1 ? "Active" : documentStatus === 3 ? "Deprecated" : "Unknown"}
+              </Box>
             </Typography>
-
             {selectedDocument ? (
               <>
                 <form onSubmit={handleSubmit} encType="multipart/form-data">

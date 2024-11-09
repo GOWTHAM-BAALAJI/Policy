@@ -25,6 +25,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from '@mui/icons-material/Check';
 import img1 from "../../../assets/download_file_icon.png";
+import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
@@ -108,6 +109,7 @@ export default function PSGTable() {
   const { control } = useForm();
   const navigate = useNavigate();
   const location = useLocation();
+  const customFetchWithAuth=useCustomFetch();
 
   const queryParams = new URLSearchParams(location.search);
   const initialTab = queryParams.get("tab") || "1";
@@ -154,6 +156,7 @@ export default function PSGTable() {
 
   const [selectedType, setSelectedType] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedCAStatus, setSelectedCAStatus] = useState("");
 
   const filteredData = selectedType
     ? psgList.filter((record) => record.type === Number(selectedType))
@@ -171,7 +174,7 @@ export default function PSGTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response1 = await fetch("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count", {
+        const response1 = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count","GET",{}, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -185,7 +188,7 @@ export default function PSGTable() {
           setUserCount(userCount || 0);
         }
 
-        const response2 = await fetch("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count", {
+        const response2 = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count","GET",{}, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -199,7 +202,7 @@ export default function PSGTable() {
           setPolicyCount(policyCount || 0);
         }
 
-        const response3 = await fetch('https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count', {
+        const response3 = await customFetchWithAuth('https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count',"GET",{}, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -227,7 +230,7 @@ export default function PSGTable() {
     try {
       if (tab == 1) {
         let url = `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-user?page=${page}&rows=${rows}`;
-        const response = await fetch(url, {
+        const response = await customFetchWithAuth(url,"GET",{}, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -239,7 +242,7 @@ export default function PSGTable() {
         setCount(userCount || 0);
       } else if (tab == 2) {
         let url = `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-policy?page=${page}&rows=${rows}`;
-        const response = await fetch(url, {
+        const response = await customFetchWithAuth(url,"GET",{}, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -251,7 +254,7 @@ export default function PSGTable() {
         setCount(policyCount || 0);
       } else if (tab == 3) {
         let url = `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-circulars?page=${page}&rows=${rows}`;
-        const response = await fetch(url, {
+        const response = await customFetchWithAuth(url,"GET",{}, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -262,13 +265,6 @@ export default function PSGTable() {
         setPsgList(data.data); // Adjust this based on your API response structure
         setCount(circularCount || 0);
       }
-      const decodedToken = jwtDecode(userToken);
-      if (decodedToken.role_id) {
-        setRoleId(decodedToken.role_id);
-      }
-      if (decodedToken.user_id) {
-        setUserId(decodedToken.user_id);
-      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -277,63 +273,19 @@ export default function PSGTable() {
   };
 
   const [searchValue, setSearchValue] = useState("");
+  const [searchValue2, setSearchValue2] = useState("");
+  const [searchValue3, setSearchValue3] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
   const handleInputChange = (event) => {
-    setSearchValue(event.target.value);
+    if(activeTab == 1) setSearchValue(event.target.value);
+    else if(activeTab == 2) setSearchValue2(event.target.value);
+    else if(activeTab == 3) setSearchValue3(event.target.value);
   };
 
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
 
-  // const handleSearchType = async (tab, page, rows, searchValue, selectedType) => {
-  //   setLoading(true);
-
-  //   setIsBtnDisabled(true);
-  //       setTimeout(() => {
-  //           setIsBtnDisabled(false);
-  //       }, 1000);
-
-  //   setIsSearching(true);
-  //   setSelectedType(selectedType);
-
-  //   try {
-  //     const response = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, {
-  //       method: 'GET',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: `Bearer ${userToken}`,
-  //       },
-  //     });
-  //     const data = await response.json();
-  //     setPsgList(data);
-
-  //     const countResponse = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, {
-  //       method: 'GET',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: `Bearer ${userToken}`,
-  //       },
-  //     });
-
-  //     if (!countResponse.ok) {
-  //       throw new Error('Failed to fetch count data');
-  //     }
-
-  //     const countData = await countResponse.json();
-
-  //     if (tab === "1") setCount(countData.approved);
-  //     if (tab === "2") setCount(countData.rejected);
-  //     if (tab === "3") setCount(countData.pending);
-  //     if (tab === "4") setCount(countData.waitingForAction);
-
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  const handleSearchData = async (tab, page, rows, searchValue, type, status) => {
+  const handleSearchData = async (tab, page, rows, searchValue, searchValue2, searchValue3, type, status, CAstatus) => {
     setLoading(true);
 
     setIsBtnDisabled(true);
@@ -343,11 +295,13 @@ export default function PSGTable() {
 
     setIsSearching(true);
     setSearchValue(searchValue.trimStart());
+    setSearchValue2(searchValue2.trimStart());
+    setSearchValue3(searchValue3.trimStart());
 
     try {
       if (tab == 1) {
-        const response1 = await fetch(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-user?page=${page}&rows=${rows}&search=${searchValue}`,
+        const response1 = await customFetchWithAuth(
+          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-user?page=${page}&rows=${rows}&search=${searchValue}`,"GET",{},
           {
             method: "GET",
             headers: {
@@ -359,8 +313,8 @@ export default function PSGTable() {
         const data1 = await response1.json();
         setPsgList(data1.data);
 
-        const countResponse1 = await fetch(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count?search=${searchValue}`,
+        const countResponse1 = await customFetchWithAuth(
+          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count?search=${searchValue}`,"GET",{},
           {
             method: "GET",
             headers: {
@@ -377,8 +331,8 @@ export default function PSGTable() {
         const countData1 = await countResponse1.json();
         setCount(countData1.count);
       } else if (tab == 2) {
-        const response2 = await fetch(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-policy?page=${page}&rows=${rows}&search=${searchValue}&type=${type}&status=${status}`,
+        const response2 = await customFetchWithAuth(
+          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-policy?page=${page}&rows=${rows}&search=${searchValue2}&type=${type}&status=${status}`,"GET",{},
           {
             method: "GET",
             headers: {
@@ -390,8 +344,8 @@ export default function PSGTable() {
         const data2 = await response2.json();
         setPsgList(data2.data);
 
-        const countResponse2 = await fetch(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count?search=${searchValue}&type=${type}&status=${status}`,
+        const countResponse2 = await customFetchWithAuth(
+          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count?search=${searchValue2}&type=${type}&status=${status}`,"GET",{},
           {
             method: "GET",
             headers: {
@@ -408,7 +362,7 @@ export default function PSGTable() {
         const countData2 = await countResponse2.json();
         setCount(countData2.count);
       } else if(tab == 3){
-        const response3 = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-circulars?page=${page}&rows=${rows}&search=${searchValue}`, {
+        const response3 = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-circulars?page=${page}&rows=${rows}&search=${searchValue3}&status=${CAstatus}`,"GET",{}, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -418,7 +372,7 @@ export default function PSGTable() {
         const data3 = await response3.json();
         setPsgList(data3.data);
     
-        const countResponse3 = await fetch(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count?search=${searchValue}`, {
+        const countResponse3 = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count?search=${searchValue3}&status=${CAstatus}`,"GET",{}, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -580,7 +534,7 @@ export default function PSGTable() {
               justifyContent: "center",
               alignItems: "center"
             }}
-            // onClick={() => handleRowClick(row)}
+            onClick={() => handleRowClick(row)}
           />
         </Box>
       )
@@ -739,7 +693,7 @@ export default function PSGTable() {
     selector: row => row.description || 'N/A',
     sortable: true,
     // center: true,
-    width: '25%',
+    width: '37%',
     cell: (row) => (
         <Typography
         variant="body2"
@@ -775,35 +729,13 @@ export default function PSGTable() {
       }
     },
     {
-      name: "File",
-      selector: (row) => row.file_name || "N/A",
-      // sortable: true,
-      // center: true,
-      width: "10%",
-      cell: (row) => {
-        return (
-          <div style={{ textAlign: "left", width: "100%", paddingLeft: "8px" }}>
-            <a
-              href={`https://policyuat.spandanasphoorty.com/policy_apis/CA_document/${row.file_name}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              download
-              style={{ cursor: "pointer" }}
-            >
-              <img src={img1} width="35%" alt="Download File" />
-            </a>
-          </div>
-        );
-      }
-    },
-    {
       name: 'Action',
       selector: () => null,
-      width: '17%',
+      width: '15%',
       headerStyle: {
         textAlign: 'center',
       },
-      // center: true,
+      center: true,
       cell: (row) => (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '40%' }}>
           <form>
@@ -811,19 +743,44 @@ export default function PSGTable() {
               value={rowActions[row.id] || ""}
               onChange={(event) => handleActionChange(event, row)}
               displayEmpty
+              sx={{ width: '120px' }}
             >
               <MenuItem value="activate" disabled={row.status === 1}>Activate</MenuItem>
               <MenuItem value="deprecate" disabled={row.status === 2}>Deprecate</MenuItem>
             </StyledSelect>
           </form>
-          <IconButton
-            size="small"
-            disabled={!isCheckEnabled[row.id]}
-            onClick={() => handleCASubmit(row)}
-            sx={{ ml: 1, color: '#ee8812' }}
-          >
-            <CheckIcon />
-          </IconButton>
+          {isCheckEnabled[row.id] && (
+            <Button
+              onClick={() => handleCASubmit(row)}
+              sx={{
+                ml: 1,
+                backgroundColor: '#ee8812',
+                color: '#fff',
+                minWidth: '30px',
+                height: '25px',
+                borderRadius: '5px',
+                '&:hover': {
+                  backgroundColor: 'rgb(249, 83, 22)',
+                },
+              }}
+            >
+              <CheckIcon />
+            </Button>
+          //   <Button
+          //   size="small"
+          //   onClick={() => handleCASubmit(row)}
+          //   sx={{
+          //     ml: 1,
+          //     color: '#ee8812',
+          //     display: 'flex',
+          //     alignItems: 'center',
+          //     textTransform: 'none',
+          //     fontSize: '0.875rem', // Adjust font size if needed
+          //   }}
+          //   startIcon={<CheckIcon />}
+          // >
+          // </Button>
+          )}
         </Box>
       ),
     }
@@ -834,7 +791,7 @@ export default function PSGTable() {
   const handlePageChange = (newPage) => {
     if (isSearching) {
       setCurrentPage(newPage);
-      handleSearchData(activeTab, newPage, rowsPerPage, searchValue, selectedType, selectedStatus);
+      handleSearchData(activeTab, newPage, rowsPerPage, searchValue, searchValue2, searchValue3, selectedType, selectedStatus, selectedCAStatus);
     } else {
       setCurrentPage(newPage);
       fetchData(activeTab, newPage, rowsPerPage);
@@ -849,7 +806,7 @@ export default function PSGTable() {
   const handleRowsPerPageChange = (newRowsPerPage) => {
     if (isSearching) {
       setRowsPerPage(newRowsPerPage);
-      handleSearchData(activeTab, currentPage, newRowsPerPage, searchValue, selectedType, selectedStatus); // Search API with updated rows per page
+      handleSearchData(activeTab, currentPage, newRowsPerPage, searchValue, searchValue2, searchValue3, selectedType, selectedStatus, selectedCAStatus); // Search API with updated rows per page
     } else {
       setRowsPerPage(newRowsPerPage);
       fetchData(activeTab, currentPage, newRowsPerPage); // Default rows per page change
@@ -863,19 +820,32 @@ export default function PSGTable() {
   // };
 
   useEffect(() => {
+    if (userToken) {
+      const decodedToken = jwtDecode(userToken);
+      console.log("Decoded role ID ------------",decodedToken.role_id);
+      if (decodedToken.role_id) {
+        setRoleId(decodedToken.role_id);
+      }
+      if (decodedToken.user_id) {
+        setUserId(decodedToken.user_id);
+      }
+    }
+  }, [userToken, roleId, userId]);
+
+  useEffect(() => {
     fetchData(activeTab, currentPage, rowsPerPage);
   }, [activeTab, currentPage, rowsPerPage]);
 
   useEffect(() => {
-    handleSearchData(activeTab, currentPage, rowsPerPage, searchValue, selectedType, selectedStatus);
-  }, [selectedType, activeTab, currentPage, rowsPerPage, searchValue, selectedType, selectedStatus]);
+    handleSearchData(activeTab, currentPage, rowsPerPage, searchValue, searchValue2, searchValue3, selectedType, selectedStatus, selectedCAStatus);
+  }, [activeTab, currentPage, rowsPerPage, searchValue, searchValue2, searchValue3, selectedType, selectedStatus, selectedCAStatus]);
 
   const handleRowClick = (row) => {
     if (activeTab == 1) {
-      setSelectedDocument(row.emp_id);
+      setSelectedDocument(row.user_id);
       setSelectedRow(row);
-      navigate(`/admin/user/${row.emp_id}`, {
-        state: { emp_id: row.emp_id, emp_name: row.emp_name, activeTab }
+      navigate(`/admin/user/${row.user_id}`, {
+        state: { user_id: row.user_id, emp_id: row.emp_id, emp_name: row.emp_name, activeTab }
       });
     } else if (activeTab == 2) {
       setSelectedDocument(row.title);
@@ -908,7 +878,7 @@ export default function PSGTable() {
       status: status
     }
 
-    const submitForm = fetch(url, {
+    const submitForm = customFetchWithAuth(url,"POST",JSON.stringify(formData), {
       method: "POST",
       headers: {
         'Content-Type': 'application/json',
@@ -1022,12 +992,14 @@ export default function PSGTable() {
                 }}
                 onChange={(e) => {
                   field.onChange(e);
-                  setSelectedStatus(e.target.value);
+                  if(e.target.value === ""){
+                    setSelectedStatus("");
+                  } else{
+                    setSelectedStatus(e.target.value);
+                  }
                 }}
               >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
+                <MenuItem value="">None</MenuItem>
                 <MenuItem value={0}>In review</MenuItem>
                 <MenuItem value={1}>Approved</MenuItem>
                 <MenuItem value={2}>Rejected</MenuItem>
@@ -1037,8 +1009,64 @@ export default function PSGTable() {
           />
         </Grid>
         )}
+        {activeTab == 3 && (
+        <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2 }}>
+            Status
+          </Typography>
+          <Controller
+            name="documentStatus"
+            control={control}
+            value={selectedCAStatus}
+            render={({ field }) => (
+              <StyledSelect
+                labelId="document-status-label"
+                id="documentStatus"
+                {...field}
+                sx={{
+                  width: '160px',
+                }}
+                onChange={(e) => {
+                  field.onChange(e);
+                  if(e.target.value == ""){
+                    setSelectedCAStatus("");
+                  } else{
+                    setSelectedCAStatus((e.target.value)-3);
+                  }
+                }}
+              >
+                <MenuItem value="">None</MenuItem>
+                <MenuItem value={4}>Active</MenuItem>
+                <MenuItem value={5}>Deprecated</MenuItem>
+              </StyledSelect>
+            )}
+          />
+        </Grid>
+        )}
+        {activeTab == 1 && (
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{
+              fontFamily: "sans-serif",
+              fontSize: "0.875rem",
+              textTransform: "none",
+              marginTop: { sm: 2, xs: 2 },
+              height: "25px",
+              backgroundColor: "#ee8812",
+              "&:hover": {
+                backgroundColor: "rgb(249, 83, 22)"
+              }
+            }}
+            onClick={() => navigate("/admin/user/add")}
+          >
+            New User
+          </Button>
+        )}
       </Grid>
       <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
+        {activeTab == 1 && (
+        <>
         <StyledTextField
           value={searchValue}
           onChange={handleInputChange}
@@ -1057,16 +1085,53 @@ export default function PSGTable() {
             <CloseIcon />
           </IconButton>
         )}
-        {/* <Button
-          variant="contained"
-          color="primary"
-          disabled={isBtnDisabled}
-          sx={{ marginTop: -2, textTransform: 'none', height: '30px', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }}
-          onClick={() => handleSearchData(activeTab, currentPage, rowsPerPage, searchValue)}
-        >
-          Search
-        </Button> */}
-          </Grid>
+        </>
+        )}
+        {activeTab == 2 && (
+        <>
+        <StyledTextField
+          value={searchValue2}
+          onChange={handleInputChange}
+          placeholder="Search..."
+          sx={{ width: '300px', marginRight: 2 }}
+        />
+        {searchValue2 && (
+          <IconButton
+            onClick={() => {
+              setSearchValue2(''); // Clear the search field
+              setIsSearching(false); // Reset isSearching state
+              fetchData(activeTab, currentPage, rowsPerPage); // Fetch data without search
+            }}
+            sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }} // Adjust for proper spacing
+          >
+            <CloseIcon />
+          </IconButton>
+        )}
+        </>
+        )}
+        {activeTab == 3 && (
+        <>
+        <StyledTextField
+          value={searchValue3}
+          onChange={handleInputChange}
+          placeholder="Search..."
+          sx={{ width: '300px', marginRight: 2 }}
+        />
+        {searchValue3 && (
+          <IconButton
+            onClick={() => {
+              setSearchValue3(''); // Clear the search field
+              setIsSearching(false); // Reset isSearching state
+              fetchData(activeTab, currentPage, rowsPerPage); // Fetch data without search
+            }}
+            sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }} // Adjust for proper spacing
+          >
+            <CloseIcon />
+          </IconButton>
+        )}
+        </>
+        )}
+        </Grid>
           <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2 }}>
             <Box width="100%" height="100%" overflow="auto">
               <DataTable

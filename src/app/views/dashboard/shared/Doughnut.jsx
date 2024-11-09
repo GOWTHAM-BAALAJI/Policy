@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTheme } from "@mui/material/styles";
 import ReactEcharts from "echarts-for-react";
 import { useDispatch, useSelector } from "react-redux";
+import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
 export default function DoughnutChart({
   height = "100%",
@@ -11,6 +12,7 @@ export default function DoughnutChart({
   onClickSection
 }) {
   const theme = useTheme();
+  const customFetchWithAuth=useCustomFetch();
   const [loading, setLoading] = useState(true);
   const [selectedSection, setSelectedSection] = useState(selectedTab || null);
 
@@ -26,7 +28,7 @@ export default function DoughnutChart({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count", {
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count","GET",{}, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
