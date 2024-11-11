@@ -1,11 +1,15 @@
 import { jwtDecode } from "jwt-decode";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 //import { setAccessToken } from "./redux/accessTokenSlice";
-import { setJwtToken } from "../../redux/actions/authActions";
+import { clearJwtToken, setJwtToken } from "../../redux/actions/authActions";
 const useCustomFetch = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const accessToken = useSelector((state) => state.token);
-  const customFetchWithAuth = async (url,method,payload) => {
+  //flag (1->GET, 2-> POST(application/json), 3->POST(form-data));
+  const customFetchWithAuth = async (url,method,flag,payload) => {
     let token = accessToken;
     const decodedToken = jwtDecode(token);
     const expirationTime = decodedToken.exp;
@@ -21,7 +25,14 @@ const useCustomFetch = () => {
         body: JSON.stringify({ otp: "value" })
       });
       const data = await newAccessTokenData.json();
-      if (!data.status) {console.log("token not refreshed");
+      console.log("Checking if token expired --------- ", data);
+      if (!data.status) {
+        dispatch(clearJwtToken());
+        toast.error("Token expired, redirecting to login page");
+        setTimeout(()=>{
+          navigate("/");
+        },3000);
+        return;
         //redirect to login page
       }
       dispatch(setJwtToken(data.jwt));
@@ -29,13 +40,26 @@ const useCustomFetch = () => {
     }
     let requestParams ={
       method:method,
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
+      // headers: {
+      //   'Content-Type': 'application/json',
+      //   Authorization: `Bearer ${token}`
+      // },
     }
     if(method=="POST"){
-      requestParams.body=payload
+      requestParams.body=payload;
     }
+    if(flag==1||flag==3){
+      requestParams.headers= {
+          Authorization: `Bearer ${token}`
+        }
+    }
+    else if(flag==2){
+      requestParams.headers= {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    }
+
     const response = await fetch(url, requestParams);
     return response;
     // const secretData = await response.json();

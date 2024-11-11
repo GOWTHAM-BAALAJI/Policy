@@ -60,7 +60,7 @@ const StyledTextField = styled(TextField)(() => ({
 
 const StyledSelect = styled(Select)(() => ({
   width: "100%",
-  height: "30px", // Ensure the select component itself has a defined height
+  height: "25px", // Ensure the select component itself has a defined height
   fontFamily: "sans-serif",
   fontSize: "0.875rem",
   "& .MuiInputBase-root": {
@@ -188,13 +188,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count", "GET",{},{
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-          }
-        });
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count", "GET",1,{});
         const data = await response.json();
 
         if (data && data.status) {
@@ -224,13 +218,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     setLoading(true);
     try {
       let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
-      const response = await customFetchWithAuth(url, "GET",{},{
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-        }
-      });
+      const response = await customFetchWithAuth(url, "GET",1,{});
       const data = await response.json();
       setPsgList(data); // Adjust this based on your API response structure
       if (tab == 1) {
@@ -273,29 +261,13 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     try {
       // First API call: Fetch data based on searchValue
       const response = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",{},
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`
-          }
-        }
-      );
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",1,{});
       const data = await response.json();
       setPsgList(data);
 
       // Second API call: Fetch the count data based on searchValue
       const countResponse = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",{},
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`
-          }
-        }
-      );
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",1,{});
 
       if (!countResponse.ok) {
         throw new Error("Failed to fetch count data");
@@ -340,29 +312,13 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     try {
       // First API call: Fetch data based on searchValue
       const response = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",{},
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`
-          }
-        }
-      );
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",1,{});
       const data = await response.json();
       setPsgList(data);
 
       // Second API call: Fetch the count data based on searchValue
       const countResponse = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",{},
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`
-          }
-        }
-      );
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",1,{});
 
       if (!countResponse.ok) {
         throw new Error("Failed to fetch count data");
@@ -557,7 +513,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
 
   return (
     <Grid container spacing={2}>
-      <Grid item lg={6} md={6} sm={6} xs={6}>
+      <Grid item lg={6} md={6} sm={12} xs={12} sx={{ mb: {sm:-2, xs:-2} }}>
         <Typography
           variant="h5"
           sx={{
@@ -573,7 +529,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
         </Typography>
       </Grid>
       {(isInitiator(roleId)) && (
-        <Grid item lg={3} md={3} sm={3} xs={3}>
+        <Grid item lg={3} md={3} sm={6} xs={6} sx={{ml: {sm: 1, xs: 1}}}>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -596,10 +552,10 @@ const PSGTable = ({ initialTab, onTabChange }) => {
       )}
       <Grid
         item
-        lg={(isInitiator(roleId)) ? 3 : 6}
-        md={(isInitiator(roleId)) ? 3 : 6}
-        sm={(isInitiator(roleId)) ? 3 : 6}
-        xs={(isInitiator(roleId)) ? 3 : 6}
+        lg={(isInitiator(roleId)) ? 2.7 : 6}
+        md={(isInitiator(roleId)) ? 2.7 : 6}
+        sm={(isInitiator(roleId)) ? 5.7 : 12}
+        xs={(isInitiator(roleId)) ? 5.7 : 12}
       >
         <Grid
           item
@@ -640,19 +596,23 @@ const PSGTable = ({ initialTab, onTabChange }) => {
           />
         </Grid>
       </Grid>
-      <Grid item lg={12} md={12} sm={12} xs={12}>
+      <Grid item lg={12} md={12} sm={12} xs={12} sx={{marginTop: -1}}>
+      <Box sx={{ overflowX: 'auto', width: '100%' }}>
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
           textColor="inherit"
           indicatorColor="secondary"
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ whiteSpace: 'nowrap' }}
         >
           <Tab
             label="Waiting for Action"
             value="4"
             sx={{
               fontFamily: "sans-serif",
-              fontSize: "1rem",
+              fontSize: "0.875rem",
               fontWeight: 100,
               textTransform: "none"
             }}
@@ -662,7 +622,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
             value="1"
             sx={{
               fontFamily: "sans-serif",
-              fontSize: "1rem",
+              fontSize: "0.875rem",
               fontWeight: 100,
               textTransform: "none"
             }}
@@ -672,7 +632,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
             value="2"
             sx={{
               fontFamily: "sans-serif",
-              fontSize: "1rem",
+              fontSize: "0.875rem",
               fontWeight: 100,
               textTransform: "none"
             }}
@@ -682,12 +642,13 @@ const PSGTable = ({ initialTab, onTabChange }) => {
             value="3"
             sx={{
               fontFamily: "sans-serif",
-              fontSize: "1rem",
+              fontSize: "0.875rem",
               fontWeight: 100,
               textTransform: "none"
             }}
           />
         </Tabs>
+      </Box>
       </Grid>
       <Grid
         item

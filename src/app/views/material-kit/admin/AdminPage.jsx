@@ -174,13 +174,7 @@ export default function PSGTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response1 = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count","GET",{}, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-          }
-        });
+        const response1 = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count","GET",1,{});
         const data1 = await response1.json();
 
         if (data1 && data1.status) {
@@ -188,13 +182,7 @@ export default function PSGTable() {
           setUserCount(userCount || 0);
         }
 
-        const response2 = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count","GET",{}, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-          }
-        });
+        const response2 = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count","GET",1,{});
         const data2 = await response2.json();
 
         if (data2 && data2.status) {
@@ -202,13 +190,7 @@ export default function PSGTable() {
           setPolicyCount(policyCount || 0);
         }
 
-        const response3 = await customFetchWithAuth('https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count',"GET",{}, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
-          },
-        });
+        const response3 = await customFetchWithAuth('https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count',"GET",1,{});
         const data3 = await response3.json();
 
         if (data3 && data3.status) {
@@ -230,37 +212,19 @@ export default function PSGTable() {
     try {
       if (tab == 1) {
         let url = `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-user?page=${page}&rows=${rows}`;
-        const response = await customFetchWithAuth(url,"GET",{}, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-          }
-        });
+        const response = await customFetchWithAuth(url,"GET",1,{});
         const data = await response.json();
         setPsgList(data.data); // Adjust this based on your API response structure
         setCount(userCount || 0);
       } else if (tab == 2) {
         let url = `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-policy?page=${page}&rows=${rows}`;
-        const response = await customFetchWithAuth(url,"GET",{}, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-          }
-        });
+        const response = await customFetchWithAuth(url,"GET",1,{});
         const data = await response.json();
         setPsgList(data.data); // Adjust this based on your API response structure
         setCount(policyCount || 0);
       } else if (tab == 3) {
         let url = `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-circulars?page=${page}&rows=${rows}`;
-        const response = await customFetchWithAuth(url,"GET",{}, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
-          },
-        });
+        const response = await customFetchWithAuth(url,"GET",1,{});
         const data = await response.json();
         setPsgList(data.data); // Adjust this based on your API response structure
         setCount(circularCount || 0);
@@ -301,28 +265,12 @@ export default function PSGTable() {
     try {
       if (tab == 1) {
         const response1 = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-user?page=${page}&rows=${rows}&search=${searchValue}`,"GET",{},
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${userToken}`
-            }
-          }
-        );
+          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-user?page=${page}&rows=${rows}&search=${searchValue}`,"GET",1,{});
         const data1 = await response1.json();
         setPsgList(data1.data);
 
         const countResponse1 = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count?search=${searchValue}`,"GET",{},
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${userToken}`
-            }
-          }
-        );
+          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count?search=${searchValue}`,"GET",1,{},);
 
         if (!countResponse1.ok) {
           throw new Error("Failed to fetch count data");
@@ -332,28 +280,12 @@ export default function PSGTable() {
         setCount(countData1.count);
       } else if (tab == 2) {
         const response2 = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-policy?page=${page}&rows=${rows}&search=${searchValue2}&type=${type}&status=${status}`,"GET",{},
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${userToken}`
-            }
-          }
-        );
+          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-policy?page=${page}&rows=${rows}&search=${searchValue2}&type=${type}&status=${status}`,"GET",1,{});
         const data2 = await response2.json();
         setPsgList(data2.data);
 
         const countResponse2 = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count?search=${searchValue2}&type=${type}&status=${status}`,"GET",{},
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${userToken}`
-            }
-          }
-        );
+          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count?search=${searchValue2}&type=${type}&status=${status}`,"GET",1,{});
 
         if (!countResponse2.ok) {
           throw new Error("Failed to fetch count data");
@@ -362,23 +294,11 @@ export default function PSGTable() {
         const countData2 = await countResponse2.json();
         setCount(countData2.count);
       } else if(tab == 3){
-        const response3 = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-circulars?page=${page}&rows=${rows}&search=${searchValue3}&status=${CAstatus}`,"GET",{}, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${userToken}`,
-          },
-        });
+        const response3 = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-circulars?page=${page}&rows=${rows}&search=${searchValue3}&status=${CAstatus}`,"GET",1,{});
         const data3 = await response3.json();
         setPsgList(data3.data);
     
-        const countResponse3 = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count?search=${searchValue3}&status=${CAstatus}`,"GET",{}, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${userToken}`,
-          },
-        });
+        const countResponse3 = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count?search=${searchValue3}&status=${CAstatus}`,"GET",1,{});
     
         if (!countResponse3.ok) {
           throw new Error('Failed to fetch count data');
@@ -520,9 +440,9 @@ export default function PSGTable() {
     },
     {
       name: "Action",
-      selector: () => null, // No need for selector since we're using a custom cell
+      selector: () => null,
       width: "10%",
-      center: true,
+      center: "true",
       cell: (row) => (
         <Box
           sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}
@@ -537,7 +457,11 @@ export default function PSGTable() {
             onClick={() => handleRowClick(row)}
           />
         </Box>
-      )
+      ),
+      style: {
+        textAlign: 'center',
+        width: '100%'
+      }
     }
   ];
 
@@ -570,7 +494,6 @@ export default function PSGTable() {
             paddingLeft: "8px",
             fontSize: "14px"
           }}
-          // onClick={() => handleRowClick(row)}
         >
           {row.title}
         </Typography>
@@ -640,7 +563,7 @@ export default function PSGTable() {
       name: "Action",
       selector: () => null, // No need for selector since we're using a custom cell
       width: "10%",
-      center: true,
+      center: "true",
       cell: (row) => (
         <Box
           sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}
@@ -677,7 +600,7 @@ export default function PSGTable() {
     selector: row => row.title || 'N/A',
     sortable: true,
     // center: true,
-    width: '25%',
+    width: '23%',
     cell: (row) => (
         <Typography
         variant="body2"
@@ -693,7 +616,7 @@ export default function PSGTable() {
     selector: row => row.description || 'N/A',
     sortable: true,
     // center: true,
-    width: '37%',
+    width: '33%',
     cell: (row) => (
         <Typography
         variant="body2"
@@ -716,7 +639,7 @@ export default function PSGTable() {
       selector: (row) => row.status || "N/A",
       // sortable: true,
       // center: true,
-      width: "10%",
+      width: "13%",
       cell: (row) => {
         const statusMapping = {
           1: "Active",
@@ -724,7 +647,7 @@ export default function PSGTable() {
         };
         const displayStatus = statusMapping[row.status] || "N/A";
         return (
-          <div style={{ textAlign: "left", width: "100%", paddingLeft: "8px" }}>{displayStatus}</div>
+          <div style={{ textAlign: "left", width: "100%", paddingLeft: "8px", paddingRight: "8px" }}>{displayStatus}</div>
         );
       }
     },
@@ -735,7 +658,7 @@ export default function PSGTable() {
       headerStyle: {
         textAlign: 'center',
       },
-      center: true,
+      center: "true",
       cell: (row) => (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '40%' }}>
           <form>
@@ -766,20 +689,6 @@ export default function PSGTable() {
             >
               <CheckIcon />
             </Button>
-          //   <Button
-          //   size="small"
-          //   onClick={() => handleCASubmit(row)}
-          //   sx={{
-          //     ml: 1,
-          //     color: '#ee8812',
-          //     display: 'flex',
-          //     alignItems: 'center',
-          //     textTransform: 'none',
-          //     fontSize: '0.875rem', // Adjust font size if needed
-          //   }}
-          //   startIcon={<CheckIcon />}
-          // >
-          // </Button>
           )}
         </Box>
       ),
@@ -877,15 +786,9 @@ export default function PSGTable() {
       id: event.id,
       status: status
     }
+    console.log("Payload Stringified:", JSON.stringify(formData));
 
-    const submitForm = customFetchWithAuth(url,"POST",JSON.stringify(formData), {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userToken}` // Example header for token authentication
-      },
-      body: JSON.stringify(formData),
-    })
+    const submitForm = customFetchWithAuth(url,"POST",2,JSON.stringify(formData))
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
@@ -962,19 +865,24 @@ export default function PSGTable() {
         </Grid>
         )}
       </Grid>
-      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2, display: 'flex', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }, justifyContent: 'space-between', alignItems: 'center', whiteSpace: 'nowrap' }}>
+      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2, display: 'flex', flexDirection: { xs: 'column', sm: 'row', md: 'row', lg: 'row' }, justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ overflowX: 'auto', width: '100%' }}>
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
           textColor="inherit"
           indicatorColor="secondary"
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ whiteSpace: 'nowrap' }}
         >
-          <Tab label="User Management" value='1' sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Policy Management" value='2' sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Circular Management" value='3' sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="User Management" value='1' sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Policy Management" value='2' sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Circular Management" value='3' sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
         </Tabs>
+        </Box>
         {activeTab == 2 && (
-        <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center' }}>
+        <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center', mt: {lg: -1, md: -1, sm: 0, xs: 2} }}>
           <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2 }}>
             Status
           </Typography>
@@ -1010,7 +918,7 @@ export default function PSGTable() {
         </Grid>
         )}
         {activeTab == 3 && (
-        <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center' }}>
+        <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center', mt: {lg: -1, md: -1, sm: 0, xs: 2} }}>
           <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2 }}>
             Status
           </Typography>
@@ -1051,8 +959,9 @@ export default function PSGTable() {
               fontFamily: "sans-serif",
               fontSize: "0.875rem",
               textTransform: "none",
-              marginTop: { sm: 2, xs: 2 },
+              marginTop: { sm: -1, xs: 2 },
               height: "25px",
+              width: {lg:"12%", md: "16%", sm:"20%", xs:"36%"},
               backgroundColor: "#ee8812",
               "&:hover": {
                 backgroundColor: "rgb(249, 83, 22)"

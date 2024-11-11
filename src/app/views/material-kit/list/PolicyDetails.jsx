@@ -322,12 +322,7 @@ export default function PolicyDetails() {
   useEffect(() => {
     const fetchReviewers = async () => {
       try {
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer", "GET", {}, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`
-          }
-        });
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer", "GET", 1,{});
         const data = await response.json();
         if (data.status) {
           // Map the API response to format for dropdown (using emp_name as label and user_id as value)
@@ -349,12 +344,7 @@ export default function PolicyDetails() {
   useEffect(() => {
     const fetchApprovers = async () => {
       try {
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover", "GET", {}, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`
-          }
-        });
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover", "GET", 1,{});
         const data = await response.json();
         if (data.status) {
           // Map the API response to format for dropdown (using emp_name as label and user_id as value)
@@ -376,12 +366,7 @@ export default function PolicyDetails() {
   useEffect(() => {
     const fetchUserGroups = async () => {
       try {
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", "GET", {}, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`
-          }
-        });
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", "GET", 1,{});
         const data = await response.json();
         if (data.status) {
           const fetchedUserGroups = data.data.map((usergroup) => ({
@@ -606,13 +591,7 @@ export default function PolicyDetails() {
     setError(null); // Reset error
 
     try {
-      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/${documentId}`, "GET", {}, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-        }
-      });
+      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/${documentId}`, "GET", 1,{});
       const data = await response.json();
       setSelectedDocument(data.data); // Set the document data
     } catch (err) {
@@ -850,13 +829,7 @@ export default function PolicyDetails() {
     );
     formData.append("user_group", selectedUserGroupSum || 0);
 
-    const submitForm = customFetchWithAuth(url, "POST", formData, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}` // Example header for token authentication
-      },
-      body: formData
-    })
+    const submitForm = customFetchWithAuth(url, "POST", 3,formData)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
@@ -973,9 +946,9 @@ export default function PolicyDetails() {
             sx={{
               fontFamily: "sans-serif",
               fontSize: "0.875 rem",
-              marginLeft: 2,
+              marginLeft: {lg:2, md: 2, sm: 1, xs: 1},
               marginTop: 2,
-              marginRight: 2,
+              marginRight: {lg:2, md: 2, sm: -1, xs: -2},
               paddingRight: "16px"
             }}
           >
@@ -1001,85 +974,73 @@ export default function PolicyDetails() {
                   <Table aria-label="data table">
                     <TableBody>
                       <TableRow>
-                        <TableCell sx={{ pl: 2, width: "30%", verticalAlign: "top" }}>
-                          <b>Document ID:</b>
+                        <TableCell sx={{ pl: 2, width: { lg: "30%", md: "28%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
+                          <b>{selectedDocument.type == 1 ? 'Policy' : selectedDocument.type == 2 ? 'SOP' : 'Guidance Note'} ID:</b>
                         </TableCell>
-                        <TableCell sx={{ pl: 2, width: "70%", verticalAlign: "top" }}>
+                        <TableCell sx={{ pl: 2, width: { lg: "70%", md: "72%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>
                           {getDisplayPolicyId(selectedDocument.id)}
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                          <b>Document Title:</b>
+                        <TableCell sx={{ pl: 2, width: { lg: "30%", md: "30%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
+                          <b>Title:</b>
                         </TableCell>
-                        <TableCell sx={{ pl: 2, verticalAlign: "top" }}>{selectedDocument.title}</TableCell>
+                        <TableCell sx={{ pl: 2, width: { lg: "70%", md: "70%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>{selectedDocument.title}</TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                          <b>Document Description:</b>
+                        <TableCell sx={{ pl: 2, width: { lg: "30%", md: "30%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
+                          <b>Description:</b>
                         </TableCell>
-                        <TableCell sx={{ pl: 2, verticalAlign: "top" }}>{selectedDocument.description}</TableCell>
+                        <TableCell sx={{ pl: 2, width: { lg: "70%", md: "70%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>{selectedDocument.description}</TableCell>
                       </TableRow>
                       {roleId !== 16 && (
                         <>
                           <TableRow>
-                            <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                              <b>Initiator Name:</b>
+                            <TableCell sx={{ pl: 2, width: { lg: "30%", md: "30%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
+                              <b>Initiator :</b>
                             </TableCell>
-                            <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
+                            <TableCell sx={{ pl: 2, width: { lg: "70%", md: "70%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>
                               {selectedDocument.initiator_details?.emp_name}
                             </TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                              <b>Reviewer Name:</b>
+                            <TableCell sx={{ pl: 2, width: { lg: "30%", md: "30%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
+                              <b>Reviewer :</b>
                             </TableCell>
-                            <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
+                            <TableCell sx={{ pl: 2, width: { lg: "70%", md: "70%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>
                               {selectedDocument.reviwer_details?.emp_name}
                             </TableCell>
                           </TableRow>
                           {selectedDocument.Policy_status.slice(1).map((approver, index) => (
                             <TableRow key={approver.approver_id}>
-                              <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                                <b>Approver-{index + 1} Name:</b>
+                              <TableCell sx={{ pl: 2, width: { lg: "30%", md: "30%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
+                                <b>Approver-{index + 1} :</b>
                               </TableCell>
-                              <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
+                              <TableCell sx={{ pl: 2, width: { lg: "70%", md: "70%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>
                                 {approver.approver_details?.emp_name}
                               </TableCell>
                             </TableRow>
                           ))}
                           <TableRow>
-                            <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
+                            <TableCell sx={{ pl: 2, width: { lg: "30%", md: "30%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                               <b>Current Version:</b>
                             </TableCell>
-                            <TableCell sx={{ pl: 2, verticalAlign: "top" }}>{selectedDocument.version}</TableCell>
+                            <TableCell sx={{ pl: 2, width: { lg: "70%", md: "70%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>{selectedDocument.version}</TableCell>
                           </TableRow>
                         </>
                       )}
                       {activeTab == 3 && roleId !== 16 && (
                         <>
                           <TableRow>
-                            <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
+                            <TableCell sx={{ pl: 2, width: { lg: "30%", md: "30%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                               <b>Pending at:</b>
                             </TableCell>
-                            <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
+                            <TableCell sx={{ pl: 2, width: { lg: "70%", md: "70%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>
                               {selectedDocument.pending_at_details?.emp_name}
                             </TableCell>
                           </TableRow>
                         </>
                       )}
-                      {activeTab == 1 &&
-                        selectedDocument.pending_at_id === null &&
-                        roleId !== 16 && (
-                          <>
-                            <TableRow>
-                              <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                                <b>Final Decision: </b>
-                              </TableCell>
-                              <TableCell sx={{ pl: 2, verticalAlign: "top" }}>Approved</TableCell>
-                            </TableRow>
-                          </>
-                        )}
                       {activeTab == 2 &&
                         selectedDocument.pending_at_id === null &&
                         roleId !== 16 && (
@@ -1127,16 +1088,16 @@ export default function PolicyDetails() {
                         roleId !== 16 && (
                           <>
                             <TableRow>
-                              <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
+                              <TableCell sx={{ pl: 2, width: { lg: "30%", md: "30%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                                 <b>Remarks: </b>
                               </TableCell>
-                              <TableCell sx={{ pl: 2, verticalAlign: "top" }}>{latest_remarks}</TableCell>
+                              <TableCell sx={{ pl: 2, width: { lg: "70%", md: "70%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>{latest_remarks}</TableCell>
                             </TableRow>
                             <TableRow>
-                              <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
+                              <TableCell sx={{ pl: 2, width: { lg: "30%", md: "30%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                                 <b>Rejected by: </b>
                               </TableCell>
-                              <TableCell sx={{ pl: 2, verticalAlign: "top" }}>{rejected_by}</TableCell>
+                              <TableCell sx={{ pl: 2, width: { lg: "70%", md: "70%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>{rejected_by}</TableCell>
                             </TableRow>
                           </>
                         )}
@@ -1236,7 +1197,9 @@ export default function PolicyDetails() {
                                                   style={{ cursor: "pointer" }}
                                                 >
                                                   <div className="img-wrapper">
-                                                    <img src={img1} width="45%" alt="" />
+                                                    <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                      <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                    </Box>
                                                   </div>
                                                 </a>
                                               </td>
@@ -1371,7 +1334,9 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <img src={img1} width="45%" alt="" />
+                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
                                                 </div>
                                               </a>
                                             </td>
@@ -1514,7 +1479,11 @@ export default function PolicyDetails() {
                                                         download
                                                         style={{ cursor: "pointer" }}
                                                       >
-                                                        <img src={img1} width="45%" alt="" />
+                                                        <div className="img-wrapper">
+                                                          <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                            <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                          </Box>
+                                                        </div>
                                                       </a>
                                                     </td>
                                                     <td
@@ -1634,7 +1603,11 @@ export default function PolicyDetails() {
                                                         download
                                                         style={{ cursor: "pointer" }}
                                                       >
-                                                        <img src={img1} width="45%" alt="" />
+                                                        <div className="img-wrapper">
+                                                          <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                            <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                          </Box>
+                                                        </div>
                                                       </a>
                                                     </td>
                                                     <td
@@ -1770,7 +1743,11 @@ export default function PolicyDetails() {
                                                 download
                                                 style={{ cursor: "pointer" }}
                                               >
-                                                <img src={img1} width="45%" alt="" />
+                                                <div className="img-wrapper">
+                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
+                                                </div>
                                               </a>
                                             </td>
                                             <td
@@ -1897,7 +1874,11 @@ export default function PolicyDetails() {
                                                         download
                                                         style={{ cursor: "pointer" }}
                                                       >
-                                                        <img src={img1} width="45%" alt="" />
+                                                        <div className="img-wrapper">
+                                                          <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                            <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                          </Box>
+                                                        </div>
                                                       </a>
                                                     </td>
                                                     <td
@@ -2017,7 +1998,11 @@ export default function PolicyDetails() {
                                                         download
                                                         style={{ cursor: "pointer" }}
                                                       >
-                                                        <img src={img1} width="45%" alt="" />
+                                                        <div className="img-wrapper">
+                                                          <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                            <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                          </Box>
+                                                        </div>
                                                       </a>
                                                     </td>
                                                     <td
@@ -2155,7 +2140,9 @@ export default function PolicyDetails() {
                                                   style={{ cursor: "pointer" }}
                                                 >
                                                   <div className="img-wrapper">
-                                                    <img src={img1} width="45%" alt="" />
+                                                    <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                      <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                    </Box>
                                                   </div>
                                                 </a>
                                               </td>
@@ -2275,7 +2262,9 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <img src={img1} width="45%" alt="" />
+                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
                                                 </div>
                                               </a>
                                             </td>
@@ -2407,7 +2396,9 @@ export default function PolicyDetails() {
                                                   style={{ cursor: "pointer" }}
                                                 >
                                                   <div className="img-wrapper">
-                                                    <img src={img1} width="45%" alt="" />
+                                                    <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                      <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                    </Box>
                                                   </div>
                                                 </a>
                                               </td>
@@ -2532,7 +2523,9 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <img src={img1} width="45%" alt="" />
+                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
                                                 </div>
                                               </a>
                                             </td>
@@ -2651,7 +2644,11 @@ export default function PolicyDetails() {
                                                 download
                                                 style={{ cursor: "pointer" }}
                                               >
-                                                <img src={img1} width="45%" alt="" />
+                                                <div className="img-wrapper">
+                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
+                                                </div>
                                               </a>
                                             </td>
                                             <td
@@ -2770,7 +2767,11 @@ export default function PolicyDetails() {
                                                 download
                                                 style={{ cursor: "pointer" }}
                                               >
-                                                <img src={img1} width="45%" alt="" />
+                                                <div className="img-wrapper">
+                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
+                                                </div>
                                               </a>
                                             </td>
                                             <td
@@ -2902,7 +2903,9 @@ export default function PolicyDetails() {
                                                   style={{ cursor: "pointer" }}
                                                 >
                                                   <div className="img-wrapper">
-                                                    <img src={img1} width="45%" alt="" />
+                                                    <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                      <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                    </Box>
                                                   </div>
                                                 </a>
                                               </td>
@@ -3022,7 +3025,9 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <img src={img1} width="45%" alt="" />
+                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
                                                 </div>
                                               </a>
                                             </td>
@@ -3144,7 +3149,9 @@ export default function PolicyDetails() {
                                                   style={{ cursor: "pointer" }}
                                                 >
                                                   <div className="img-wrapper">
-                                                    <img src={img1} width="45%" alt="" />
+                                                    <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                      <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                    </Box>
                                                   </div>
                                                 </a>
                                               </td>
@@ -3269,7 +3276,9 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <img src={img1} width="45%" alt="" />
+                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
                                                 </div>
                                               </a>
                                             </td>
@@ -3388,7 +3397,11 @@ export default function PolicyDetails() {
                                                 download
                                                 style={{ cursor: "pointer" }}
                                               >
-                                                <img src={img1} width="45%" alt="" />
+                                                <div className="img-wrapper">
+                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
+                                                </div>
                                               </a>
                                             </td>
                                             <td
@@ -3508,7 +3521,11 @@ export default function PolicyDetails() {
                                                 download
                                                 style={{ cursor: "pointer" }}
                                               >
-                                                <img src={img1} width="45%" alt="" />
+                                                <div className="img-wrapper">
+                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
+                                                </div>
                                               </a>
                                             </td>
                                             <td
@@ -3542,6 +3559,7 @@ export default function PolicyDetails() {
                         </>
                       ) : (
                         <>
+                          {activeTab == 2 && (
                           <TableRow>
                             <TableCell sx={{ pt: 3, pl: 2, verticalAlign: "top" }}>
                               <b>Final files</b>
@@ -3625,7 +3643,9 @@ export default function PolicyDetails() {
                                           style={{ cursor: "pointer" }}
                                         >
                                           <div className="img-wrapper">
-                                            <img src={img1} width="45%" alt="" />
+                                            <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                              <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                            </Box>
                                           </div>
                                         </a>
                                       </td>
@@ -3653,6 +3673,7 @@ export default function PolicyDetails() {
                               </table>
                             </TableCell>
                           </TableRow>
+                          )}
                         </>
                       )}
                     </TableBody>
@@ -3663,18 +3684,153 @@ export default function PolicyDetails() {
           </Grid>
           <Grid
             item
-            lg={5}
+            lg={5.3}
             md={5}
             sm={12}
             xs={12}
             sx={{
               fontFamily: "sans-serif",
               fontSize: "0.875 rem",
-              marginLeft: 2,
+              marginLeft: {lg:2, md: 2, sm: 1, xs: 1},
               marginTop: 2,
-              marginRight: 2
+              marginRight: {sm: 1, xs: 1}
             }}
           >
+            {selectedDocument && (
+            <>
+            {activeTab == 1 &&
+            selectedDocument.pending_at_id === null &&
+            roleId !== 16 && (
+              <>
+              <TableContainer component={Paper} sx={{ marginLeft: "0", marginTop: { lg:"30px", md:"30px", sm:0, xs:0 } }}>
+              <Table aria-label="data table">
+              <TableBody>
+                <TableRow>
+                  <TableCell sx={{ pt: 2, pl: 2, width: { lg: "30%", md: "30%", sm: "40%", xs: "40%" }, verticalAlign: "top" }}>
+                    <b>Final Decision: </b>
+                  </TableCell>
+                  <TableCell sx={{ pt: 2, pl: 2, width: { lg: "70%", md: "70%", sm: "60%", xs: "60%" }, verticalAlign: "top" }}>Approved</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell sx={{ pt: 2, pl: 2, width: '30%', verticalAlign: "top" }}>
+                    <b>Final file: </b>
+                  </TableCell>
+                  <TableCell sx={{pl: 1, width: '70%', verticalAlign: "top" }}>
+                    <table
+                      style={{
+                        width: "100%",
+                        borderCollapse: "collapse",
+                        marginBottom: "10px"
+                      }}
+                    >
+                      <thead>
+                        <tr>
+                          <th
+                            style={{
+                              width: "15%",
+                              borderBottom: "1px solid #ddd",
+                              padding: "8px",
+                              textAlign: "left"
+                            }}
+                          >
+                            S.no
+                          </th>
+                          <th
+                            style={{
+                              width: "20%",
+                              borderBottom: "1px solid #ddd",
+                              padding: "8px",
+                              textAlign: "left"
+                            }}
+                          >
+                            File
+                          </th>
+                          <th
+                            style={{
+                              width: "20%",
+                              borderBottom: "1px solid #ddd",
+                              padding: "8px",
+                              textAlign: "left"
+                            }}
+                          >
+                            Version
+                          </th>
+                          <th
+                            style={{
+                              width: "25%",
+                              borderBottom: "1px solid #ddd",
+                              padding: "8px",
+                              textAlign: "left"
+                            }}
+                          >
+                            Uploaded On
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedDocument.policy_files.map((file, index) => (
+                          <tr key={index}>
+                            <td
+                              style={{
+                                width: "15%",
+                                padding: "8px",
+                                borderBottom: "1px solid #ddd"
+                              }}
+                            >
+                              {index + 1}
+                            </td>
+                            <td
+                              style={{
+                                width: "20%",
+                                padding: "8px",
+                                borderBottom: "1px solid #ddd"
+                              }}
+                            >
+                              <a
+                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                download
+                                style={{ cursor: "pointer" }}
+                              >
+                                <div className="img-wrapper">
+                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                  </Box>
+                                </div>
+                              </a>
+                            </td>
+                            <td
+                              style={{
+                                width: "20%",
+                                padding: "8px",
+                                borderBottom: "1px solid #ddd"
+                              }}
+                            >
+                              {file.version}
+                            </td>
+                            <td
+                              style={{
+                                width: "25%",
+                                padding: "8px",
+                                borderBottom: "1px solid #ddd"
+                              }}
+                            >
+                              {new Date(file.createdAt).toLocaleDateString("en-GB")}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+              </Table>
+              </TableContainer>
+              </>
+            )}
+            </>
+            )}
             {activeTab == 4 && (
               <div>
                 <Typography

@@ -217,14 +217,7 @@ const Profile = () => {
 
     const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/updateProfile";
 
-    const submitPromise1 = customFetchWithAuth(url,"POST",formData, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}` // Example header for token authentication
-        // Note: Do not include 'Content-Type: application/json' when sending FormData
-      },
-      body: formData
-    })
+    const submitPromise1 = customFetchWithAuth(url,"POST",3,formData)
       .then((response) => {
         return response.json();
       })
@@ -291,15 +284,7 @@ const Profile = () => {
       newPassword: newpassword
     };
 
-    const submitPromise2 = customFetchWithAuth(url,"POST",JSON.stringify(requestData), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userToken}` // Example header for token authentication
-        // Note: Do not include 'Content-Type: application/json' when sending FormData
-      },
-      body: JSON.stringify(requestData)
-    })
+    const submitPromise2 = customFetchWithAuth(url,"POST",2,JSON.stringify(requestData))
       .then((response) => {
         return response.json();
       })

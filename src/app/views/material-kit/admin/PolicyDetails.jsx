@@ -200,12 +200,7 @@ export default function PolicyDetails() {
   useEffect(() => {
     const fetchUserGroups = async() => {
       try{
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",{},{
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`
-          }
-        })
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",1,{});
         const data = await response.json();
         if (data.status) {
           const fetchedUserGroups = data.data.map((usergroup) => ({
@@ -324,13 +319,7 @@ export default function PolicyDetails() {
     setError(null); // Reset error
 
     try {
-      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/${documentId}`,"GET",{}, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-        }
-      });
+      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/${documentId}`,"GET",1,{});
       const data = await response.json();
       setSelectedDocument(data.data); // Set the document data
     } catch (err) {
@@ -359,14 +348,7 @@ export default function PolicyDetails() {
     const formData = {
         id: documentID
     }
-    const submitForm = customFetchWithAuth(url,"POST",JSON.stringify(formData), {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userToken}` // Example header for token authentication
-      },
-      body: JSON.stringify(formData),
-    })
+    const submitForm = customFetchWithAuth(url,"POST",2,JSON.stringify(formData))
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
@@ -428,9 +410,9 @@ export default function PolicyDetails() {
             sx={{
               fontFamily: "sans-serif",
               fontSize: "0.875 rem",
-              marginLeft: 2,
+              marginLeft: {lg:2, md: 2, sm: 1, xs: 1},
               marginTop: 2,
-              marginRight: 2,
+              marginRight: {lg:2, md: 2, sm: -1, xs: -2},
               paddingRight: "16px"
             }}
           >
@@ -453,66 +435,66 @@ export default function PolicyDetails() {
                   <Table aria-label="data table">
                     <TableBody>
                       <TableRow>
-                        <TableCell sx={{ pl: 2, width: "30%" }}>
+                        <TableCell sx={{ pl: 2, width: { lg: "30%", md: "28%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                           <b>Document ID:</b>
                         </TableCell>
-                        <TableCell sx={{ pl: 2, width: "70%" }}>
+                        <TableCell sx={{ pl: 2, width: { lg: "70%", md: "72%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>
                           {getDisplayPolicyId(selectedDocument.id)}
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell sx={{ pl: 2 }}>
+                        <TableCell sx={{ pl: 2, width: { lg: "30%", md: "28%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                           <b>Document Title:</b>
                         </TableCell>
-                        <TableCell sx={{ pl: 2 }}>{selectedDocument.title}</TableCell>
+                        <TableCell sx={{ pl: 2, width: { lg: "70%", md: "72%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>{selectedDocument.title}</TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell sx={{ pl: 2 }}>
+                        <TableCell sx={{ pl: 2, width: { lg: "30%", md: "28%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                           <b>Document Description:</b>
                         </TableCell>
-                        <TableCell sx={{ pl: 2 }}>{selectedDocument.description}</TableCell>
+                        <TableCell sx={{ pl: 2, width: { lg: "70%", md: "72%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>{selectedDocument.description}</TableCell>
                       </TableRow>
                       {roleId !== 16 && (
                         <>
                           <TableRow>
-                            <TableCell sx={{ pl: 2 }}>
+                            <TableCell sx={{ pl: 2, width: { lg: "30%", md: "28%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                               <b>Initiator Name:</b>
                             </TableCell>
-                            <TableCell sx={{ pl: 2 }}>
+                            <TableCell sx={{ pl: 2, width: { lg: "70%", md: "72%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>
                               {selectedDocument.initiator_details?.emp_name}
                             </TableCell>
                           </TableRow>
                           <TableRow>
-                            <TableCell sx={{ pl: 2 }}>
+                            <TableCell sx={{ pl: 2, width: { lg: "30%", md: "28%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                               <b>Reviewer Name:</b>
                             </TableCell>
-                            <TableCell sx={{ pl: 2 }}>
+                            <TableCell sx={{ pl: 2, width: { lg: "70%", md: "72%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>
                               {selectedDocument.reviwer_details?.emp_name}
                             </TableCell>
                           </TableRow>
                           {selectedDocument.Policy_status.slice(1).map((approver, index) => (
                             <TableRow key={approver.approver_id}>
-                              <TableCell sx={{ pl: 2 }}>
+                              <TableCell sx={{ pl: 2, width: { lg: "30%", md: "28%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                                 <b>Approver-{index + 1} Name:</b>
                               </TableCell>
-                              <TableCell sx={{ pl: 2 }}>
+                              <TableCell sx={{ pl: 2, width: { lg: "70%", md: "72%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>
                                 {approver.approver_details?.emp_name}
                               </TableCell>
                             </TableRow>
                           ))}
                           <TableRow>
-                            <TableCell sx={{ pl: 2 }}>
+                            <TableCell sx={{ pl: 2, width: { lg: "30%", md: "28%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                               <b>Current Version:</b>
                             </TableCell>
-                            <TableCell sx={{ pl: 2 }}>{selectedDocument.version}</TableCell>
+                            <TableCell sx={{ pl: 2, width: { lg: "70%", md: "72%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>{selectedDocument.version}</TableCell>
                           </TableRow>
                         </>
                       )}
                       <TableRow>
-                        <TableCell sx={{ pl: 2 }}>
+                        <TableCell sx={{ pl: 2, width: { lg: "30%", md: "28%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                           <b>Status: </b>
                         </TableCell>
-                        <TableCell sx={{ pl: 2 }}>
+                        <TableCell sx={{ pl: 2, width: { lg: "70%", md: "72%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>
                           {{
                             0: "In Review",
                             1: "Approved",
@@ -530,11 +512,11 @@ export default function PolicyDetails() {
                               {selectedDocument.pending_at_id === selectedDocument.initiator_id && (
                                 <>
                                   <TableRow>
-                                    <TableCell sx={{ pl: 2 }}>
+                                    <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
                                       <b>Latest files received for changes</b>
                                     </TableCell>
 
-                                    <TableCell sx={{ pl: 2 }}>
+                                    <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
                                       <table style={{ width: "100%", borderCollapse: "collapse" }}>
                                         <thead>
                                           <tr>
@@ -663,10 +645,10 @@ export default function PolicyDetails() {
                               )}
 
                               <TableRow>
-                                <TableCell sx={{ pl: 2 }}>
+                                <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
                                   <b>Latest files uploaded by the initiator</b>
                                 </TableCell>
-                                <TableCell sx={{ pl: 2 }}>
+                                <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
                                   <table style={{ width: "100%", borderCollapse: "collapse" }}>
                                     <thead>
                                       <tr>
@@ -801,10 +783,10 @@ export default function PolicyDetails() {
                           selectedDocument.policy_files.length > 0 ? (
                             <>
                               <TableRow>
-                                <TableCell sx={{ pl: 2 }}>
+                                <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
                                   <b>Received files</b>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell sx={{ pl: 2, verticalAlign: "top"}}>
                                   <table
                                     style={{
                                       width: "100%",
@@ -923,10 +905,10 @@ export default function PolicyDetails() {
                       ) : (
                         <>
                           <TableRow>
-                            <TableCell sx={{ pl: 2 }}>
+                            <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
                               <b>Final files</b>
                             </TableCell>
-                            <TableCell>
+                            <TableCell sx={{ pl: 2, verticalAlign: "top"}}>
                               <table
                                 style={{
                                   width: "100%",

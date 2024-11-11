@@ -24,7 +24,7 @@ import toast from "react-hot-toast";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
 const ContentBox = styled("div")(({ theme }) => ({
-  margin: "20px",
+  margin: "15px",
   [theme.breakpoints.down("sm")]: { margin: "16px" }
 }));
 
@@ -90,25 +90,11 @@ export default function CATable() {
     setLoading(true);
     try {
       const response = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}`,"GET",{},
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-          }
-        }
-      );
+        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}`,"GET",1,{});
       const data = await response.json();
       setPsgList(data.data); // Adjust this based on your API response structure
 
-      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/count`,"GET",{}, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`
-        }
-      });
+      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/count`,"GET",1,{});
 
       if (!countResponse.ok) {
         throw new Error("Failed to fetch count data");
@@ -158,29 +144,13 @@ export default function CATable() {
     try {
       // First API call: Fetch data based on searchValue
       const response = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}&search=${searchValue}`,"GET",{},
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`
-          }
-        }
-      );
+        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}&search=${searchValue}`,"GET",1,{});
       const data = await response.json();
       setPsgList(data.data);
 
       // Second API call: Fetch the count data based on searchValue
       const countResponse = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/count?search=${searchValue}`,"GET",{},
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`
-          }
-        }
-      );
+        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/count?search=${searchValue}`,"GET",1,{});
 
       if (!countResponse.ok) {
         throw new Error("Failed to fetch count data");
@@ -322,26 +292,13 @@ export default function CATable() {
     setSelectedRow(row);
 
     try {
-      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/${row.id}`,"GET",{}, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}`
-        }
-      });
+      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/${row.id}`,"GET",1,{});
 
       const data = await response.json();
 
       if (data.status && data.data.file_name) {
         const fileResponse = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/CA_document/${data.data.file_name}`,"GET",{},
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${userToken}`
-            }
-          }
-        );
+          `https://policyuat.spandanasphoorty.com/policy_apis/CA_document/${data.data.file_name}`,"GET",1,{});
         const blob = await fileResponse.blob();
         const url = window.URL.createObjectURL(new Blob([blob]));
         const link = document.createElement("a");
@@ -385,7 +342,7 @@ export default function CATable() {
               md={6}
               sm={6}
               xs={6}
-              sx={{ display: "flex", justifyContent: "flex-end", alignItems: "flex-end" }}
+              sx={{ display: "flex", justifyContent: "flex-end", alignItems: "flex-end", mb: {sm:1, xs:1.5} }}
             >
               <Button
                 variant="contained"

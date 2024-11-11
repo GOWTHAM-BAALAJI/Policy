@@ -8,7 +8,7 @@ import PolicyList from "../material-kit/list/PolicyList";
 
 // STYLED COMPONENTS
 const ContentBox = styled("div")(({ theme }) => ({
-  margin: "20px",
+  margin: "15px",
   [theme.breakpoints.down("sm")]: { margin: "16px" }
 }));
 

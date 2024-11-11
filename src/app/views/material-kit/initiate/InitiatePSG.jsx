@@ -272,12 +272,7 @@ const InitiatePSG = () => {
   useEffect(() => {
     const fetchReviewers = async() => {
       try{
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer","GET",{},{
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`
-          }
-        });
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer","GET",1,{});
         const data = await response.json();
         if (data.status) {
           const fetchedReviewers = data.data.map((reviewer) => ({
@@ -298,12 +293,7 @@ const InitiatePSG = () => {
   useEffect(() => {
     const fetchApprovers = async() => {
       try{
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover","GET",{},{
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`
-          }
-        });
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover","GET",1,{});
         const data = await response.json();
         if (data.status) {
           const fetchedApprovalMembers = data.data.map((approvalmember) => ({
@@ -324,12 +314,7 @@ const InitiatePSG = () => {
   useEffect(() => {
     const fetchUserGroups = async() => {
       try{
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",{},{
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`
-          }
-        });
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",1,{});
         const data = await response.json();
         if (data.status) {
           const categorizedGroups = data.data.reduce((acc, usergroup) => {
@@ -468,13 +453,7 @@ const InitiatePSG = () => {
     formData.append("approver_ids", JSON.stringify(selectedApprovalMembers || [])); // Convert array to string
     formData.append("user_group", selectedUserGroupSum || 0);
 
-    const submitPromise = customFetchWithAuth(url, "POST", formData, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${userToken}`
-      },
-      body: formData
-    })
+    const submitPromise = customFetchWithAuth(url, "POST", 3,formData)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);

@@ -23,7 +23,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
 const ContentBox = styled("div")(({ theme }) => ({
-  margin: "20px",
+  margin: "15px",
   [theme.breakpoints.down("sm")]: { margin: "16px" }
 }));
 
@@ -64,7 +64,7 @@ const StyledTextField = styled(TextField)(() => ({
 
 const StyledSelect = styled(Select)(() => ({
   width: "100%",
-  height: "30px", // Ensure the select component itself has a defined height
+  height: "25px", // Ensure the select component itself has a defined height
   fontFamily: "sans-serif",
   fontSize: "0.875rem",
   "& .MuiInputBase-root": {
@@ -120,13 +120,7 @@ const ApplicableTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true","GET",{} ,{
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-          }
-        });
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true","GET",1,{});
         const data = await response.json();
 
         if (data && data.status) {
@@ -147,13 +141,7 @@ const ApplicableTable = () => {
     setLoading(true);
     try {
       let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}`;
-      const response = await customFetchWithAuth(url,"GET",{}, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-        }
-      });
+      const response = await customFetchWithAuth(url,"GET",1,{});
       const data = await response.json();
       setPsgList2(data); // Adjust this based on your API response structure
     } catch (error) {
@@ -204,29 +192,13 @@ const ApplicableTable = () => {
     try {
       // First API call: Fetch data based on searchValue
       const response = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",{},
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`
-          }
-        }
-      );
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",1,{});
       const data = await response.json();
       setPsgList2(data);
 
       // Second API call: Fetch the count data based on searchValue
       const countResponse = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",{},
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`
-          }
-        }
-      );
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",1,{});
 
       if (!countResponse.ok) {
         throw new Error("Failed to fetch count data");
@@ -267,29 +239,13 @@ const ApplicableTable = () => {
     try {
       // First API call: Fetch data based on searchValue
       const response = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}`,"GET",{},
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`
-          }
-        }
-      );
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}`,"GET",1,{});
       const data = await response.json();
       setPsgList2(data);
 
       // Second API call: Fetch the count data based on searchValue
       const countResponse = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true&search=${searchValue}`,"GET",{},
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`
-          }
-        }
-      );
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true&search=${searchValue}`,"GET",1,{});
 
       if (!countResponse.ok) {
         throw new Error("Failed to fetch count data");

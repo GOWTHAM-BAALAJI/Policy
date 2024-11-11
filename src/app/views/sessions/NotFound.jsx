@@ -1,4 +1,5 @@
-import { Box, Button, styled } from "@mui/material";
+import { Box, Button, styled, Typography } from "@mui/material";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 // STYLED COMPONENTS
@@ -8,7 +9,7 @@ const FlexBox = styled(Box)({
 });
 
 const JustifyBox = styled(FlexBox)({
-  maxWidth: 320,
+  // maxWidth: 320,
   flexDirection: "column",
   justifyContent: "center"
 });
@@ -28,18 +29,26 @@ const NotFoundRoot = styled(FlexBox)({
 export default function NotFound() {
   const navigate = useNavigate();
 
+  // useEffect(()=>{
+  //   {setTimeout(() => {
+  //     navigate(-1);
+  //   }, 1000)}
+  // },[]);
+
+  setTimeout(() => {
+    navigate(-1);
+  }, 2000);
+
   return (
     <NotFoundRoot>
       <JustifyBox>
-        <IMG src="/assets/images/illustrations/404.svg" alt="" />
+        <Typography sx={{ fontSize: '40px', color: '#ee8812', fontWeight: 'bold' }}>
+          404, Page Not Found
+        </Typography>
 
-        <Button
-          color="primary"
-          variant="contained"
-          sx={{ textTransform: "capitalize" }}
-          onClick={() => navigate(-1)}>
-          Go Back
-        </Button>
+        {/* {setTimeout(() => {
+          navigate(-1);
+        }, 1000)} */}
       </JustifyBox>
     </NotFoundRoot>
   );

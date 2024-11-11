@@ -53,7 +53,7 @@ const StyledTextField = styled(TextField)(() => ({
 
 const StyledSelect = styled(Select)(() => ({
     width: '100%',
-    height: '30px', // Ensure the select component itself has a defined height
+    height: '25px', // Ensure the select component itself has a defined height
     fontFamily: 'sans-serif',
     fontSize: '0.875rem',
     '& .MuiInputBase-root': {
@@ -159,13 +159,7 @@ export default function PSGTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await customFetchWithAuth('https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count', "GET",{},{
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
-          },
-        });
+        const response = await customFetchWithAuth('https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count', "GET",1,{});
         //console.log("testing response - ",response);
         const data =await response.json();
 
@@ -196,13 +190,7 @@ export default function PSGTable() {
     setLoading(true);
     try {
       let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
-      const response = await customFetchWithAuth(url,"GET",{}, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`, // Include JWT token in the headers
-        },
-      });
+      const response = await customFetchWithAuth(url,"GET",1,{});
       console.log("Response ----------- ",response);
       const data = await response.json();
       console.log("data    --- ",data);
@@ -247,23 +235,11 @@ export default function PSGTable() {
     setSelectedType(selectedType);
   
     try {
-      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",{}, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
+      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",1,{});
       const data =await response.json();
       setPsgList(data);
   
-      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, "GET",{},{
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
+      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, "GET",1,{});
   
       if (!countResponse.status) {
         throw new Error('Failed to fetch count data');
@@ -307,24 +283,12 @@ export default function PSGTable() {
   
     try {
       // First API call: Fetch data based on searchValue
-      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, "GET",{},{
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
+      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, "GET",1,{});
       const data = await  response.json();
       setPsgList(data);
   
       // Second API call: Fetch the count data based on searchValue
-      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",{}, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userToken}`,
-        },
-      });
+      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",1,{});
   
       if (!countResponse.status) {
         throw new Error('Failed to fetch count data');
@@ -517,15 +481,15 @@ export default function PSGTable() {
 
   return (
     <ContentBox className="analytics">
-    <Card sx={{ px: 1, py: 1, height: '100%', width: '100%' }}>
+    <Card sx={{ px: 1, py: 1, height: '100%', width: '100%', flexDirection: { lg: 'row', md: 'row', sm: 'column', xs: 'column' } }}>
     <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
-      <Grid item lg={6} md={6} sm={6} xs={6}>
+      <Grid item lg={6} md={6} sm={12} xs={12} sx={{ mb: {sm:-2, xs:-2} }}>
         <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1rem', marginLeft: 2, marginTop: 2, marginRight: 2 }}>
           Policies, SOPs and Guidance notes
         </Typography>
       </Grid>
       {(isInitiator(roleId)) && (
-        <Grid item lg={3} md={3} sm={3} xs={3}>
+        <Grid item lg={3} md={3} sm={6} xs={6} sx={{ml: {sm: 1, xs: 1}}}>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -546,7 +510,7 @@ export default function PSGTable() {
           </Button>
         </Grid>
       )}
-      <Grid item lg={(isInitiator(roleId)) ? 3 : 6} md={(isInitiator(roleId)) ? 3 : 6} sm={(isInitiator(roleId)) ? 3 : 6} xs={(isInitiator(roleId)) ? 3 : 6}>
+      <Grid item lg={(isInitiator(roleId)) ? 2.9 : 6} md={(isInitiator(roleId)) ? 2.9 : 6} sm={(isInitiator(roleId)) ? 5.7 : 12} xs={(isInitiator(roleId)) ? 5.7 : 12}>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 2, mr: 2 }}>
           <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2, mt: 0.5 }}>
             Type
@@ -580,18 +544,23 @@ export default function PSGTable() {
           />
         </Grid>
       </Grid>
-      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2, display: 'flex', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }, alignItems: 'center', overflowX: 'auto', whiteSpace: 'nowrap' }}>
+      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2, display: 'flex', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }, alignItems: 'center' }}>
+      <Box sx={{ overflowX: 'auto', width: '100%' }}>
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
           textColor="inherit"
           indicatorColor="secondary"
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{ whiteSpace: 'nowrap' }}
         >
-          <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Approved" value='1' sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Rejected" value="2" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Pending" value="3" sx={{ fontFamily: "sans-serif", fontSize: '1rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Approved" value='1' sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Rejected" value="2" sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Pending" value="3" sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
         </Tabs>
+      </Box>
       </Grid>
       <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
         <StyledTextField

@@ -28,13 +28,7 @@ export default function DoughnutChart({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count","GET",{}, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-          }
-        });
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count","GET",1,{});
         const data = await response.json();
 
         if (data && data.status) {

@@ -121,6 +121,7 @@ export default function PolicyDetails() {
   const [selectedUser, setSelectedUser] = useState(null);
 
   const [userID, setUserID] = useState(selectedUser?.user_id || "");
+  console.log("User ID ---------- ", userID);
   const [documentStatus, setDocumentStatus] = useState(null);
   const [empID, setEmpID] = useState(selectedUser?.emp_id || "");
   const [empName, setEmpName] = useState(selectedUser?.emp_name || "");
@@ -249,12 +250,7 @@ export default function PolicyDetails() {
   useEffect(() => {
     const fetchUserGroups = async() => {
       try{
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",{},{
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`
-          }
-        })
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",1,{});
         const data = await response.json();
         if (data.status) {
           const fetchedUserGroups = data.data.map((usergroup) => ({
@@ -323,13 +319,7 @@ export default function PolicyDetails() {
     setError(null); // Reset error
 
     try {
-      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user/${documentId}`,"GET",{}, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${userToken}` // Include JWT token in the headers
-        }
-      });
+      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user/${documentId}`,"GET",1,{});
       const data = await response.json();
       setSelectedUser(data.data); // Set the document data
     //   const decodedToken = jwtDecode(userToken);
@@ -376,14 +366,7 @@ export default function PolicyDetails() {
       status: empStatus
     };
 
-    const submitForm = customFetchWithAuth(url,"POST",JSON.stringify(formData), {
-      method: "POST",
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${userToken}` // Example header for token authentication
-      },
-      body: JSON.stringify(formData),
-    })
+    const submitForm = customFetchWithAuth(url,"POST",2,JSON.stringify(formData))
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);

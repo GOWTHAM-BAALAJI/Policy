@@ -256,12 +256,7 @@ const AddNewUser = () => {
   useEffect(() => {
     const fetchUserGroups = async() => {
       try{
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",{},{
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${userToken}`
-          }
-        })
+        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",1,{});
         const data = await response.json();
         if (data.status) {
           const fetchedUserGroups = data.data.map((usergroup) => ({
@@ -344,14 +339,7 @@ const AddNewUser = () => {
     // formData.append("cluster_id", clusterID || "");
     // formData.append("user_group", selectedUserGroup || 0);
 
-    const submitPromise = customFetchWithAuth(url,"POST",JSON.stringify(formData), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userToken}`
-      },
-      body: JSON.stringify(formData)
-    })
+    const submitPromise = customFetchWithAuth(url,"POST",2,JSON.stringify(formData))
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
