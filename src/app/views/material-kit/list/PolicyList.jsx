@@ -103,7 +103,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   const location = useLocation();
 
   const queryParams = new URLSearchParams(location.search);
-  const queryTab = queryParams.get("tab") || "4";
+  const queryTab = Number(queryParams.get("tab")) || 4;
 
   const [activeTab, setActiveTab] = useState(initialTab || queryTab);
 
@@ -436,7 +436,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     const bin = temp.toString(2);
     return bin[bin.length - 1] == "1";
   };
-  console.log("Check initiator: ", isInitiator(roleId));
 
   const isReviewer = (role_id) => {
     let temp = Number(role_id);
@@ -485,7 +484,6 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   useEffect(() => {
     if (userToken) {
       const decodedToken = jwtDecode(userToken);
-      console.log("Decoded role ID ------------",decodedToken.role_id);
       if (decodedToken.role_id) {
         setRoleId(decodedToken.role_id);
       }
@@ -574,23 +572,23 @@ const PSGTable = ({ initialTab, onTabChange }) => {
           <Controller
             name="documentType"
             control={control}
-            value={selectedType}
+            defaultValue={selectedType}
             render={({ field }) => (
               <StyledSelect
                 labelId="document-type-label"
                 id="documentType"
                 {...field}
+                value={field.value ?? selectedType}
                 sx={{
                   width: "160px"
                 }}
+                displayEmpty
                 onChange={(e) => {
                   field.onChange(e);
                   setSelectedType(e.target.value); // Set the selected type here
                 }}
               >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
+                <MenuItem value="">All</MenuItem>
                 <MenuItem value={1}>Policy</MenuItem>
                 <MenuItem value={2}>SOP</MenuItem>
                 <MenuItem value={3}>Guidance Note</MenuItem>

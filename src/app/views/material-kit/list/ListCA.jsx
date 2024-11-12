@@ -272,7 +272,6 @@ export default function CATable() {
   useEffect(() => {
     if (userToken) {
       const decodedToken = jwtDecode(userToken);
-      console.log("Decoded role ID ------------",decodedToken.role_id);
       if (decodedToken.role_id) {
         setRoleId(decodedToken.role_id);
       }

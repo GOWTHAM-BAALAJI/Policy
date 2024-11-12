@@ -121,26 +121,20 @@ export default function PolicyDetails() {
   const [selectedUser, setSelectedUser] = useState(null);
 
   const [userID, setUserID] = useState(selectedUser?.user_id || "");
-  console.log("User ID ---------- ", userID);
   const [documentStatus, setDocumentStatus] = useState(null);
   const [empID, setEmpID] = useState(selectedUser?.emp_id || "");
   const [empName, setEmpName] = useState(selectedUser?.emp_name || "");
   const [empEmail, setEmpEmail] = useState(selectedUser?.emp_email || "");
   const [empMobile, setEmpMobile] = useState(selectedUser?.emp_mobile || "");
   const [roleID, setRoleID] = useState(selectedUser?.role_id || 0);
-  console.log("Role ID Sum --------- ", roleID);
   const [roleIDLabel, setRoleIDLabel] = useState([]);
-  console.log("Role ID Label: ",roleIDLabel);
   const [designation, setDesignation] = useState(selectedUser?.designation || "");
   const [state, setState] = useState(selectedUser?.state || "");
   const [clusterID, setClusterID] = useState(selectedUser?.cluster_id || "");
   const [userGroup, setUserGroup] = useState(selectedUser?.user_group || 0);
-  console.log("User group ------------- ",userGroup);
   const [userGroupLabel, setUserGroupLabel] = useState("");
-  console.log("Usergroup Label: ",userGroupLabel);
   const [empStatusLabel, setEmpStatusLabel] = useState("");
   const [empStatus, setEmpStatus] = useState(selectedUser?.status || 0);
-  console.log("Employee status: ",empStatus);
   const [selectedOption, setSelectedOption] = useState(null);
   const [othersSelected, setOthersSelected] = useState(false);
 
@@ -150,7 +144,6 @@ export default function PolicyDetails() {
 
   useEffect(() => {
     if (selectedUser) {
-      console.log("Selected document: ", selectedUser);
       setUserID(selectedUser.user_id || "");
       setEmpID(selectedUser.emp_id || "");
       setEmpName(selectedUser.emp_name || "");
@@ -220,7 +213,6 @@ export default function PolicyDetails() {
   //     return selectedOption ? acc + selectedOption.value : acc;
   //   }, 0);
   //   setRoleID(sum);
-  //   console.log("Role ID Sum -------------", roleID);
   // }, [roleIDLabel]);
 
   const handleRoleChange = (event) => {
@@ -272,9 +264,6 @@ export default function PolicyDetails() {
           // Set the state for both user group options and categorized user group options
           setUserGroupOptions(fetchedUserGroups);
           setCategorizedUserGroupOptions(categorizedGroups);
-
-          console.log("Fetched user groups from useEffect: ", fetchedUserGroups);
-          console.log("Categorized user groups: ", categorizedGroups);
         }
       } catch (error) {
         console.error('Error fetching data', error);
@@ -624,11 +613,12 @@ export default function PolicyDetails() {
                     <Controller
                       name="roleid"
                       control={control}
+                      defaultValue={roleIDLabel}
                       render={({ field }) => (
                         <StyledSelect
                           labelId="role-id-label"
                           id="roleid"
-                          value={roleIDLabel} // Use as array
+                          value={field.value ?? roleIDLabel}
                           multiple // Enable multiple selection
                           displayEmpty
                           onChange={(event) => {
@@ -737,12 +727,13 @@ export default function PolicyDetails() {
                     <Controller
                         name="userGroups"
                         control={control}
+                        defaultValue={userGroupLabel}
                         render={({ field }) => (
                             <StyledSelect
                             labelId="user-groups-label"
                             id="userGroups"
                             displayEmpty
-                            value={userGroupLabel || field.value} // Set value to userGroupLabel
+                            value={field.value ?? userGroupLabel}
                             onChange={(event) => {
                               const selectedLabel = event.target.value;
                   
@@ -754,12 +745,6 @@ export default function PolicyDetails() {
                                 setUserGroupLabel(selectedOption.label); // Update label
                                 setUserGroup(selectedOption.value); // Update corresponding value
                                 field.onChange(selectedOption.value); // Update form field with the value (not label)
-                  
-                                // Debug logs
-                                console.log("Selected Option Label:", selectedOption.label);
-                                console.log("Selected Option Value:", selectedOption.value);
-                              } else {
-                                console.log("No matching option found for selected label:", selectedLabel);
                               }
                             }}
                             renderValue={(selected) => {
@@ -842,12 +827,13 @@ export default function PolicyDetails() {
                     <Controller
                         name="empstatus"
                         control={control}
+                        defaultValue={empStatusLabel}
                         render={({ field }) => (
                             <StyledSelect
                             labelId="status-label"
                             id="empstatus"
                             displayEmpty
-                            value={empStatusLabel || field.value} // Set value to userGroupLabel
+                            value={field.value ?? empStatusLabel}
                             onChange={(event) => {
                                 const selectedValue = event.target.value;
                                 field.onChange(selectedValue); // Update form field value

@@ -139,9 +139,9 @@ const InitiateCA = () => {
   const [uploadFilename, setUploadFilename] = useState([]);
   const [uploadedFile, setUploadedFile] = useState([]);
   const [userGroupOptions, setUserGroupOptions] = useState([]);
-  console.log("User group options: ", userGroupOptions);
   const [selectedUserGroup, setSelectedUserGroup] = useState([]);
   const [selectedUserGroupSum, setSelectedUserGroupSum] = useState(0);
+  const [userGroupStoreSum, setUserGroupStoreSum] = useState(0);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogtitle, setDialogTitle] = useState("");
@@ -166,26 +166,15 @@ const InitiateCA = () => {
 
       // Calculate the sum of selected values
       const newTotalValue = updatedSelection.reduce((sum, value) => sum + value, 0);
-      console.log("New total value: ", newTotalValue);
       setSelectedUserGroupSum(newTotalValue);
-      console.log("Selected User group total sum: ", selectedUserGroupSum);
 
       return updatedSelection;
     });
   };
 
   useEffect(() => {
-    console.log("Selected User group total sum:", selectedUserGroupSum);
+    setUserGroupStoreSum(selectedUserGroupSum);
   }, [selectedUserGroupSum]);
-
-  const handleSelectChangeUserGroups = (event) => {
-    const value = event.target.value;
-    console.log("User group values:", value);
-    const sum = value.reduce((acc, curr) => acc + curr, 0);
-    console.log("Sum of selected user group values:", sum);
-    setSelectedUserGroup(value);
-    setSelectedUserGroupSum(sum);
-  };
 
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
@@ -245,7 +234,6 @@ const InitiateCA = () => {
             acc[category].push(option);
             return acc;
           }, {});
-          console.log("Categorized groups: ", categorizedGroups);
 
           setUserGroupOptions(categorizedGroups);
         }
@@ -260,7 +248,6 @@ const InitiateCA = () => {
 
   // const handleCheckboxChange = (category, value) => {
   //   // Handle checkbox state changes here
-  //   console.log(`Checkbox for ${value} in ${category} category changed.`);
   // };
 
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);

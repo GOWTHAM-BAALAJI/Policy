@@ -25,7 +25,6 @@ const useCustomFetch = () => {
         body: JSON.stringify({ otp: "value" })
       });
       const data = await newAccessTokenData.json();
-      console.log("Checking if token expired --------- ", data);
       if (!data.status) {
         dispatch(clearJwtToken());
         toast.error("Token expired, redirecting to login page");
@@ -63,7 +62,6 @@ const useCustomFetch = () => {
     const response = await fetch(url, requestParams);
     return response;
     // const secretData = await response.json();
-    // console.log("data - ", secretData);
     // return secretData;
   };
   return customFetchWithAuth;

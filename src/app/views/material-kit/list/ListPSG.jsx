@@ -96,7 +96,7 @@ export default function PSGTable() {
   const location = useLocation();
 
   const queryParams = new URLSearchParams(location.search);
-  const initialTab = queryParams.get('tab') || '4';
+  const initialTab = Number(queryParams.get("tab")) || 4;
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const [tabledata, setTableData] = useState([]);
@@ -131,16 +131,16 @@ export default function PSGTable() {
   useEffect(() => {
     if (waitingForActionCount > 0) {
       setCount(waitingForActionCount);
-      setActiveTab('4');
+      setActiveTab(4);
     } else if (approvedCount > 0) {
       setCount(approvedCount);
-      setActiveTab('1');
+      setActiveTab(1);
     } else if (rejectedCount > 0) {
       setCount(rejectedCount);
-      setActiveTab('2');
+      setActiveTab(2);
     } else if (pendingCount > 0) {
       setCount(pendingCount);
-      setActiveTab('3');
+      setActiveTab(3);
     }
   }, [waitingForActionCount, approvedCount, rejectedCount, pendingCount]);
 
@@ -161,7 +161,6 @@ export default function PSGTable() {
     const fetchData = async () => {
       try {
         const response = await customFetchWithAuth('https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count', "GET",1,{});
-        //console.log("testing response - ",response);
         const data =await response.json();
 
         if (data && data.status) {
@@ -192,9 +191,7 @@ export default function PSGTable() {
     try {
       let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
       const response = await customFetchWithAuth(url,"GET",1,{});
-      console.log("Response ----------- ",response);
       const data = await response.json();
-      console.log("data    --- ",data);
       setPsgList(data); // Adjust this based on your API response structure
       if (tab == 1){
         setCount(approvedCount || 0);
@@ -248,10 +245,10 @@ export default function PSGTable() {
   
       const countData = await countResponse.json();
   
-      if (tab === "1") setCount(countData.approved);
-      if (tab === "2") setCount(countData.rejected);
-      if (tab === "3") setCount(countData.pending);
-      if (tab === "4") setCount(countData.waitingForAction);
+      if (tab == 1) setCount(countData.approved);
+      if (tab == 2) setCount(countData.rejected);
+      if (tab == 3) setCount(countData.pending);
+      if (tab == 4) setCount(countData.waitingForAction);
   
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -298,10 +295,10 @@ export default function PSGTable() {
       const countData =await  countResponse.json();
   
       // Check tab values and set the count based on the tab
-      if (tab === "1") setCount(countData.approved);
-      if (tab === "2") setCount(countData.rejected);
-      if (tab === "3") setCount(countData.pending);
-      if (tab === "4") setCount(countData.waitingForAction);
+      if (tab == 1) setCount(countData.approved);
+      if (tab == 2) setCount(countData.rejected);
+      if (tab == 3) setCount(countData.pending);
+      if (tab == 4) setCount(countData.waitingForAction);
   
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -397,9 +394,6 @@ export default function PSGTable() {
     const bin = temp.toString(2);
     return bin[bin.length - 1] == "1";
   };
-  console.log("Token ----------", userToken);
-  console.log("Role id ------------",roleId);
-  console.log("Check initiator: ", isInitiator(roleId));
 
   const isReviewer = (role_id) => {
     let temp = Number(role_id);
@@ -454,7 +448,6 @@ export default function PSGTable() {
   useEffect(() => {
     if (userToken) {
       const decodedToken = jwtDecode(userToken);
-      console.log("Decoded role ID ------------",decodedToken.role_id);
       if (decodedToken.role_id) {
         setRoleId(decodedToken.role_id);
       }
@@ -521,12 +514,14 @@ export default function PSGTable() {
           <Controller
             name="documentType"
             control={control}
-            value={selectedType}
+            defaultValue={selectedType}
             render={({ field }) => (
               <StyledSelect
                 labelId="document-type-label"
                 id="documentType"
                 {...field}
+                value={field.value ?? selectedType}
+                displayEmpty
                 sx={{
                   width: '160px',
                 }}
@@ -536,9 +531,7 @@ export default function PSGTable() {
                   // handleSearchType(activeTab, currentPage, rowsPerPage, searchValue, selectedType);
                 }}
               >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
+                <MenuItem value="">All</MenuItem>
                 <MenuItem value={1}>Policy</MenuItem>
                 <MenuItem value={2}>SOP</MenuItem>
                 <MenuItem value={3}>Guidance Note</MenuItem>
@@ -558,10 +551,10 @@ export default function PSGTable() {
           scrollButtons="auto"
           sx={{ whiteSpace: 'nowrap' }}
         >
-          <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Approved" value='1' sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Rejected" value="2" sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Pending" value="3" sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Waiting for Action" value={4} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Approved" value={1} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Rejected" value={2} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Pending" value={3} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
         </Tabs>
       </Box>
       </Grid>

@@ -165,7 +165,6 @@ export default function PolicyDetails() {
 
   useEffect(() => {
     if (selectedDocument) {
-      console.log("Selected document: ", selectedDocument);
       setDocumentID(selectedDocument.id || "");
       setDocumentTitle(selectedDocument.title);
       setDocumentDescription(selectedDocument.description);
@@ -226,9 +225,6 @@ export default function PolicyDetails() {
           // Set the state for both user group options and categorized user group options
           setUserGroupOptions(fetchedUserGroups);
           setCategorizedUserGroupOptions(categorizedGroups);
-
-          console.log("Fetched user groups from useEffect: ", fetchedUserGroups);
-          console.log("Categorized user groups: ", categorizedGroups);
         }
       } catch (error) {
         console.error('Error fetching data', error);
@@ -270,7 +266,6 @@ export default function PolicyDetails() {
       : null;
   
   const rejected_by = latestPolicyLogEntry && (latestPolicyLogEntry.approver_id == latestPolicyStatus?.approver_id) ? latestPolicyStatus.approver_details.emp_name : null;
-  console.log("Rejected by ------- ", rejected_by);
 
   useEffect(() => {
     if (selectedDocument && selectedDocument?.status !== undefined) {
@@ -305,7 +300,6 @@ export default function PolicyDetails() {
   useEffect(() => {
     if (userToken) {
       const decodedToken = jwtDecode(userToken);
-      console.log("Decoded role ID ------------",decodedToken.role_id);
       if (decodedToken.role_id) {
         setRoleId(decodedToken.role_id);
       }
@@ -390,7 +384,6 @@ export default function PolicyDetails() {
   const [groupedFiles, setGroupedFiles] = useState([]);
   const [groupedFiles1, setGroupedFiles1] = useState([]);
   useEffect(() => {
-    console.log("before condition")
     let tempArray = []
     if (selectedDocument) {
       selectedDocument.Policy_status_log.forEach((item) => {
@@ -400,7 +393,6 @@ export default function PolicyDetails() {
       })
     }
     setRemarksArray(tempArray);
-    console.log("Remarks array --------- ",tempArray);
   }, [selectedDocument]);
 
   useEffect(()=>{

@@ -9,7 +9,6 @@ const PrivateRoute1 = ({ element }) => {
     const userToken = useSelector((state)=>{
         return state.token;//.data;
         });
-    console.log("UserToken:",userToken);    
 
     useEffect(() => {
         if (userToken) {

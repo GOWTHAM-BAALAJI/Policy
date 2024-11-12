@@ -159,7 +159,6 @@ const ApplicableTable = () => {
   useEffect(() => {
     if (userToken) {
       const decodedToken = jwtDecode(userToken);
-      console.log("Decoded role ID ------------",decodedToken.role_id);
       if (decodedToken.role_id) {
         setRoleId(decodedToken.role_id);
       }
@@ -426,12 +425,14 @@ const ApplicableTable = () => {
               <Controller
                 name="documentType"
                 control={control}
-                value={selectedType}
+                defaultValue={selectedType}
                 render={({ field }) => (
                   <StyledSelect
                     labelId="document-type-label"
                     id="documentType"
                     {...field}
+                    value={field.value ?? selectedType}
+                    displayEmpty
                     sx={{
                       width: "160px"
                     }}
@@ -440,9 +441,7 @@ const ApplicableTable = () => {
                       setSelectedType(e.target.value);
                     }}
                   >
-                    <MenuItem value="">
-                      <em>None</em>
-                    </MenuItem>
+                    <MenuItem value="">All</MenuItem>
                     <MenuItem value={1}>Policy</MenuItem>
                     <MenuItem value={2}>SOP</MenuItem>
                     <MenuItem value={3}>Guidance Note</MenuItem>

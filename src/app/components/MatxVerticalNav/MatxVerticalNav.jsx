@@ -75,7 +75,7 @@ const BadgeValue = styled("div")(() => ({
   borderRadius: "300px"
 }));
 
-export default function MatxVerticalNav({ items }) {
+export default function MatxVerticalNav({ items, onItemClick }) {
   const { settings } = useSettings();
   const { mode } = settings.layout1Settings.leftSidebar;
 
@@ -90,7 +90,12 @@ export default function MatxVerticalNav({ items }) {
 
       if (item.children) {
         return (
-          <MatxVerticalNavExpansionPanel mode={mode} item={item} key={index}>
+          <MatxVerticalNavExpansionPanel
+            mode={mode}
+            item={item}
+            key={index}
+            onItemClick={onItemClick}
+          >
             {renderLevels(item.children)}
           </MatxVerticalNavExpansionPanel>
         );
@@ -101,15 +106,15 @@ export default function MatxVerticalNav({ items }) {
             href={item.path}
             className={`${mode === "compact" && "compactNavItem"}`}
             rel="noopener noreferrer"
-            target="_blank">
+            target="_blank"
+            onClick={onItemClick} // Close sidebar on external link click
+          >
             <ButtonBase key={item.name} name="child" sx={{ width: "100%" }}>
-              {(() => {
-                if (item.icon) {
-                  return <Icon className="icon">{item.icon}</Icon>;
-                } else {
-                  return <span className="item-icon icon-text">{item.iconText}</span>;
-                }
-              })()}
+              {item.icon ? (
+                <Icon className="icon">{item.icon}</Icon>
+              ) : (
+                <span className="item-icon icon-text">{item.iconText}</span>
+              )}
               <StyledText mode={mode} className="sidenavHoverShow">
                 {item.name}
               </StyledText>
@@ -123,11 +128,13 @@ export default function MatxVerticalNav({ items }) {
           <InternalLink key={index}>
             <NavLink
               to={item.path}
+              onClick={onItemClick} // Close sidebar on internal link click
               className={({ isActive }) =>
                 isActive
                   ? `navItemActive ${mode === "compact" && "compactNavItem"}`
                   : `${mode === "compact" && "compactNavItem"}`
-              }>
+              }
+            >
               <ButtonBase key={item.name} name="child" sx={{ width: "100%" }}>
                 {item?.icon ? (
                   <Icon className="icon" sx={{ width: 36 }}>
@@ -144,8 +151,9 @@ export default function MatxVerticalNav({ items }) {
                       sx={{
                         ml: "20px",
                         fontSize: "11px",
-                        display: mode !== "compact" && "none"
-                      }}>
+                        display: mode !== "compact" && "none",
+                      }}
+                    >
                       {item.iconText}
                     </Box>
                   </Fragment>
@@ -157,7 +165,9 @@ export default function MatxVerticalNav({ items }) {
                 <Box mx="auto" />
 
                 {item.badge && (
-                  <BadgeValue className="sidenavHoverShow">{item.badge.value}</BadgeValue>
+                  <BadgeValue className="sidenavHoverShow">
+                    {item.badge.value}
+                  </BadgeValue>
                 )}
               </ButtonBase>
             </NavLink>

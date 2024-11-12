@@ -106,22 +106,27 @@ const customSort = (data, column, direction) => {
   });
 };
 
-export default function PSGTable() {
+export default function AdminTable() {
   const { control } = useForm();
   const navigate = useNavigate();
   const location = useLocation();
-  const customFetchWithAuth=useCustomFetch();
+  const customFetchWithAuth = useCustomFetch();
 
   const queryParams = new URLSearchParams(location.search);
-  const initialTab = queryParams.get("tab") || "1";
+  const initialTab = Number(queryParams.get("tab")) || 1;
 
   const [activeTab, setActiveTab] = useState(initialTab);
   const [tabledata, setTableData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
+  useEffect(() => {
+    setActiveTab(Number(initialTab));
+  }, [initialTab]);
+
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
     setCurrentPage(1);
+    navigate(`?tab=${newValue}`, { replace: true });
     fetchData(newValue, currentPage, rowsPerPage);
     // handleSearchType(newValue, currentPage, rowsPerPage, searchValue, selectedType);
   };
@@ -142,18 +147,18 @@ export default function PSGTable() {
   const [circularCount, setCircularCount] = useState(0);
   const [count, setCount] = useState(userCount);
 
-  useEffect(() => {
-    if (userCount > 0) {
-      setCount(userCount);
-      setActiveTab('1');
-    } else if (policyCount > 0) {
-      setCount(policyCount);
-      setActiveTab('2');
-    } else if (circularCount > 0) {
-      setCount(circularCount);
-      setActiveTab('3');
-    }
-  }, [userCount, policyCount, circularCount]);
+  // useEffect(() => {
+  //   if (userCount > 0) {
+  //     setCount(userCount);
+  //     setActiveTab('1');
+  //   } else if (policyCount > 0) {
+  //     setCount(policyCount);
+  //     setActiveTab('2');
+  //   } else if (circularCount > 0) {
+  //     setCount(circularCount);
+  //     setActiveTab('3');
+  //   }
+  // }, [userCount, policyCount, circularCount]);
 
   const [selectedType, setSelectedType] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -175,7 +180,7 @@ export default function PSGTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response1 = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count","GET",1,{});
+        const response1 = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count", "GET", 1, {});
         const data1 = await response1.json();
 
         if (data1 && data1.status) {
@@ -183,7 +188,7 @@ export default function PSGTable() {
           setUserCount(userCount || 0);
         }
 
-        const response2 = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count","GET",1,{});
+        const response2 = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count", "GET", 1, {});
         const data2 = await response2.json();
 
         if (data2 && data2.status) {
@@ -191,7 +196,7 @@ export default function PSGTable() {
           setPolicyCount(policyCount || 0);
         }
 
-        const response3 = await customFetchWithAuth('https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count',"GET",1,{});
+        const response3 = await customFetchWithAuth('https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count', "GET", 1, {});
         const data3 = await response3.json();
 
         if (data3 && data3.status) {
@@ -206,26 +211,26 @@ export default function PSGTable() {
       }
     };
     fetchData();
-  }, [userCount,policyCount, circularCount]);
+  }, [userCount, policyCount, circularCount]);
 
   const fetchData = async (tab, page, rows) => {
     setLoading(true);
     try {
       if (tab == 1) {
         let url = `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-user?page=${page}&rows=${rows}`;
-        const response = await customFetchWithAuth(url,"GET",1,{});
+        const response = await customFetchWithAuth(url, "GET", 1, {});
         const data = await response.json();
         setPsgList(data.data); // Adjust this based on your API response structure
         setCount(userCount || 0);
       } else if (tab == 2) {
         let url = `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-policy?page=${page}&rows=${rows}`;
-        const response = await customFetchWithAuth(url,"GET",1,{});
+        const response = await customFetchWithAuth(url, "GET", 1, {});
         const data = await response.json();
         setPsgList(data.data); // Adjust this based on your API response structure
         setCount(policyCount || 0);
       } else if (tab == 3) {
         let url = `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-circulars?page=${page}&rows=${rows}`;
-        const response = await customFetchWithAuth(url,"GET",1,{});
+        const response = await customFetchWithAuth(url, "GET", 1, {});
         const data = await response.json();
         setPsgList(data.data); // Adjust this based on your API response structure
         setCount(circularCount || 0);
@@ -243,9 +248,9 @@ export default function PSGTable() {
   const [isSearching, setIsSearching] = useState(false);
 
   const handleInputChange = (event) => {
-    if(activeTab == 1) setSearchValue(event.target.value);
-    else if(activeTab == 2) setSearchValue2(event.target.value);
-    else if(activeTab == 3) setSearchValue3(event.target.value);
+    if (activeTab == 1) setSearchValue(event.target.value);
+    else if (activeTab == 2) setSearchValue2(event.target.value);
+    else if (activeTab == 3) setSearchValue3(event.target.value);
   };
 
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
@@ -266,12 +271,12 @@ export default function PSGTable() {
     try {
       if (tab == 1) {
         const response1 = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-user?page=${page}&rows=${rows}&search=${searchValue}`,"GET",1,{});
+          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-user?page=${page}&rows=${rows}&search=${searchValue}`, "GET", 1, {});
         const data1 = await response1.json();
         setPsgList(data1.data);
 
         const countResponse1 = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count?search=${searchValue}`,"GET",1,{},);
+          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count?search=${searchValue}`, "GET", 1, {},);
 
         if (!countResponse1.ok) {
           throw new Error("Failed to fetch count data");
@@ -281,12 +286,12 @@ export default function PSGTable() {
         setCount(countData1.count);
       } else if (tab == 2) {
         const response2 = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-policy?page=${page}&rows=${rows}&search=${searchValue2}&type=${type}&status=${status}`,"GET",1,{});
+          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-policy?page=${page}&rows=${rows}&search=${searchValue2}&type=${type}&status=${status}`, "GET", 1, {});
         const data2 = await response2.json();
         setPsgList(data2.data);
 
         const countResponse2 = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count?search=${searchValue2}&type=${type}&status=${status}`,"GET",1,{});
+          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count?search=${searchValue2}&type=${type}&status=${status}`, "GET", 1, {});
 
         if (!countResponse2.ok) {
           throw new Error("Failed to fetch count data");
@@ -294,17 +299,17 @@ export default function PSGTable() {
 
         const countData2 = await countResponse2.json();
         setCount(countData2.count);
-      } else if(tab == 3){
-        const response3 = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-circulars?page=${page}&rows=${rows}&search=${searchValue3}&status=${CAstatus}`,"GET",1,{});
+      } else if (tab == 3) {
+        const response3 = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-circulars?page=${page}&rows=${rows}&search=${searchValue3}&status=${CAstatus}`, "GET", 1, {});
         const data3 = await response3.json();
         setPsgList(data3.data);
-    
-        const countResponse3 = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count?search=${searchValue3}&status=${CAstatus}`,"GET",1,{});
-    
+
+        const countResponse3 = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count?search=${searchValue3}&status=${CAstatus}`, "GET", 1, {});
+
         if (!countResponse3.ok) {
           throw new Error('Failed to fetch count data');
         }
-    
+
         const countData3 = await countResponse3.json();
         setCount(countData3.count);
       }
@@ -379,7 +384,7 @@ export default function PSGTable() {
             paddingLeft: "8px",
             fontSize: "14px"
           }}
-          // onClick={() => handleRowClick(row)}
+        // onClick={() => handleRowClick(row)}
         >
           {row.emp_id}
         </Typography>
@@ -401,7 +406,7 @@ export default function PSGTable() {
             paddingLeft: "8px",
             fontSize: "14px"
           }}
-          // onClick={() => handleRowClick(row)}
+        // onClick={() => handleRowClick(row)}
         >
           {row.emp_name}
         </Typography>
@@ -423,7 +428,7 @@ export default function PSGTable() {
             paddingLeft: "8px",
             fontSize: "14px"
           }}
-          // onClick={() => handleRowClick(row)}
+        // onClick={() => handleRowClick(row)}
         >
           {row.emp_email}
         </Typography>
@@ -432,7 +437,7 @@ export default function PSGTable() {
     {
       name: "Action",
       selector: () => null,
-      width: isXs? "15%" : isMd ? "15%" : "10%",
+      width: isXs ? "15%" : isMd ? "15%" : "10%",
       center: "true",
       cell: (row) => (
         <Box
@@ -467,7 +472,7 @@ export default function PSGTable() {
           {getDisplayPolicyId(row.id) || "N/A"}
         </div>
       ),
-      width: isXs ? "15%" : isMd? "15%" : "12%"
+      width: isXs ? "15%" : isMd ? "15%" : "12%"
     },
     {
       name: "Document Title",
@@ -575,55 +580,55 @@ export default function PSGTable() {
 
   const columns3 = [
     {
-    name: 'Circular ID',
-    selector: row => row.id || 'N/A',
-    sortable: true,
-    // center: true,
-    cell: (row) => (
+      name: 'Circular ID',
+      selector: row => row.id || 'N/A',
+      sortable: true,
+      // center: true,
+      cell: (row) => (
         <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
           {getDisplayCircularId(row.id) || 'N/A'}
         </div>
-    ),
-    width: isXs ? '20%' : isMd ? '20%' : '13%',
+      ),
+      width: isXs ? '20%' : isMd ? '20%' : '13%',
     },
     {
-    name: 'Circular Title',
-    selector: row => row.title || 'N/A',
-    sortable: true,
-    // center: true,
-    width: '23%',
-    cell: (row) => (
+      name: 'Circular Title',
+      selector: row => row.title || 'N/A',
+      sortable: true,
+      // center: true,
+      width: '23%',
+      cell: (row) => (
         <Typography
-        variant="body2"
-        sx={{ textAlign: 'left', cursor: 'pointer', textDecoration: 'none', paddingLeft: '8px', fontSize: '14px' }}
+          variant="body2"
+          sx={{ textAlign: 'left', cursor: 'pointer', textDecoration: 'none', paddingLeft: '8px', fontSize: '14px' }}
         // onClick={() => handleRowClick(row)}
         >
-        {row.title}
+          {row.title}
         </Typography>
-    ),
+      ),
     },
     {
-    name: 'Circular Description',
-    selector: row => row.description || 'N/A',
-    sortable: true,
-    // center: true,
-    width: '33%',
-    cell: (row) => (
+      name: 'Circular Description',
+      selector: row => row.description || 'N/A',
+      sortable: true,
+      // center: true,
+      width: '33%',
+      cell: (row) => (
         <Typography
-        variant="body2"
-        sx={{
+          variant="body2"
+          sx={{
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             maxWidth: '600px',
             textAlign: 'center',
             paddingLeft: '8px'
-        }}
-        title={row.description} // Shows full text on hover
+          }}
+          title={row.description} // Shows full text on hover
         >
-        {row.description}
+          {row.description}
         </Typography>
-    ),
+      ),
     },
     {
       name: "Status",
@@ -722,7 +727,6 @@ export default function PSGTable() {
   useEffect(() => {
     if (userToken) {
       const decodedToken = jwtDecode(userToken);
-      console.log("Decoded role ID ------------",decodedToken.role_id);
       if (decodedToken.role_id) {
         setRoleId(decodedToken.role_id);
       }
@@ -777,9 +781,7 @@ export default function PSGTable() {
       id: event.id,
       status: status
     }
-    console.log("Payload Stringified:", JSON.stringify(formData));
-
-    const submitForm = customFetchWithAuth(url,"POST",2,JSON.stringify(formData))
+    const submitForm = customFetchWithAuth(url, "POST", 2, JSON.stringify(formData))
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
@@ -816,222 +818,226 @@ export default function PSGTable() {
 
   return (
     <ContentBox className="analytics">
-    <Card sx={{ px: 1, py: 1, height: '100%', width: '100%' }}>
-    <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
-      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', sm: 'space-between', md: 'space-between', lg: 'space-between' }, alignItems: 'center', flexDirection: { xs: 'column', sm: 'row', md: 'row', lg: 'row' }, mt: 2 }}>
-        <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1rem', ml: 2 }}>
-          Admin Portal
-        </Typography>
-        {activeTab == 2 && (
-        <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center', mt: {lg:0, md: 0, sm: 0, xs: 2} }}>
-          <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2 }}>
-            Type
-          </Typography>
-          <Controller
-            name="documentType"
-            control={control}
-            value={selectedType}
-            render={({ field }) => (
-              <StyledSelect
-                labelId="document-type-label"
-                id="documentType"
-                {...field}
-                sx={{
-                  width: '160px',
-                }}
-                onChange={(e) => {
-                  field.onChange(e);
-                  setSelectedType(e.target.value);
-                }}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                <MenuItem value={1}>Policy</MenuItem>
-                <MenuItem value={2}>SOP</MenuItem>
-                <MenuItem value={3}>Guidance Note</MenuItem>
-              </StyledSelect>
+      <Card sx={{ px: 1, py: 1, height: '100%', width: '100%' }}>
+        <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
+          <Grid item lg={12} md={12} sm={12} xs={12} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', sm: 'space-between', md: 'space-between', lg: 'space-between' }, alignItems: 'center', flexDirection: { xs: 'column', sm: 'row', md: 'row', lg: 'row' }, mt: 2 }}>
+            <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1rem', ml: 2 }}>
+              Admin Portal
+            </Typography>
+            {activeTab == 2 && (
+              <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center', mt: { lg: 0, md: 0, sm: 0, xs: 2 } }}>
+                <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2 }}>
+                  Type
+                </Typography>
+                <Controller
+                  name="documentType"
+                  control={control}
+                  defaultValue={selectedType}
+                  render={({ field }) => (
+                    <StyledSelect
+                      labelId="document-type-label"
+                      id="documentType"
+                      {...field}
+                      value={field.value ?? selectedType}
+                      displayEmpty
+                      sx={{
+                        width: '160px',
+                      }}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        setSelectedType(e.target.value);
+                      }}
+                    >
+                      <MenuItem value="">All</MenuItem>
+                      <MenuItem value={1}>Policy</MenuItem>
+                      <MenuItem value={2}>SOP</MenuItem>
+                      <MenuItem value={3}>Guidance Note</MenuItem>
+                    </StyledSelect>
+                  )}
+                />
+              </Grid>
             )}
-          />
-        </Grid>
-        )}
-      </Grid>
-      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2, display: 'flex', flexDirection: { xs: 'column', sm: 'row', md: 'row', lg: 'row' }, justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box sx={{ overflowX: 'auto', width: '100%' }}>
-        <Tabs
-          value={activeTab}
-          onChange={handleTabChange}
-          textColor="inherit"
-          indicatorColor="secondary"
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{ whiteSpace: 'nowrap' }}
-        >
-          <Tab label="User Management" value='1' sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Policy Management" value='2' sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Circular Management" value='3' sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
-        </Tabs>
-        </Box>
-        {activeTab == 2 && (
-        <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center', mt: {lg: -1, md: -1, sm: 0, xs: 2} }}>
-          <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2 }}>
-            Status
-          </Typography>
-          <Controller
-            name="documentStatus"
-            control={control}
-            value={selectedStatus}
-            render={({ field }) => (
-              <StyledSelect
-                labelId="document-status-label"
-                id="documentStatus"
-                {...field}
+          </Grid>
+          <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2, display: 'flex', flexDirection: { xs: 'column', sm: 'row', md: 'row', lg: 'row' }, justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ overflowX: 'auto', width: '100%' }}>
+              <Tabs
+                value={activeTab}
+                onChange={handleTabChange}
+                textColor="inherit"
+                indicatorColor="secondary"
+                variant="scrollable"
+                scrollButtons="auto"
+                sx={{ whiteSpace: 'nowrap' }}
+              >
+                <Tab label="User Management" value={1} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+                <Tab label="Policy Management" value={2} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+                <Tab label="Circular Management" value={3} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+              </Tabs>
+            </Box>
+            {activeTab == 2 && (
+              <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center', mt: { lg: -1, md: -1, sm: 0, xs: 2 } }}>
+                <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2 }}>
+                  Status
+                </Typography>
+                <Controller
+                  name="documentStatus"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <StyledSelect
+                      labelId="document-status-label"
+                      id="documentStatus"
+                      {...field}
+                      value={field.value ?? selectedStatus}
+                      displayEmpty
+                      sx={{
+                        width: '160px',
+                      }}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        if (e.target.value === "") {
+                          setSelectedStatus("");
+                        } else {
+                          setSelectedStatus(e.target.value);
+                        }
+                      }}
+                    >
+                      <MenuItem value="">All</MenuItem>
+                      <MenuItem value={0}>In review</MenuItem>
+                      <MenuItem value={1}>Approved</MenuItem>
+                      <MenuItem value={2}>Rejected</MenuItem>
+                      <MenuItem value={3}>Deprecated</MenuItem>
+                    </StyledSelect>
+                  )}
+                />
+              </Grid>
+            )}
+            {activeTab == 3 && (
+              <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center', mt: { lg: -1, md: -1, sm: 0, xs: 2 } }}>
+                <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2 }}>
+                  Status
+                </Typography>
+                <Controller
+                  name="documentCAStatus"
+                  control={control}
+                  defaultValue={selectedCAStatus}
+                  render={({ field }) => (
+                    <StyledSelect
+                      labelId="document-CAstatus-label"
+                      id="documentCAStatus"
+                      {...field}
+                      value={field.value ?? selectedCAStatus}
+                      displayEmpty
+                      sx={{
+                        width: '160px',
+                      }}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        if (e.target.value == "") {
+                          setSelectedCAStatus("");
+                        } else {
+                          setSelectedCAStatus((e.target.value) - 3);
+                        }
+                      }}
+                    >
+                      <MenuItem value="">All</MenuItem>
+                      <MenuItem value={4}>Active</MenuItem>
+                      <MenuItem value={5}>Deprecated</MenuItem>
+                    </StyledSelect>
+                  )}
+                />
+              </Grid>
+            )}
+            {activeTab == 1 && (
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
                 sx={{
-                  width: '160px',
-                }}
-                onChange={(e) => {
-                  field.onChange(e);
-                  if(e.target.value === ""){
-                    setSelectedStatus("");
-                  } else{
-                    setSelectedStatus(e.target.value);
+                  fontFamily: "sans-serif",
+                  fontSize: "0.875rem",
+                  textTransform: "none",
+                  marginTop: { sm: -1, xs: 2 },
+                  height: "25px",
+                  width: { lg: "14%", md: "16%", sm: "30%", xs: "50%" },
+                  backgroundColor: "#ee8812",
+                  "&:hover": {
+                    backgroundColor: "rgb(249, 83, 22)"
                   }
                 }}
+                onClick={() => navigate("/admin/user/add")}
               >
-                <MenuItem value="">None</MenuItem>
-                <MenuItem value={0}>In review</MenuItem>
-                <MenuItem value={1}>Approved</MenuItem>
-                <MenuItem value={2}>Rejected</MenuItem>
-                <MenuItem value={3}>Deprecated</MenuItem>
-              </StyledSelect>
+                New User
+              </Button>
             )}
-          />
-        </Grid>
-        )}
-        {activeTab == 3 && (
-        <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center', mt: {lg: -1, md: -1, sm: 0, xs: 2} }}>
-          <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2 }}>
-            Status
-          </Typography>
-          <Controller
-            name="documentStatus"
-            control={control}
-            value={selectedCAStatus}
-            render={({ field }) => (
-              <StyledSelect
-                labelId="document-status-label"
-                id="documentStatus"
-                {...field}
-                sx={{
-                  width: '160px',
-                }}
-                onChange={(e) => {
-                  field.onChange(e);
-                  if(e.target.value == ""){
-                    setSelectedCAStatus("");
-                  } else{
-                    setSelectedCAStatus((e.target.value)-3);
-                  }
-                }}
-              >
-                <MenuItem value="">None</MenuItem>
-                <MenuItem value={4}>Active</MenuItem>
-                <MenuItem value={5}>Deprecated</MenuItem>
-              </StyledSelect>
+          </Grid>
+          <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
+            {activeTab == 1 && (
+              <>
+                <StyledTextField
+                  value={searchValue}
+                  onChange={handleInputChange}
+                  placeholder="Search..."
+                  sx={{ width: '300px', marginRight: 2 }}
+                />
+                {searchValue && (
+                  <IconButton
+                    onClick={() => {
+                      setSearchValue(''); // Clear the search field
+                      setIsSearching(false); // Reset isSearching state
+                      fetchData(activeTab, currentPage, rowsPerPage); // Fetch data without search
+                    }}
+                    sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }} // Adjust for proper spacing
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                )}
+              </>
             )}
-          />
-        </Grid>
-        )}
-        {activeTab == 1 && (
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            sx={{
-              fontFamily: "sans-serif",
-              fontSize: "0.875rem",
-              textTransform: "none",
-              marginTop: { sm: -1, xs: 2 },
-              height: "25px",
-              width: {lg:"14%", md: "16%", sm:"30%", xs:"50%"},
-              backgroundColor: "#ee8812",
-              "&:hover": {
-                backgroundColor: "rgb(249, 83, 22)"
-              }
-            }}
-            onClick={() => navigate("/admin/user/add")}
-          >
-            New User
-          </Button>
-        )}
-      </Grid>
-      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
-        {activeTab == 1 && (
-        <>
-        <StyledTextField
-          value={searchValue}
-          onChange={handleInputChange}
-          placeholder="Search..."
-          sx={{ width: '300px', marginRight: 2 }}
-        />
-        {searchValue && (
-          <IconButton
-            onClick={() => {
-              setSearchValue(''); // Clear the search field
-              setIsSearching(false); // Reset isSearching state
-              fetchData(activeTab, currentPage, rowsPerPage); // Fetch data without search
-            }}
-            sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }} // Adjust for proper spacing
-          >
-            <CloseIcon />
-          </IconButton>
-        )}
-        </>
-        )}
-        {activeTab == 2 && (
-        <>
-        <StyledTextField
-          value={searchValue2}
-          onChange={handleInputChange}
-          placeholder="Search..."
-          sx={{ width: '300px', marginRight: 2 }}
-        />
-        {searchValue2 && (
-          <IconButton
-            onClick={() => {
-              setSearchValue2(''); // Clear the search field
-              setIsSearching(false); // Reset isSearching state
-              fetchData(activeTab, currentPage, rowsPerPage); // Fetch data without search
-            }}
-            sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }} // Adjust for proper spacing
-          >
-            <CloseIcon />
-          </IconButton>
-        )}
-        </>
-        )}
-        {activeTab == 3 && (
-        <>
-        <StyledTextField
-          value={searchValue3}
-          onChange={handleInputChange}
-          placeholder="Search..."
-          sx={{ width: '300px', marginRight: 2 }}
-        />
-        {searchValue3 && (
-          <IconButton
-            onClick={() => {
-              setSearchValue3(''); // Clear the search field
-              setIsSearching(false); // Reset isSearching state
-              fetchData(activeTab, currentPage, rowsPerPage); // Fetch data without search
-            }}
-            sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }} // Adjust for proper spacing
-          >
-            <CloseIcon />
-          </IconButton>
-        )}
-        </>
-        )}
-        </Grid>
+            {activeTab == 2 && (
+              <>
+                <StyledTextField
+                  value={searchValue2}
+                  onChange={handleInputChange}
+                  placeholder="Search..."
+                  sx={{ width: '300px', marginRight: 2 }}
+                />
+                {searchValue2 && (
+                  <IconButton
+                    onClick={() => {
+                      setSearchValue2(''); // Clear the search field
+                      setIsSearching(false); // Reset isSearching state
+                      fetchData(activeTab, currentPage, rowsPerPage); // Fetch data without search
+                    }}
+                    sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }} // Adjust for proper spacing
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                )}
+              </>
+            )}
+            {activeTab == 3 && (
+              <>
+                <StyledTextField
+                  value={searchValue3}
+                  onChange={handleInputChange}
+                  placeholder="Search..."
+                  sx={{ width: '300px', marginRight: 2 }}
+                />
+                {searchValue3 && (
+                  <IconButton
+                    onClick={() => {
+                      setSearchValue3(''); // Clear the search field
+                      setIsSearching(false); // Reset isSearching state
+                      fetchData(activeTab, currentPage, rowsPerPage); // Fetch data without search
+                    }}
+                    sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }} // Adjust for proper spacing
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                )}
+              </>
+            )}
+          </Grid>
           <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2 }}>
             <Box width="100%" height="100%" overflow="auto">
               <DataTable

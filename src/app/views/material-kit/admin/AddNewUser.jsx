@@ -141,14 +141,15 @@ const AddNewUser = () => {
   const [empMobile, setEmpMobile] = useState("");
   const [role, setRole] = useState([]);
   const [roleSum, setRoleSum] = useState(0);
+  const [roleStoresum, setRoleStoreSum] = useState(0);
   const [othersSelected, setOthersSelected] = useState(false);
   const [designation, setDesignation] = useState("");
   const [state, setState] = useState("");
   const [clusterID, setClusterID] = useState("");
   const [selectedUserGroup, setSelectedUserGroup] = useState("");
-  console.log("Selected User Group: ",selectedUserGroup);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedUserGroupSum, setSelectedUserGroupSum] = useState(0);
+  const [userGroupStoreSum, setUserGroupStoreSum] = useState(0);
 //   const [status, setStatus] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -165,7 +166,6 @@ const AddNewUser = () => {
   const [priorityOrder, setPriorityOrder] = useState([]);
   const [userGroupOptions, setUserGroupOptions] = useState([]);
   const [categorizedUserGroupOptions, setCategorizedUserGroupOptions] = useState({});
-  console.log("Categorized user options -----------", categorizedUserGroupOptions);
   const [loading, setLoading] = useState(false);
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -189,17 +189,8 @@ const AddNewUser = () => {
   }, [role]);
 
   useEffect(() => {
-    console.log("Selected role sum:", roleSum);
+    setRoleStoreSum(roleSum);
   }, [roleSum]);
-
-  const handleRoleChange = (event) => {
-    const value = event.target.value;
-    setRole((prevSelectedRoles) =>
-      prevSelectedRoles.includes(value)
-        ? prevSelectedRoles.filter((option) => option !== value) // Deselect role
-        : [...prevSelectedRoles, value] // Select role
-    );
-  };
 
 //   const status_types = [
 //     { value: "1", label: "Active" },
@@ -215,7 +206,6 @@ const AddNewUser = () => {
         // Calculate the sum of selected values
         const newTotalValue = updatedSelection.reduce((sum, value) => sum + value, 0);
         setSelectedUserGroupSum(newTotalValue);
-        console.log("New total value:", newTotalValue);
 
         // Check if the selected category should be updated or cleared
         if (updatedSelection.length === 0) {
@@ -233,7 +223,7 @@ const AddNewUser = () => {
   };
 
   useEffect(() => {
-    console.log("Selected User group total sum:", selectedUserGroupSum);
+    setUserGroupStoreSum(selectedUserGroupSum);
   }, [selectedUserGroupSum]);
 
   const handleDialogClose = () => {
@@ -278,9 +268,6 @@ const AddNewUser = () => {
           // Set the state for both user group options and categorized user group options
           setUserGroupOptions(fetchedUserGroups);
           setCategorizedUserGroupOptions(categorizedGroups);
-
-          console.log("Fetched user groups from useEffect: ", fetchedUserGroups);
-          console.log("Categorized user groups: ", categorizedGroups);
         }
       } catch (error) {
         console.error('Error fetching data', error);

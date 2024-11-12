@@ -140,7 +140,6 @@ export default function PolicyDetails() {
   const [approvalMembersOptions, setApprovalMembersOptions] = useState([]);
   const [userGroupOptions, setUserGroupOptions] = useState([]);
   const [categorizedUserGroupOptions, setCategorizedUserGroupOptions] = useState({});
-  console.log("User group options -------------------", userGroupOptions);
   const [sortColumn, setSortColumn] = useState(""); // Column being sorted
   const [sortDirection, setSortDirection] = useState("asc");
   const [loading, setLoading] = useState(true);
@@ -161,7 +160,7 @@ export default function PolicyDetails() {
   const [priorityOrder, setPriorityOrder] = useState([]);
   const [selectedUserGroup, setSelectedUserGroup] = useState([]);
   const [selectedUserGroupSum, setSelectedUserGroupSum] = useState(0);
-  console.log("Initial selected user group from the useEffect: ", selectedUserGroup);
+  const [userGroupStoreSum, setUserGroupStoreSum] = useState(0);
 
   useEffect(() => {
     if (selectedDocument?.user_group && userGroupOptions.length > 0) {
@@ -170,12 +169,10 @@ export default function PolicyDetails() {
         .filter((group) => selectedDocument.user_group[group.label] === 1) // Filter groups with value 1
         .map((group) => group.label); // Extract only labels
       setSelectedUserGroup(initialSelectedGroups);
-      console.log("Initial selected usergroups: ", initialSelectedGroups);
       const sum = initialSelectedGroups.reduce((acc, currentLabel) => {
         // Find the corresponding group value based on the label
         const group = userGroupOptions.find((group) => group.label === currentLabel);
         const groupValue = group ? group.value : 0; // Default to 0 if not found
-        console.log("Current value being summed: ", groupValue); // Log current value
         return acc + groupValue; // Add to the sum
       }, 0);
       setSelectedUserGroupSum(sum);
@@ -186,25 +183,20 @@ export default function PolicyDetails() {
     const value = event.target.value; // Get selected value(s)
     const newSelectedGroups = Array.isArray(value) ? value : [value]; // Ensure it's an array
 
-    console.log("Selected groups before summation: ", newSelectedGroups);
-
     // Calculate the sum of selected user group values
     const sum = newSelectedGroups.reduce((acc, currentLabel) => {
       // Find the corresponding group value based on the label
       const group = userGroupOptions.find((group) => group.label === currentLabel);
       const groupValue = group ? group.value : 0; // Default to 0 if not found
-      console.log("Current value being summed: ", groupValue); // Log current value
       return acc + groupValue; // Add to the sum
     }, 0);
 
     setSelectedUserGroup(newSelectedGroups); // Update selected groups
     setSelectedUserGroupSum(sum); // Update sum
-    console.log("User group: ", newSelectedGroups);
-    console.log("User group sum: ", sum);
   };
 
   useEffect(() => {
-    console.log("Selected User group total sum:", selectedUserGroupSum);
+    setUserGroupStoreSum(selectedUserGroupSum);
   }, [selectedUserGroupSum]);
 
   const [userGroupMap, setUserGroupMap] = useState(new Map());
@@ -260,7 +252,6 @@ export default function PolicyDetails() {
 
   useEffect(() => {
     if (selectedDocument) {
-      console.log("Selected document: ", selectedDocument);
       setDocumentID(selectedDocument.id || "");
       setDocumentTitle(selectedDocument.title);
       setDocumentDescription(selectedDocument.description);
@@ -287,7 +278,6 @@ export default function PolicyDetails() {
       //     HO: userGroup.HO
       //   };
       //   setSelectedUserGroup(formattedUserGroup);
-      //   console.log("Selected user group: ", formattedUserGroup);
       //   fetchUserGroup(formattedUserGroup);
       // } else {
       //   console.error("User group is not defined", userGroup);
@@ -392,9 +382,6 @@ export default function PolicyDetails() {
           // Set the state for both user group options and categorized user group options
           setUserGroupOptions(fetchedUserGroups);
           setCategorizedUserGroupOptions(categorizedGroups);
-
-          console.log("Fetched user groups from useEffect: ", fetchedUserGroups);
-          console.log("Categorized user groups: ", categorizedGroups);
         }
       } catch (error) {
         console.error('Error fetching data', error);
@@ -423,7 +410,6 @@ export default function PolicyDetails() {
     // Resulting map: key-value pairs of each user group role to binary status (1 or 0)
     setUserGroupMap(valueMap); // Store the map in state
 
-    console.log(valueMap);
   };
 
   const handleCheckboxChange = (optionValue) => {
@@ -434,37 +420,11 @@ export default function PolicyDetails() {
 
       // Calculate the sum of selected values
       const newTotalValue = updatedSelection.reduce((sum, value) => sum + value, 0);
-      console.log("New total value: ", newTotalValue);
       setSelectedUserGroupSum(newTotalValue);
-      console.log("Selected User group total sum: ", selectedUserGroupSum);
 
       return updatedSelection;
     });
   };
-
-  // const valueMap = new Map();
-  // const userGroupMasterData = await UserGroupMaster.findAll();
-  // let jsonObject = [];
-  // userGroupMasterData.forEach((seqObj)=>{
-  //   jsonObject.push(seqObj.toJSON());
-  // })
-  // console.log(jsonObject);
-
-  // for(let i=0;i<jsonObject.length;i++){
-  //   console.log(Math.log2(parseInt(jsonObject[i]["value"])))
-  //   console.log(jsonObject[i]["user_group"])
-
-  //   valueMap.set(Math.log2(parseInt(jsonObject[i]["value"])),jsonObject[i]["user_group"]);
-  // }
-  // console.log(valueMap);
-
-  // const userGroupBinString = user_group.toString(2);
-  // let cUserGroupObj={};
-  // for(let i=0;i<jsonObject.length;i++){
-  //   cUserGroupObj[valueMap.get(i)]=(userGroupBinString[userGroupBinString.length-1-i]!=null)?userGroupBinString[userGroupBinString.length-1-i]:'0';
-  // }
-
-  // console.log(cUserGroupObj);
 
   const [decision, setDecision] = useState("");
   const [remarks, setRemarks] = useState("");
@@ -500,14 +460,12 @@ export default function PolicyDetails() {
   const latestPolicyStatus = selectedDocument?.Policy_status?.filter(
     (status) => status.decision !== 0
   ).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
-  console.log("Latest policy status ------- ", latestPolicyStatus);
 
   const latestPolicyLogEntry = selectedDocument?.Policy_status_log?.find(
     (log) =>
       log.approver_id === latestPolicyStatus?.approver_id && // Check latestPolicyStatus for null/undefined
       log.activity === latestPolicyStatus?.decision // Assuming decision corresponds to activity
   );
-  console.log("Latest policy log --------- ", latestPolicyLogEntry);
 
   // Check if both are not null
   const latest_remarks =
@@ -516,7 +474,6 @@ export default function PolicyDetails() {
       : null;
 
   const rejected_by = latestPolicyLogEntry && (latestPolicyLogEntry.approver_id == latestPolicyStatus?.approver_id) ? latestPolicyStatus.approver_details.emp_name : null;
-  console.log("Rejected by ------- ", rejected_by);
 
   const handleDecisionChange = (event) => {
     setDecision(event.target.value);
@@ -634,7 +591,6 @@ export default function PolicyDetails() {
   useEffect(() => {
     if (userToken) {
       const decodedToken = jwtDecode(userToken);
-      console.log("Decoded role ID ------------", decodedToken.role_id);
       if (decodedToken.role_id) {
         setRoleId(decodedToken.role_id);
       }
@@ -820,7 +776,6 @@ export default function PolicyDetails() {
 
     // Append other data to FormData
     formData.append("policy_id", selectedDocument.id);
-    console.log("ID ------------ ", selectedDocument.id);
     formData.append("decision", mappedDecision);
     formData.append("remarks", remarks.trimStart());
     // formData.append("files[]", uploadedFile1);
@@ -878,7 +833,6 @@ export default function PolicyDetails() {
   const [groupedFiles, setGroupedFiles] = useState([]);
   const [groupedFiles1, setGroupedFiles1] = useState([]);
   useEffect(() => {
-    console.log("before condition")
     let tempArray = []
     if (selectedDocument) {
       selectedDocument.Policy_status_log.forEach((item) => {
@@ -888,7 +842,6 @@ export default function PolicyDetails() {
       })
     }
     setRemarksArray(tempArray);
-    console.log("Remarks array --------- ",tempArray);
   }, [selectedDocument]);
 
   useEffect(()=>{
@@ -4291,10 +4244,6 @@ export default function PolicyDetails() {
                                                   (group) => group.label === currentLabel
                                                 );
                                                 const groupValue = group ? group.value : 0; // Default to 0 if not found
-                                                console.log(
-                                                  "Current value being summed: ",
-                                                  groupValue
-                                                ); // Log current value
                                                 return acc + groupValue; // Add to the sum
                                               },
                                               0
