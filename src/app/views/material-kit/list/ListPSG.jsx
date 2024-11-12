@@ -10,6 +10,7 @@ import axios from 'axios';
 import toast from "react-hot-toast";
 import CloseIcon from '@mui/icons-material/Close';
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
+import { useMediaQuery } from '@mui/material';
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
@@ -325,9 +326,11 @@ export default function PSGTable() {
     return "PL" + String(policy_id).padStart(7, "0");
   };
 
+  const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+
   const columns1 = [
     {
-      name: 'Policy ID',
+      name: 'Document ID',
       selector: row => row.id || 'N/A',
       sortable: true,
       // center: true,
@@ -336,14 +339,14 @@ export default function PSGTable() {
           {getDisplayPolicyId(row.id) || 'N/A'}
         </div>
       ),
-      width: '15%',
+      width: isXs ? '30%' : '15%',
     },
     {
       name: 'Document Title',
       selector: row => row.title || 'N/A',
       sortable: true,
       // center: true,
-      width: '40%',
+      width: isXs ? '50%' : '40%',
       cell: (row) => (
         <Typography
           variant="body2"
@@ -385,7 +388,7 @@ export default function PSGTable() {
           </div>
         );
       },
-      width: '25%',
+      width: isXs ? '30%' : '25%',
     },
   ];
 
@@ -510,7 +513,7 @@ export default function PSGTable() {
           </Button>
         </Grid>
       )}
-      <Grid item lg={(isInitiator(roleId)) ? 2.9 : 6} md={(isInitiator(roleId)) ? 2.9 : 6} sm={(isInitiator(roleId)) ? 5.7 : 12} xs={(isInitiator(roleId)) ? 5.7 : 12}>
+      <Grid item lg={(isInitiator(roleId)) ? 2.9 : 6} md={(isInitiator(roleId)) ? 2.7 : 6} sm={(isInitiator(roleId)) ? 5.7 : 12} xs={(isInitiator(roleId)) ? 5.5 : 12}>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 2, mr: 2 }}>
           <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2, mt: 0.5 }}>
             Type

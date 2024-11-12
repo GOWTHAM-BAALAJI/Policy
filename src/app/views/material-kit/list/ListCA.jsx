@@ -22,6 +22,7 @@ import { jwtDecode } from "jwt-decode";
 import CloseIcon from "@mui/icons-material/Close";
 import toast from "react-hot-toast";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
+import { useMediaQuery } from '@mui/material';
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
@@ -169,6 +170,8 @@ export default function CATable() {
     return "CA" + String(policy_id).padStart(7, "0");
   };
 
+  const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+
   const columns1 = [
     {
       name: "Circular ID",
@@ -180,7 +183,7 @@ export default function CATable() {
           {getDisplayCircularId(row.id) || "N/A"}
         </div>
       ),
-      width: "20%"
+      width: isXs ? "30%" : "20%"
     },
     {
       name: "Circular Title",
@@ -320,7 +323,7 @@ export default function CATable() {
     <ContentBox className="analytics">
       <Card sx={{ px: 1, py: 1, height: "100%", width: "100%" }}>
         <Grid container spacing={2}>
-          <Grid item lg={6} md={6} sm={6} xs={6}>
+          <Grid item lg={isInitiator(roleId) ? 6 : 12} md={isInitiator(roleId) ? 6 : 12} sm={isInitiator(roleId) ? 6 : 12} xs={12}>
             <Typography
               variant="h5"
               sx={{
@@ -341,8 +344,8 @@ export default function CATable() {
               lg={6}
               md={6}
               sm={6}
-              xs={6}
-              sx={{ display: "flex", justifyContent: "flex-end", alignItems: "flex-end", mb: {sm:1, xs:1.5} }}
+              xs={12}
+              sx={{ display: "flex", justifyContent: {lg:"flex-end", md:"flex-end", sm:"flex-end", xs:"center",}, alignItems: "flex-end", mb: {sm:1, xs:1.5} }}
             >
               <Button
                 variant="contained"
@@ -351,7 +354,7 @@ export default function CATable() {
                   fontFamily: "sans-serif",
                   fontSize: "0.875rem",
                   textTransform: "none",
-                  marginTop: { sm: 2, xs: 2 },
+                  marginTop: { sm: 2, xs: 0 },
                   height: "25px",
                   backgroundColor: "#ee8812",
                   "&:hover": {

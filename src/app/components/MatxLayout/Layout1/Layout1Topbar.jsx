@@ -73,7 +73,8 @@ const UserMenu = styled(Box)({
 
 const StyledItem = styled(MenuItem)(({ theme }) => ({
   display: "flex",
-  alignItems: "center",
+  alignItems: "flex-end",
+  justifyContent: "flex-end",
   // minWidth: 125,
   "& a": {
     width: "100%",
@@ -182,7 +183,7 @@ const Layout1Topbar = () => {
           </Link>
         </Box>
 
-        <Box display="flex" alignItems="center">
+        <Box display="flex" alignItems="flex-end" justifyContent="flex-end">
           <MatxMenu
             menuButton={
               <UserMenu>
@@ -201,7 +202,8 @@ const Layout1Topbar = () => {
                 width: "auto",
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "flex-start"
+                justifyContent: "flex-end",
+                alignItems: "flex-end"
               }}
             >
               <StyledItem>
@@ -216,12 +218,6 @@ const Layout1Topbar = () => {
                 <Span sx={{ ml: "2px" }}>Logout</Span>
               </StyledItem>
             </Box>
-
-            {/* Remove or adjust the logout item */}
-            {/* <StyledItem onClick={logout}>
-              <PowerSettingsNew />
-              <Span>Logout</Span>
-            </StyledItem> */}
           </MatxMenu>
         </Box>
       </TopbarContainer>

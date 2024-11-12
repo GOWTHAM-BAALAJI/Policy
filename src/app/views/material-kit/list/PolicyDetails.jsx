@@ -36,6 +36,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import toast from "react-hot-toast";
 import img1 from "../../../assets/download_file_icon.png";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
+import { useMediaQuery } from '@mui/material';
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "20px",
@@ -109,6 +110,9 @@ export default function PolicyDetails() {
   const { title, status, activeTab } = location.state || {};
 
   const customFetchWithAuth = useCustomFetch();
+
+  const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const isMd = useMediaQuery((theme) => theme.breakpoints.down('md'));
 
   const getDisplayPolicyId = (policy_id) => {
     return "PL" + String(policy_id).padStart(7, "0");
@@ -940,7 +944,7 @@ export default function PolicyDetails() {
           <Grid
             item
             lg={6}
-            md={6}
+            md={12}
             sm={12}
             xs={12}
             sx={{
@@ -1082,7 +1086,7 @@ export default function PolicyDetails() {
                             </TableRow>
                           </>
                         )}
-                      {activeTab == 2 &&
+                      {(activeTab == 2 && selectedDocument.status == 2) &&
                         selectedDocument.pending_at_id === null &&
                         latestPolicyStatus &&
                         roleId !== 16 && (
@@ -1119,7 +1123,8 @@ export default function PolicyDetails() {
                     <b>Received for Changes</b>
                 </Typography> */}
                                   <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                                  <div style={{ overflowX: 'auto', width: '100%' }}>
+                                    <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse" }}>
                                       <thead>
                                         <tr>
                                           <th
@@ -1197,7 +1202,7 @@ export default function PolicyDetails() {
                                                   style={{ cursor: "pointer" }}
                                                 >
                                                   <div className="img-wrapper">
-                                                    <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                       <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                     </Box>
                                                   </div>
@@ -1243,6 +1248,7 @@ export default function PolicyDetails() {
                                           )}
                                       </tbody>
                                     </table>
+                                    </div>
                                   </TableCell>
                                 </TableRow>
                               </>
@@ -1256,7 +1262,8 @@ export default function PolicyDetails() {
                                   <b>Uploaded files</b>
                                 </TableCell>
                                 <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                                <div style={{ overflowX: 'auto', width: '100%' }}>
+                                  <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse" }}>
                                     <thead>
                                       <tr>
                                         <th
@@ -1334,7 +1341,7 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
@@ -1378,6 +1385,7 @@ export default function PolicyDetails() {
                                         )}
                                     </tbody>
                                   </table>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                               {selectedDocument.version !== "1.0" && (
@@ -1401,10 +1409,11 @@ export default function PolicyDetails() {
                                             <Typography sx={{ marginBottom: 2 }}>
                                               {remarksArray[tableIndex]}
                                             </Typography>
+                                            <div style={{ overflowX: 'auto', width: '100%' }}>
                                             <table
                                               key={tableIndex}
                                               style={{
-                                                width: "100%",
+                                                minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                                 borderCollapse: "collapse",
                                                 marginBottom: "20px"
                                               }}
@@ -1480,7 +1489,7 @@ export default function PolicyDetails() {
                                                         style={{ cursor: "pointer" }}
                                                       >
                                                         <div className="img-wrapper">
-                                                          <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                          <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                             <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                           </Box>
                                                         </div>
@@ -1508,6 +1517,7 @@ export default function PolicyDetails() {
                                                 ))}
                                               </tbody>
                                             </table>
+                                            </div>
                                             </>
                                           ))}
 
@@ -1525,10 +1535,11 @@ export default function PolicyDetails() {
                                             <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
                                               Version {version}:
                                             </Typography>
+                                            <div style={{ overflowX: 'auto', width: '100%' }}>
                                             <table
                                               key={tableIndex}
                                               style={{
-                                                width: "100%",
+                                                minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                                 borderCollapse: "collapse",
                                                 marginBottom: "20px"
                                               }}
@@ -1604,7 +1615,7 @@ export default function PolicyDetails() {
                                                         style={{ cursor: "pointer" }}
                                                       >
                                                         <div className="img-wrapper">
-                                                          <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                          <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                             <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                           </Box>
                                                         </div>
@@ -1632,6 +1643,7 @@ export default function PolicyDetails() {
                                                 ))}
                                               </tbody>
                                             </table>
+                                            </div>
                                             </>
                                           ))}
                                       </>
@@ -1644,7 +1656,7 @@ export default function PolicyDetails() {
                             <Typography>No files uploaded</Typography>
                           )}
                         </>
-                      ) : activeTab == 4 &&
+                      ) : (activeTab == 4 || (selectedDocument.status != 1 && selectedDocument.status != 2)) &&
                         (isApprover(roleId) || isReviewer(roleId)) &&
                         (selectedDocument.reviewer_id === userId ||
                           selectedDocument.Policy_status.some(
@@ -1660,9 +1672,10 @@ export default function PolicyDetails() {
                                   <b>Received files</b>
                                 </TableCell>
                                 <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
+                                <div style={{ overflowX: 'auto', width: '100%' }}>
                                   <table
                                     style={{
-                                      width: "100%",
+                                      minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                       borderCollapse: "collapse",
                                       marginBottom: "20px"
                                     }}
@@ -1744,7 +1757,7 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
@@ -1772,6 +1785,7 @@ export default function PolicyDetails() {
                                         ))}
                                     </tbody>
                                   </table>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                               {selectedDocument.version !== "1.0" && (
@@ -1796,10 +1810,11 @@ export default function PolicyDetails() {
                                             <Typography sx={{ marginBottom: 2 }}>
                                               {remarksArray[tableIndex]}
                                             </Typography>
+                                            <div style={{ overflowX: 'auto', width: '100%' }}>
                                             <table
                                               key={tableIndex}
                                               style={{
-                                                width: "100%",
+                                                minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                                 borderCollapse: "collapse",
                                                 marginBottom: "20px"
                                               }}
@@ -1875,7 +1890,7 @@ export default function PolicyDetails() {
                                                         style={{ cursor: "pointer" }}
                                                       >
                                                         <div className="img-wrapper">
-                                                          <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                          <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                             <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                           </Box>
                                                         </div>
@@ -1903,6 +1918,7 @@ export default function PolicyDetails() {
                                                 ))}
                                               </tbody>
                                             </table>
+                                            </div>
                                             </>
                                           ))}
 
@@ -1920,10 +1936,11 @@ export default function PolicyDetails() {
                                             <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
                                               Version {version}:
                                             </Typography>
+                                            <div style={{ overflowX: 'auto', width: '100%' }}>
                                             <table
                                               key={tableIndex}
                                               style={{
-                                                width: "100%",
+                                                minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                                 borderCollapse: "collapse",
                                                 marginBottom: "20px"
                                               }}
@@ -1999,7 +2016,7 @@ export default function PolicyDetails() {
                                                         style={{ cursor: "pointer" }}
                                                       >
                                                         <div className="img-wrapper">
-                                                          <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                          <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                             <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                           </Box>
                                                         </div>
@@ -2027,6 +2044,7 @@ export default function PolicyDetails() {
                                                 ))}
                                               </tbody>
                                             </table>
+                                            </div>
                                             </>
                                           ))}
                                         </>
@@ -2056,9 +2074,10 @@ export default function PolicyDetails() {
                                     >
                                       <b>Files sent for review :</b>
                                     </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
                                     <table
                                       style={{
-                                        width: "100%",
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                         borderCollapse: "collapse",
                                         marginBottom: "20px"
                                       }}
@@ -2140,7 +2159,7 @@ export default function PolicyDetails() {
                                                   style={{ cursor: "pointer" }}
                                                 >
                                                   <div className="img-wrapper">
-                                                    <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                       <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                     </Box>
                                                   </div>
@@ -2170,6 +2189,7 @@ export default function PolicyDetails() {
                                           ))}
                                       </tbody>
                                     </table>
+                                    </div>
                                   </>
                                 )}
 
@@ -2178,9 +2198,10 @@ export default function PolicyDetails() {
                                   <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
                                     <b>Files uploaded by initiator :</b>
                                   </Typography>
+                                  <div style={{ overflowX: 'auto', width: '100%' }}>
                                   <table
                                     style={{
-                                      width: "100%",
+                                      minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                       borderCollapse: "collapse",
                                       marginBottom: "20px"
                                     }}
@@ -2262,7 +2283,7 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
@@ -2290,6 +2311,7 @@ export default function PolicyDetails() {
                                         ))}
                                     </tbody>
                                   </table>
+                                  </div>
                                 </>
                               )}
 
@@ -2312,9 +2334,10 @@ export default function PolicyDetails() {
                                     >
                                       {latest_remarks}
                                     </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
                                     <table
                                       style={{
-                                        width: "100%",
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                         borderCollapse: "collapse",
                                         marginBottom: "20px"
                                       }}
@@ -2396,7 +2419,7 @@ export default function PolicyDetails() {
                                                   style={{ cursor: "pointer" }}
                                                 >
                                                   <div className="img-wrapper">
-                                                    <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                       <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                     </Box>
                                                   </div>
@@ -2426,6 +2449,7 @@ export default function PolicyDetails() {
                                           ))}
                                       </tbody>
                                     </table>
+                                    </div>
                                   </>
                                 )}
                               {selectedDocument.version !== "1.0" && (
@@ -2439,9 +2463,10 @@ export default function PolicyDetails() {
                                   >
                                     <b>Latest files uploaded by the initiator :</b>
                                   </Typography>
+                                  <div style={{ overflowX: 'auto', width: '100%' }}>
                                   <table
                                     style={{
-                                      width: "100%",
+                                      minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                       borderCollapse: "collapse",
                                       marginBottom: "20px"
                                     }}
@@ -2523,7 +2548,7 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
@@ -2551,6 +2576,7 @@ export default function PolicyDetails() {
                                         ))}
                                     </tbody>
                                   </table>
+                                  </div>
                                 </>
                               )}
                               {selectedDocument.version !== "1.0" && (
@@ -2566,10 +2592,11 @@ export default function PolicyDetails() {
                                     <Typography sx={{ marginBottom: 2 }}>
                                       {remarksArray[tableIndex]}
                                     </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
                                     <table
                                       key={tableIndex}
                                       style={{
-                                        width: "100%",
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                         borderCollapse: "collapse",
                                         marginBottom: "20px"
                                       }}
@@ -2645,7 +2672,7 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
@@ -2673,6 +2700,7 @@ export default function PolicyDetails() {
                                         ))}
                                       </tbody>
                                     </table>
+                                    </div>
                                     </>
                                   ))}
                                   <Typography
@@ -2689,10 +2717,11 @@ export default function PolicyDetails() {
                                     <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
                                       Version {version}:
                                     </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
                                     <table
                                       key={tableIndex}
                                       style={{
-                                        width: "100%",
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                         borderCollapse: "collapse",
                                         marginBottom: "20px"
                                       }}
@@ -2768,7 +2797,7 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
@@ -2796,6 +2825,7 @@ export default function PolicyDetails() {
                                         ))}
                                       </tbody>
                                     </table>
+                                    </div>
                                     </>
                                   ))}
                                 </>
@@ -2803,7 +2833,7 @@ export default function PolicyDetails() {
                             </TableCell>
                           </TableRow>
                         </>
-                      ) : activeTab == 2 && roleId !== 16 ? (
+                      ) : activeTab == 2 && selectedDocument.status == 2 && selectedDocument.pending_at_id === null && roleId !== 16 ? (
                         <>
                           <TableRow>
                             <TableCell sx={{ pt: 3, pl: 2, verticalAlign: "top" }}>
@@ -2819,9 +2849,10 @@ export default function PolicyDetails() {
                                     >
                                       <b>Files sent for review :</b>
                                     </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
                                     <table
                                       style={{
-                                        width: "100%",
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                         borderCollapse: "collapse",
                                         marginBottom: "20px"
                                       }}
@@ -2903,7 +2934,7 @@ export default function PolicyDetails() {
                                                   style={{ cursor: "pointer" }}
                                                 >
                                                   <div className="img-wrapper">
-                                                    <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                       <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                     </Box>
                                                   </div>
@@ -2933,6 +2964,7 @@ export default function PolicyDetails() {
                                           ))}
                                       </tbody>
                                     </table>
+                                    </div>
                                   </>
                                 )}
 
@@ -2941,9 +2973,10 @@ export default function PolicyDetails() {
                                   <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
                                     <b>Files uploaded by initiator :</b>
                                   </Typography>
+                                  <div style={{ overflowX: 'auto', width: '100%' }}>
                                   <table
                                     style={{
-                                      width: "100%",
+                                      minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                       borderCollapse: "collapse",
                                       marginBottom: "20px"
                                     }}
@@ -3025,7 +3058,7 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
@@ -3053,6 +3086,7 @@ export default function PolicyDetails() {
                                         ))}
                                     </tbody>
                                   </table>
+                                  </div>
                                 </>
                               )}
 
@@ -3065,9 +3099,10 @@ export default function PolicyDetails() {
                                     >
                                       <b>Latest files sent for review :</b>
                                     </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
                                     <table
                                       style={{
-                                        width: "100%",
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                         borderCollapse: "collapse",
                                         marginBottom: "20px"
                                       }}
@@ -3149,7 +3184,7 @@ export default function PolicyDetails() {
                                                   style={{ cursor: "pointer" }}
                                                 >
                                                   <div className="img-wrapper">
-                                                    <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                       <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                     </Box>
                                                   </div>
@@ -3179,6 +3214,7 @@ export default function PolicyDetails() {
                                           ))}
                                       </tbody>
                                     </table>
+                                    </div>
                                   </>
                                 )}
                               {selectedDocument.version !== "1.0" && (
@@ -3192,9 +3228,10 @@ export default function PolicyDetails() {
                                   >
                                     <b>Latest files uploaded by the initiator:</b>
                                   </Typography>
+                                  <div style={{ overflowX: 'auto', width: '100%' }}>
                                   <table
                                     style={{
-                                      width: "100%",
+                                      minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                       borderCollapse: "collapse",
                                       marginBottom: "20px"
                                     }}
@@ -3276,7 +3313,7 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
@@ -3304,6 +3341,7 @@ export default function PolicyDetails() {
                                         ))}
                                     </tbody>
                                   </table>
+                                  </div>
                                 </>
                               )}
                               {selectedDocument.version !== "1.0" && (
@@ -3319,10 +3357,11 @@ export default function PolicyDetails() {
                                     <Typography sx={{ marginBottom: 2 }}>
                                       {remarksArray[tableIndex]}
                                     </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
                                     <table
                                       key={tableIndex}
                                       style={{
-                                        width: "100%",
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                         borderCollapse: "collapse",
                                         marginBottom: "20px"
                                       }}
@@ -3398,7 +3437,7 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
@@ -3426,6 +3465,7 @@ export default function PolicyDetails() {
                                         ))}
                                       </tbody>
                                     </table>
+                                    </div>
                                     </>
                                   ))}
 
@@ -3443,10 +3483,11 @@ export default function PolicyDetails() {
                                     <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
                                       Version {version}:
                                     </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
                                     <table
                                       key={tableIndex}
                                       style={{
-                                        width: "100%",
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                         borderCollapse: "collapse",
                                         marginBottom: "20px"
                                       }}
@@ -3522,7 +3563,7 @@ export default function PolicyDetails() {
                                                 style={{ cursor: "pointer" }}
                                               >
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
@@ -3550,6 +3591,7 @@ export default function PolicyDetails() {
                                         ))}
                                       </tbody>
                                     </table>
+                                    </div>
                                     </>
                                   ))}
                                 </>
@@ -3557,19 +3599,21 @@ export default function PolicyDetails() {
                             </TableCell>
                           </TableRow>
                         </>
-                      ) : (
+                      ) : (selectedDocument.status == 1) &&
+                      selectedDocument.pending_at_id === null &&
+                      roleId == 16 && (
                         <>
-                          {activeTab == 2 && (
                           <TableRow>
-                            <TableCell sx={{ pt: 3, pl: 2, verticalAlign: "top" }}>
-                              <b>Final files</b>
+                            <TableCell sx={{ pt: 2, pl: 2, width: '30%', verticalAlign: "top" }}>
+                              <b>Final file: </b>
                             </TableCell>
-                            <TableCell sx={{pl: 2, verticalAlign: "top" }}>
+                            <TableCell sx={{pl: 1, width: '70%', verticalAlign: "top" }}>
+                            <div style={{ overflowX: 'auto', width: '100%' }}>
                               <table
                                 style={{
-                                  width: "100%",
+                                  minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                   borderCollapse: "collapse",
-                                  marginBottom: "20px"
+                                  marginBottom: "10px"
                                 }}
                               >
                                 <thead>
@@ -3643,7 +3687,7 @@ export default function PolicyDetails() {
                                           style={{ cursor: "pointer" }}
                                         >
                                           <div className="img-wrapper">
-                                            <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                            <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                               <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                             </Box>
                                           </div>
@@ -3671,9 +3715,9 @@ export default function PolicyDetails() {
                                   ))}
                                 </tbody>
                               </table>
+                              </div>
                             </TableCell>
                           </TableRow>
-                          )}
                         </>
                       )}
                     </TableBody>
@@ -3685,7 +3729,7 @@ export default function PolicyDetails() {
           <Grid
             item
             lg={5.3}
-            md={5}
+            md={12}
             sm={12}
             xs={12}
             sx={{
@@ -3698,7 +3742,7 @@ export default function PolicyDetails() {
           >
             {selectedDocument && (
             <>
-            {activeTab == 1 &&
+            {(activeTab == 1 || selectedDocument.status == 1) &&
             selectedDocument.pending_at_id === null &&
             roleId !== 16 && (
               <>
@@ -3706,19 +3750,21 @@ export default function PolicyDetails() {
               <Table aria-label="data table">
               <TableBody>
                 <TableRow>
-                  <TableCell sx={{ pt: 2, pl: 2, width: { lg: "30%", md: "30%", sm: "40%", xs: "40%" }, verticalAlign: "top" }}>
+                  <TableCell sx={{ pt: 2, pl: 2, width: { lg: "30%", md: "30%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                     <b>Final Decision: </b>
                   </TableCell>
-                  <TableCell sx={{ pt: 2, pl: 2, width: { lg: "70%", md: "70%", sm: "60%", xs: "60%" }, verticalAlign: "top" }}>Approved</TableCell>
+                  <TableCell sx={{ pt: 2, pl: 2, width: { lg: "70%", md: "70%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>Approved</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell sx={{ pt: 2, pl: 2, width: '30%', verticalAlign: "top" }}>
                     <b>Final file: </b>
                   </TableCell>
                   <TableCell sx={{pl: 1, width: '70%', verticalAlign: "top" }}>
+                  <div style={{ overflowX: 'auto', width: '100%' }}>
                     <table
                       style={{
-                        width: "100%",
+                        // width: "100%",
+                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                         borderCollapse: "collapse",
                         marginBottom: "10px"
                       }}
@@ -3794,7 +3840,7 @@ export default function PolicyDetails() {
                                 style={{ cursor: "pointer" }}
                               >
                                 <div className="img-wrapper">
-                                  <Box sx={{ width: {lg:"45%", md:"95%", sm:"65%", xs:"145%"}, ml:{sm:-1, xs:-1} }}>
+                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                   </Box>
                                 </div>
@@ -3822,6 +3868,7 @@ export default function PolicyDetails() {
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </TableCell>
                 </TableRow>
               </TableBody>

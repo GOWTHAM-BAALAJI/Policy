@@ -80,8 +80,8 @@ export default function Analytics() {
       <ContentBox className="analytics">
         <Grid container spacing={2}>
 
-          <Grid item lg={6} md={6} sm={12} xs={12}>
-            <Card sx={{ px: 3, py: 3, minHeight: '80vh', height: '100%', width: '100%' }}>
+          <Grid item lg={6} md={12} sm={12} xs={12}>
+            <Card sx={{ px: 3, py: 3, minHeight: {lg:'80vh', md:'40vh', sm:'50vh', xs:'60vh', }, height: '100%', width: '100%' }}>
               <Title>Dashboard</Title>
               <SubTitle>Policy, SOP & Guidance Note</SubTitle>
 
@@ -90,7 +90,7 @@ export default function Analytics() {
               </Box>
             </Card>
           </Grid>
-          <Grid item lg={6} md={6} sm={12} xs={12}>
+          <Grid item lg={6} md={12} sm={12} xs={12}>
             <Card sx={{ minHeight: '80vh', height: '100%', width: '100%' }}>
               {renderTable()}
             </Card>

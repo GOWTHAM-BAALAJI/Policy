@@ -22,6 +22,7 @@ import toast from "react-hot-toast";
 import CloseIcon from "@mui/icons-material/Close";
 import DoughnutChart from "app/views/charts/echarts/Doughnut";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
+import { useMediaQuery } from '@mui/material';
 
 const StyledTextField = styled(TextField)(() => ({
   width: "100%",
@@ -353,9 +354,11 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     return "PL" + String(policy_id).padStart(7, "0");
   };
 
+  const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+
   const columns1 = [
     {
-      name: "Policy ID",
+      name: "Document ID",
       selector: (row) => row.id || "N/A",
       // sortable: true,
       // center: true,
@@ -364,7 +367,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
           {getDisplayPolicyId(row.id) || "N/A"}
         </div>
       ),
-      width: "22%"
+      width: isXs ? "30%" : "22%"
     },
     {
       name: "Document Title",
@@ -395,7 +398,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
       selector: (row) => row.type || "N/A",
       sortable: true,
       // center: true,
-      width: "15%",
+      width: isXs ? "20%" : "15%",
       cell: (row) => {
         const typeMapping = {
           1: "Policy",
@@ -424,7 +427,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
           </div>
         );
       },
-      width: "25%"
+      width: isXs ? "30%" : "25%"
     }
   ];
 
@@ -529,7 +532,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
         </Typography>
       </Grid>
       {(isInitiator(roleId)) && (
-        <Grid item lg={3} md={3} sm={6} xs={6} sx={{ml: {sm: 1, xs: 1}}}>
+        <Grid item lg={3} md={3} sm={6} xs={6} sx={{ml: {sm: 1, xs: 2}}}>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -555,7 +558,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
         lg={(isInitiator(roleId)) ? 2.7 : 6}
         md={(isInitiator(roleId)) ? 2.7 : 6}
         sm={(isInitiator(roleId)) ? 5.7 : 12}
-        xs={(isInitiator(roleId)) ? 5.7 : 12}
+        xs={(isInitiator(roleId)) ? 5.2 : 12}
       >
         <Grid
           item
@@ -578,7 +581,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
                 id="documentType"
                 {...field}
                 sx={{
-                  width: "180px"
+                  width: "160px"
                 }}
                 onChange={(e) => {
                   field.onChange(e);

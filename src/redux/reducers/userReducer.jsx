@@ -1,6 +1,6 @@
 export const SET_USER_DATA = 'SET_USER_DATA';
 
-const initialUserState = JSON.parse(localStorage.getItem('userData')) || {
+const initialUserState = JSON.parse(sessionStorage.getItem('userData')) || {
     user_id: '',
     emp_id: '',
     emp_name: '',

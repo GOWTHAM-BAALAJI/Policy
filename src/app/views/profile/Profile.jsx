@@ -153,12 +153,6 @@ const Profile = () => {
         if (decodedToken.designation) {
           setEmpDesignation(decodedToken.designation);
         }
-        // if (decodedToken.profile_pic) {
-        //   setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
-        // }
-        // if (decodedToken.profile_pic) {
-        //   setStoreImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
-        // }
       } catch (error) {
         console.error("Invalid token:", error);
       }
@@ -181,13 +175,12 @@ const Profile = () => {
       setProfileImage(storeImage);
       return;
     }
-    // if (isValidFileFormat) {
     setSelectedFile(file);
     const reader = new FileReader();
     reader.onload = () => {
       const imageDataUrl = reader.result;
-      setProfileImage(imageDataUrl); // Set the base64 URL for immediate rendering
-      setStoreImage(imageDataUrl); // Optionally store it elsewhere if needed
+      setProfileImage(imageDataUrl);
+      setStoreImage(imageDataUrl);
     };
     reader.readAsDataURL(file);
     // }
@@ -200,8 +193,6 @@ const Profile = () => {
     event.preventDefault();
     setLoading(true);
 
-    // setIsBtnDisabled1(true);
-
     if (!selectedFile) {
       toast.error("Please select a file");
       setIsBtnDisabled1(true);
@@ -211,7 +202,6 @@ const Profile = () => {
       return;
     }
 
-    // Prepare the form data for the API call
     const formData = new FormData();
     formData.append("files[]", selectedFile);
 
@@ -227,21 +217,18 @@ const Profile = () => {
           if (img) {
             dispatch(setUserData({ profile_pic: img }));
           }
-          // setTimeout(() => {
-          //     navigate('/list/psg');
-          // }, 1000);
         }
-        setLoading(false); // Reset loading state
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Submission error:", error);
         setIsBtnDisabled1(false);
-        setLoading(false); // Reset loading state
+        setLoading(false);
       });
 
     toast.promise(submitPromise1, {
       loading: "Uploading...",
-      success: (data) => `Profile Image Uploaded Successfully`, // Adjust based on your API response
+      success: (data) => `Profile Image Uploaded Successfully`,
       error: (err) => `Error while Uploading`
     });
   };
@@ -249,8 +236,6 @@ const Profile = () => {
   const handlePasswordUpdate = async (event) => {
     event.preventDefault();
     setLoading(true);
-
-    // setIsBtnDisabled2(true);
 
     if (!newpassword || !confirmnewpassword) {
       toast.error("Please fill in all the required fields");
@@ -293,56 +278,51 @@ const Profile = () => {
           setNewPassword("");
           setConfirmNewPassword("");
           setShowFields(false);
-          // setTimeout(() => {
-          //     navigate('/list/psg');
-          // }, 1000);
         } else {
           throw new Error("Updation failed");
         }
-        setLoading(false); // Reset loading state
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Submission error:", error);
         setIsBtnDisabled2(false);
-        setLoading(false); // Reset loading state
+        setLoading(false);
       });
 
     toast.promise(submitPromise2, {
       loading: "Updating...",
-      success: (data) => `New password updated successfully`, // Adjust based on your API response
+      success: (data) => `New password updated successfully`,
       error: (err) => `Error while updating`
     });
   };
 
   return (
     <>
-      <Grid container sx={{ ml: 1, p: 4 }}>
+      <Grid container sx={{ ml: 0, p: 4, mr: 1 }}>
         <Grid
           container
           sx={{
             display: "flex",
             justifyContent: "center",
-            alignItems: "center"
-            // minHeight: '100vh', // Center vertically
+            alignItems: "center",
+            maxWidth: '100%'
           }}
         >
           <Grid item xs={12}>
             <Box
               sx={{
-                display: "flex", // Use flex to arrange components horizontally
-                flexDirection: { xs: "column", sm: "column", md: "row", lg: "row" }, // Stack vertically on sm and xs, horizontally on md and lg
-                justifyContent: { md: "space-between", lg: "space-between" }, // Space between items for larger screens
-                // alignItems: { xs: 'center', sm: 'center', md: 'flex-start', lg: 'flex-start' },
+                display: "flex",
+                flexDirection: { xs: "column", sm: "column", md: "row", lg: "row" },
+                justifyContent: { md: "space-between", lg: "space-between" },
                 border: "1px solid #e0e0e0",
                 boxShadow: "0px 0px 8px 2px rgba(0, 0, 0, 0.1)",
                 p: 4,
                 textAlign: "center",
-                width: "fit-content", // Border adjusts to content width
-                margin: "0 auto", // Centers the box horizontally
+                width: "fit-content",
+                margin: "0 auto",
                 gap: 4
               }}
             >
-              {/* Left Half: Profile Image and Upload Button */}
               <form onSubmit={handleFileUpload} encType="multipart/form-data">
                 <Box
                   sx={{
@@ -353,7 +333,7 @@ const Profile = () => {
                   }}
                 >
                   <Avatar
-                    src={profileImage} // Use the state for the image URL
+                    src={profileImage}
                     alt="Profile Picture"
                     sx={{ width: 160, height: 162, borderRadius: "50%", border: "1px solid #000" }}
                   />
@@ -403,18 +383,17 @@ const Profile = () => {
                 </Box>
               </form>
 
-              {/* Middle Section: Employee Details Table */}
-              <Box sx={{ p: 2, display: "flex", justifyContent: "center", alignItems: "center" }}>
+              <Box sx={{ p: 2, display: "flex", justifyContent: "center", alignItems: "center", mt:{sm:-4, xs:-2} }}>
                 <Table sx={{ width: "auto" }}>
                   <TableBody>
-                    <TableRow>
+                    <TableRow sx={{ display: { xs: "flex", sm: "table-row" }, flexDirection: { xs: "column", sm: "row" } }}>
                       <TableCell>
                         <Typography
                           variant="h6"
                           sx={{
                             fontFamily: "sans-serif",
                             fontSize: "0.875rem",
-                            marginRight: "40px"
+                            marginRight: { sm: "40px", xs: 0 }
                           }}
                         >
                           <b>Employee ID:</b>
@@ -429,14 +408,14 @@ const Profile = () => {
                         </Typography>
                       </TableCell>
                     </TableRow>
-                    <TableRow>
+                    <TableRow sx={{ display: { xs: "flex", sm: "table-row" }, flexDirection: { xs: "column", sm: "row" }, }}>
                       <TableCell>
                         <Typography
                           variant="h6"
                           sx={{
                             fontFamily: "sans-serif",
                             fontSize: "0.875rem",
-                            marginRight: "40px"
+                            marginRight: { sm: "40px", xs: 0 },
                           }}
                         >
                           <b>Name:</b>
@@ -451,14 +430,14 @@ const Profile = () => {
                         </Typography>
                       </TableCell>
                     </TableRow>
-                    <TableRow>
+                    <TableRow sx={{ display: { xs: "flex", sm: "table-row" }, flexDirection: { xs: "column", sm: "row" }, }}>
                       <TableCell>
                         <Typography
                           variant="h6"
                           sx={{
                             fontFamily: "sans-serif",
                             fontSize: "0.875rem",
-                            marginRight: "40px"
+                            marginRight: { sm: "40px", xs: 0 },
                           }}
                         >
                           <b>Designation:</b>
@@ -473,14 +452,14 @@ const Profile = () => {
                         </Typography>
                       </TableCell>
                     </TableRow>
-                    <TableRow>
+                    <TableRow sx={{ display: { xs: "flex", sm: "table-row" }, flexDirection: { xs: "column", sm: "row" }, }}>
                       <TableCell>
                         <Typography
                           variant="h6"
                           sx={{
                             fontFamily: "sans-serif",
                             fontSize: "0.875rem",
-                            marginRight: "40px"
+                            marginRight: { sm: "40px", xs: 0 },
                           }}
                         >
                           <b>Email:</b>
@@ -495,14 +474,14 @@ const Profile = () => {
                         </Typography>
                       </TableCell>
                     </TableRow>
-                    <TableRow>
+                    <TableRow sx={{ display: { xs: "flex", sm: "table-row" }, flexDirection: { xs: "column", sm: "row" }, }}>
                       <TableCell>
                         <Typography
                           variant="h6"
                           sx={{
                             fontFamily: "sans-serif",
                             fontSize: "0.875rem",
-                            marginRight: "40px"
+                            marginRight: { sm: "40px", xs: 0 },
                           }}
                         >
                           <b>Mobile:</b>
@@ -521,7 +500,6 @@ const Profile = () => {
                 </Table>
               </Box>
 
-              {/* Right Half: Update Password Section */}
               <form onSubmit={handlePasswordUpdate} encType="multipart/form-data">
                 <Box
                   sx={{
@@ -530,7 +508,8 @@ const Profile = () => {
                     justifyContent: "center",
                     alignItems: "center",
                     marginTop: "50px",
-                    marginRight: "20px"
+                    marginRight: "20px",
+                    mt:{md: 8, sm:-3, xs:-2}
                   }}
                 >
                   <Button
@@ -634,25 +613,3 @@ const Profile = () => {
 };
 
 export default Profile;
-
-{
-  /* <div className='flex justify-center p-4'>
-      <div className='p-6 bg-orange-500 mt-10 w-full max-w-4xl flex flex-col md:flex-row md:items-center border border-gray-300 shadow-lg rounded-xl'>
-        <img 
-          src={"/assets/avatar.jpg"} 
-          alt="profile picture" 
-          className='h-[180px] w-[180px] rounded-full border-4 border-white shadow-md mb-4 md:mb-0 md:mr-6 mx-auto'
-        />
-        <div className='text-xs md:text-sm flex-1 md:mx-6 mx-4'>
-          <p className='my-1'><span className='font-bold'>Employee ID :</span> SF00XXXXX</p>
-          <p className='my-1'><span className='font-bold'>Name :</span> XXXXXXXXXXX</p>
-          <p className='my-1'><span className='font-bold'>Email ID :</span> XXXXXXXXX@spandanasphoorty.com</p>
-        </div>
-        <div className='text-xs md:text-sm flex-1 md:ml-4 ml-6'>
-          <p className='my-1'><span className='font-bold'>Mobile :</span> XXXXXXXXXX</p>
-          <p className='my-1'><span className='font-bold'>Designation :</span> XXXXXXXXXXX</p>
-          <p className='my-1'><span className='font-bold'>Status :</span> Active</p>
-        </div>
-      </div>
-    </div> */
-}

@@ -26,6 +26,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from '@mui/icons-material/Check';
 import img1 from "../../../assets/download_file_icon.png";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
+import { useMediaQuery } from '@mui/material';
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
@@ -359,26 +360,16 @@ export default function PSGTable() {
     }));
   };
 
+  const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const isMd = useMediaQuery((theme) => theme.breakpoints.down('md'));
+
   const columns1 = [
-    // {
-    //   name: "S.No.",
-    //   selector: (row, index) => (currentPage - 1) * rowsPerPage + index + 1,
-    //   width: "15%",
-    //   cell: (row, index) => (
-    //     <Typography
-    //       variant="body2"
-    //       sx={{ textAlign: "center", textDecoration: "none", paddingLeft: "8px", fontSize: "14px" }}
-    //     >
-    //       {(currentPage - 1) * rowsPerPage + index + 1}
-    //     </Typography>
-    //   )
-    // },
     {
       name: "Employee ID",
       selector: (row) => row.emp_id || "N/A",
       sortable: true,
       // center: true,
-      width: "20%",
+      width: isXs ? "30%" : isMd ? "30%" : "20%",
       cell: (row) => (
         <Typography
           variant="body2"
@@ -399,7 +390,7 @@ export default function PSGTable() {
       selector: (row) => row.emp_name || "N/A",
       sortable: true,
       // center: true,
-      width: "30%",
+      width: isXs ? "35%" : "30%",
       cell: (row) => (
         <Typography
           variant="body2"
@@ -441,7 +432,7 @@ export default function PSGTable() {
     {
       name: "Action",
       selector: () => null,
-      width: "10%",
+      width: isXs? "15%" : isMd ? "15%" : "10%",
       center: "true",
       cell: (row) => (
         <Box
@@ -476,7 +467,7 @@ export default function PSGTable() {
           {getDisplayPolicyId(row.id) || "N/A"}
         </div>
       ),
-      width: "12%"
+      width: isXs ? "15%" : isMd? "15%" : "12%"
     },
     {
       name: "Document Title",
@@ -593,7 +584,7 @@ export default function PSGTable() {
           {getDisplayCircularId(row.id) || 'N/A'}
         </div>
     ),
-    width: '13%',
+    width: isXs ? '20%' : isMd ? '20%' : '13%',
     },
     {
     name: 'Circular Title',
@@ -827,12 +818,12 @@ export default function PSGTable() {
     <ContentBox className="analytics">
     <Card sx={{ px: 1, py: 1, height: '100%', width: '100%' }}>
     <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
-      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', sm: 'space-between', md: 'space-between', lg: 'space-between' }, alignItems: 'center', flexDirection: { xs: 'column', sm: 'row', md: 'row', lg: 'row' }, mt: 2 }}>
         <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1rem', ml: 2 }}>
           Admin Portal
         </Typography>
         {activeTab == 2 && (
-        <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center' }}>
+        <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center', mt: {lg:0, md: 0, sm: 0, xs: 2} }}>
           <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2 }}>
             Type
           </Typography>
@@ -961,7 +952,7 @@ export default function PSGTable() {
               textTransform: "none",
               marginTop: { sm: -1, xs: 2 },
               height: "25px",
-              width: {lg:"12%", md: "16%", sm:"20%", xs:"36%"},
+              width: {lg:"14%", md: "16%", sm:"30%", xs:"50%"},
               backgroundColor: "#ee8812",
               "&:hover": {
                 backgroundColor: "rgb(249, 83, 22)"

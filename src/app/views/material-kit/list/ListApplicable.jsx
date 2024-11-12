@@ -21,6 +21,7 @@ import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
 import CloseIcon from "@mui/icons-material/Close";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
+import { useMediaQuery } from '@mui/material';
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
@@ -266,6 +267,8 @@ const ApplicableTable = () => {
     return "PL" + String(policy_id).padStart(7, "0");
   };
 
+  const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+
   const columns2 = [
     {
       name: "Policy ID",
@@ -277,7 +280,7 @@ const ApplicableTable = () => {
           {getDisplayPolicyId(row.id) || "N/A"}
         </div>
       ),
-      width: "15%"
+      width: isXs ? "20%" : "15%"
     },
     {
       name: "Document Title",
@@ -387,7 +390,7 @@ const ApplicableTable = () => {
     <ContentBox className="analytics">
       <Card sx={{ px: 1, py: 1, height: "100%", width: "100%" }}>
         <Grid container spacing={2}>
-          <Grid item lg={6} md={6} sm={6} xs={6}>
+          <Grid item lg={6} md={6} sm={6} xs={12}>
             <Typography
               variant="h5"
               sx={{
@@ -402,16 +405,16 @@ const ApplicableTable = () => {
               Policies, SOPs and Guidance notes
             </Typography>
           </Grid>
-          <Grid item lg={6} md={6} sm={6} xs={6}>
+          <Grid item lg={6} md={6} sm={6} xs={12}>
             <Grid
               item
               xs={12}
               sx={{
                 display: "flex",
-                justifyContent: "flex-end",
+                justifyContent: {lg:"flex-end", md:"flex-end", sm:"flex-end", xs:"center"},
                 alignItems: "center",
-                mt: 2,
-                mr: 2
+                mt: {lg: 2, md: 2, sm: 2, xs: 0},
+                mr: {lg: 2, md: 2, sm: 2, xs: 0}
               }}
             >
               <Typography

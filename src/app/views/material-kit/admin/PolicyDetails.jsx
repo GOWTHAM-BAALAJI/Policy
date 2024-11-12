@@ -36,6 +36,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import toast from "react-hot-toast";
 import img1 from "../../../assets/download_file_icon.png";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
+import { useMediaQuery } from '@mui/material';
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "20px",
@@ -112,6 +113,9 @@ export default function PolicyDetails() {
   const getDisplayPolicyId = (policy_id) => {
     return "PL" + String(policy_id).padStart(7, "0");
   };
+
+  const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const isMd = useMediaQuery((theme) => theme.breakpoints.down('md'));
 
   // const reviewersOptions = [
   //     { value:'572', label: 'testUser2' }
@@ -264,6 +268,9 @@ export default function PolicyDetails() {
     latestPolicyLogEntry && latestPolicyLogEntry.approver_id === latestPolicyStatus?.approver_id
       ? latestPolicyLogEntry.remarks.split(":")[1]
       : null;
+  
+  const rejected_by = latestPolicyLogEntry && (latestPolicyLogEntry.approver_id == latestPolicyStatus?.approver_id) ? latestPolicyStatus.approver_details.emp_name : null;
+  console.log("Rejected by ------- ", rejected_by);
 
   useEffect(() => {
     if (selectedDocument && selectedDocument?.status !== undefined) {
@@ -379,6 +386,48 @@ export default function PolicyDetails() {
     });
   };
 
+  const [remarksArray, setRemarksArray] = useState([]);
+  const [groupedFiles, setGroupedFiles] = useState([]);
+  const [groupedFiles1, setGroupedFiles1] = useState([]);
+  useEffect(() => {
+    console.log("before condition")
+    let tempArray = []
+    if (selectedDocument) {
+      selectedDocument.Policy_status_log.forEach((item) => {
+        if (item.version != selectedDocument.version && item.activity == 2) {
+          tempArray.push(`${item.remarks.split(":")[1]}`)
+        }
+      })
+    }
+    setRemarksArray(tempArray);
+    console.log("Remarks array --------- ",tempArray);
+  }, [selectedDocument]);
+
+  useEffect(()=>{
+    if(selectedDocument){
+      const files_arranged = selectedDocument.policy_files
+        .filter(file => file.version !== selectedDocument.version && file.type === 2)
+        .reduce((acc, file) => {
+          if (!acc[file.version]) {
+            acc[file.version] = [];
+          }
+          acc[file.version].push(file);
+          return acc;
+      }, {});
+      setGroupedFiles(files_arranged);
+      const files_arranged1 = selectedDocument.policy_files
+        .filter(file => file.version !== selectedDocument.version && file.type === 1)
+        .reduce((acc, file) => {
+          if (!acc[file.version]) {
+            acc[file.version] = [];
+          }
+          acc[file.version].push(file);
+          return acc;
+      }, {});
+      setGroupedFiles1(files_arranged1);
+    }
+  },[selectedDocument]);
+
   return (
     <ContentBox className="analytics">
       <Card sx={{ px: 3, py: 3, height: "100%", width: "100%" }}>
@@ -404,7 +453,7 @@ export default function PolicyDetails() {
           <Grid
             item
             lg={6}
-            md={6}
+            md={12}
             sm={12}
             xs={12}
             sx={{
@@ -503,293 +552,160 @@ export default function PolicyDetails() {
                           }[selectedDocument.status] || "Unknown"}
                         </TableCell>
                       </TableRow>
+                      {selectedDocument.status == 2 && (
+                      <TableRow>
+                        <TableCell sx={{ pl: 2, width: { lg: "30%", md: "28%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
+                          <b>Rejected by: </b>
+                        </TableCell>
+                        <TableCell sx={{ pl: 2, width: { lg: "70%", md: "72%", sm: "80%", xs: "60%" }, verticalAlign: "top" }}>
+                          {rejected_by}
+                        </TableCell>
+                      </TableRow>
+                      )}
                       {selectedDocument.status == 0 ? (
                         <>
-                          {selectedDocument.policy_files &&
-                          Array.isArray(selectedDocument.policy_files) &&
-                          selectedDocument.policy_files.length > 0 ? (
-                            <>
-                              {selectedDocument.pending_at_id === selectedDocument.initiator_id && (
-                                <>
-                                  <TableRow>
-                                    <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                                      <b>Latest files received for changes</b>
-                                    </TableCell>
-
-                                    <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                                      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                                        <thead>
-                                          <tr>
-                                            <th
-                                              style={{
-                                                width: "15%",
-                                                borderBottom: "1px solid #ddd",
-                                                padding: "8px",
-                                                textAlign: "left"
-                                              }}
-                                            >
-                                              S.no
-                                            </th>
-                                            <th
-                                              style={{
-                                                width: "20%",
-                                                borderBottom: "1px solid #ddd",
-                                                padding: "8px",
-                                                textAlign: "left"
-                                              }}
-                                            >
-                                              File
-                                            </th>
-                                            <th
-                                              style={{
-                                                width: "20%",
-                                                borderBottom: "1px solid #ddd",
-                                                padding: "8px",
-                                                textAlign: "left"
-                                              }}
-                                            >
-                                              Version
-                                            </th>
-                                            <th
-                                              style={{
-                                                width: "25%",
-                                                borderBottom: "1px solid #ddd",
-                                                padding: "8px",
-                                                textAlign: "left"
-                                              }}
-                                            >
-                                              Uploaded On
-                                            </th>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          {selectedDocument.policy_files
-                                            .filter(
-                                              (file) =>
-                                                file.version === selectedDocument.version &&
-                                                file.type === 2
-                                            )
-                                            .map((file, index) => (
-                                              <tr key={index}>
-                                                <td
-                                                  style={{
-                                                    width: "15%",
-                                                    padding: "8px",
-                                                    borderBottom: "1px solid #ddd"
-                                                  }}
-                                                >
-                                                  {index + 1}
-                                                </td>
-                                                <td
-                                                  style={{
-                                                    width: "20%",
-                                                    padding: "8px",
-                                                    borderBottom: "1px solid #ddd"
-                                                  }}
-                                                >
-                                                  <a
-                                                    href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    download
-                                                    style={{ cursor: "pointer" }}
-                                                  >
-                                                    <div className="img-wrapper">
-                                                      <img src={img1} width="45%" alt="" />
-                                                    </div>
-                                                  </a>
-                                                </td>
-                                                <td
-                                                  style={{
-                                                    width: "20%",
-                                                    padding: "8px",
-                                                    borderBottom: "1px solid #ddd"
-                                                  }}
-                                                >
-                                                  {file.version}
-                                                </td>
-                                                <td
-                                                  style={{
-                                                    width: "25%",
-                                                    padding: "8px",
-                                                    borderBottom: "1px solid #ddd"
-                                                  }}
-                                                >
-                                                  {new Date(file.createdAt).toLocaleDateString(
-                                                    "en-GB"
-                                                  )}
-                                                </td>
-                                              </tr>
-                                            ))}
-
-                                          {/* If no files match, display a message */}
-                                          {selectedDocument.policy_files.filter(
+                          <TableRow>
+                            <TableCell sx={{ pt: 3, pl: 2, verticalAlign: "top" }}>
+                              <b>Files</b>
+                            </TableCell>
+                            <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
+                              {selectedDocument.version === "1.0" &&
+                                selectedDocument.pending_at_id ===
+                                selectedDocument.initiator_id && (
+                                  <>
+                                    <Typography
+                                      sx={{ marginBottom: 2, textDecoration: "underline" }}
+                                    >
+                                      <b>Files sent for review :</b>
+                                    </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
+                                    <table
+                                      style={{
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
+                                        borderCollapse: "collapse",
+                                        marginBottom: "20px"
+                                      }}
+                                    >
+                                      <thead>
+                                        <tr>
+                                          <th
+                                            style={{
+                                              width: "15%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            S.no
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            File
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Version
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "25%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Uploaded On
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {selectedDocument.policy_files
+                                          .filter(
                                             (file) =>
                                               file.version === selectedDocument.version &&
                                               file.type === 2
-                                          ).length === 0 && (
-                                            <tr>
+                                          )
+                                          .map((file, index) => (
+                                            <tr key={index}>
                                               <td
-                                                colSpan="4"
-                                                style={{ textAlign: "center", padding: "8px" }}
+                                                style={{
+                                                  width: "15%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
                                               >
-                                                No file found for the selected version and type.
+                                                {index + 1}
+                                              </td>
+                                              <td
+                                                style={{
+                                                  width: "20%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                <a
+                                                  href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  download
+                                                  style={{ cursor: "pointer" }}
+                                                >
+                                                  <div className="img-wrapper">
+                                                    <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
+                                                      <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                    </Box>
+                                                  </div>
+                                                </a>
+                                              </td>
+                                              <td
+                                                style={{
+                                                  width: "20%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                {file.version}
+                                              </td>
+                                              <td
+                                                style={{
+                                                  width: "25%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                {new Date(file.createdAt).toLocaleDateString(
+                                                  "en-GB"
+                                                )}
                                               </td>
                                             </tr>
-                                          )}
-                                        </tbody>
-                                      </table>
-                                    </TableCell>
-                                  </TableRow>
-                                </>
-                              )}
+                                          ))}
+                                      </tbody>
+                                    </table>
+                                    </div>
+                                  </>
+                                )}
 
-                              <TableRow>
-                                <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                                  <b>Latest files uploaded by the initiator</b>
-                                </TableCell>
-                                <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                                    <thead>
-                                      <tr>
-                                        <th
-                                          style={{
-                                            width: "15%",
-                                            borderBottom: "1px solid #ddd",
-                                            padding: "8px",
-                                            textAlign: "left"
-                                          }}
-                                        >
-                                          S.no
-                                        </th>
-                                        <th
-                                          style={{
-                                            width: "20%",
-                                            borderBottom: "1px solid #ddd",
-                                            padding: "8px",
-                                            textAlign: "left"
-                                          }}
-                                        >
-                                          File
-                                        </th>
-                                        <th
-                                          style={{
-                                            width: "20%",
-                                            borderBottom: "1px solid #ddd",
-                                            padding: "8px",
-                                            textAlign: "left"
-                                          }}
-                                        >
-                                          Version
-                                        </th>
-                                        <th
-                                          style={{
-                                            width: "25%",
-                                            borderBottom: "1px solid #ddd",
-                                            padding: "8px",
-                                            textAlign: "left"
-                                          }}
-                                        >
-                                          Uploaded On
-                                        </th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {selectedDocument.policy_files
-                                        .filter(
-                                          (file) =>
-                                            file.version === selectedDocument.version &&
-                                            file.type === 1
-                                        )
-                                        .map((file, index) => (
-                                          <tr key={index}>
-                                            <td
-                                              style={{
-                                                width: "15%",
-                                                padding: "8px",
-                                                borderBottom: "1px solid #ddd"
-                                              }}
-                                            >
-                                              {index + 1}
-                                            </td>
-                                            <td
-                                              style={{
-                                                width: "20%",
-                                                padding: "8px",
-                                                borderBottom: "1px solid #ddd"
-                                              }}
-                                            >
-                                              <a
-                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                download
-                                                style={{ cursor: "pointer" }}
-                                              >
-                                                <div className="img-wrapper">
-                                                  <img src={img1} width="45%" alt="" />
-                                                </div>
-                                              </a>
-                                            </td>
-                                            <td
-                                              style={{
-                                                width: "20%",
-                                                padding: "8px",
-                                                borderBottom: "1px solid #ddd"
-                                              }}
-                                            >
-                                              {file.version}
-                                            </td>
-                                            <td
-                                              style={{
-                                                width: "25%",
-                                                padding: "8px",
-                                                borderBottom: "1px solid #ddd"
-                                              }}
-                                            >
-                                              {new Date(file.createdAt).toLocaleDateString("en-GB")}
-                                            </td>
-                                          </tr>
-                                        ))}
-
-                                      {/* Fallback message if no files match */}
-                                      {selectedDocument.policy_files.filter(
-                                        (file) =>
-                                          file.version === selectedDocument.version &&
-                                          file.type === 1
-                                      ).length === 0 && (
-                                        <tr>
-                                          <td
-                                            colSpan="4"
-                                            style={{ textAlign: "center", padding: "8px" }}
-                                          >
-                                            No file found for the selected version and type.
-                                          </td>
-                                        </tr>
-                                      )}
-                                    </tbody>
-                                  </table>
-                                </TableCell>
-                              </TableRow>
-                            </>
-                          ) : (
-                            <Typography>No files uploaded</Typography>
-                          )}
-                        </>
-                      ) : selectedDocument.status == 2 || selectedDocument.status == 3 ? (
-                        <>
-                          {selectedDocument.policy_files &&
-                          Array.isArray(selectedDocument.policy_files) &&
-                          selectedDocument.policy_files.length > 0 ? (
-                            <>
-                              <TableRow>
-                                <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                                  <b>Received files</b>
-                                </TableCell>
-                                <TableCell sx={{ pl: 2, verticalAlign: "top"}}>
+                              {selectedDocument.version === "1.0" && (
+                                <>
+                                  <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                    <b>Files uploaded by initiator :</b>
+                                  </Typography>
+                                  <div style={{ overflowX: 'auto', width: '100%' }}>
                                   <table
                                     style={{
-                                      width: "100%",
+                                      minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                       borderCollapse: "collapse",
                                       marginBottom: "20px"
                                     }}
@@ -870,7 +786,11 @@ export default function PolicyDetails() {
                                                 download
                                                 style={{ cursor: "pointer" }}
                                               >
-                                                <img src={img1} width="45%" alt="" />
+                                                <div className="img-wrapper">
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
+                                                </div>
                                               </a>
                                             </td>
                                             <td
@@ -895,12 +815,1293 @@ export default function PolicyDetails() {
                                         ))}
                                     </tbody>
                                   </table>
-                                </TableCell>
-                              </TableRow>
-                            </>
-                          ) : (
-                            <Typography>No files uploaded</Typography>
-                          )}
+                                  </div>
+                                </>
+                              )}
+
+                              {selectedDocument.version !== "1.0" &&
+                                selectedDocument.pending_at_id ===
+                                selectedDocument.initiator_id && (
+                                  <>
+                                    <Typography
+                                      sx={{ marginBottom: 2, textDecoration: "underline" }}
+                                    >
+                                      <b>Latest files sent for review :</b>
+                                    </Typography>
+                                    <Typography
+                                      sx={{ marginBottom: 2, textDecoration: "underline" }}
+                                    >
+                                      Remarks :
+                                    </Typography>
+                                    <Typography
+                                      sx={{ marginBottom: 2 }}
+                                    >
+                                      {latest_remarks}
+                                    </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
+                                    <table
+                                      style={{
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
+                                        borderCollapse: "collapse",
+                                        marginBottom: "20px"
+                                      }}
+                                    >
+                                      <thead>
+                                        <tr>
+                                          <th
+                                            style={{
+                                              width: "15%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            S.no
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            File
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Version
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "25%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Uploaded On
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {selectedDocument.policy_files
+                                          .filter(
+                                            (file) =>
+                                              file.version === selectedDocument.version &&
+                                              file.type === 2
+                                          )
+                                          .map((file, index) => (
+                                            <tr key={index}>
+                                              <td
+                                                style={{
+                                                  width: "15%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                {index + 1}
+                                              </td>
+                                              <td
+                                                style={{
+                                                  width: "20%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                <a
+                                                  href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  download
+                                                  style={{ cursor: "pointer" }}
+                                                >
+                                                  <div className="img-wrapper">
+                                                    <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
+                                                      <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                    </Box>
+                                                  </div>
+                                                </a>
+                                              </td>
+                                              <td
+                                                style={{
+                                                  width: "20%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                {file.version}
+                                              </td>
+                                              <td
+                                                style={{
+                                                  width: "25%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                {new Date(file.createdAt).toLocaleDateString(
+                                                  "en-GB"
+                                                )}
+                                              </td>
+                                            </tr>
+                                          ))}
+                                      </tbody>
+                                    </table>
+                                    </div>
+                                  </>
+                                )}
+                              {selectedDocument.version !== "1.0" && (
+                                <>
+                                  <Typography
+                                    sx={{
+                                      marginBottom: 2,
+                                      marginTop: 2,
+                                      textDecoration: "underline"
+                                    }}
+                                  >
+                                    <b>Latest files uploaded by the initiator :</b>
+                                  </Typography>
+                                  <div style={{ overflowX: 'auto', width: '100%' }}>
+                                  <table
+                                    style={{
+                                      minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
+                                      borderCollapse: "collapse",
+                                      marginBottom: "20px"
+                                    }}
+                                  >
+                                    <thead>
+                                      <tr>
+                                        <th
+                                          style={{
+                                            width: "15%",
+                                            borderBottom: "1px solid #ddd",
+                                            padding: "8px",
+                                            textAlign: "left"
+                                          }}
+                                        >
+                                          S.no
+                                        </th>
+                                        <th
+                                          style={{
+                                            width: "20%",
+                                            borderBottom: "1px solid #ddd",
+                                            padding: "8px",
+                                            textAlign: "left"
+                                          }}
+                                        >
+                                          File
+                                        </th>
+                                        <th
+                                          style={{
+                                            width: "20%",
+                                            borderBottom: "1px solid #ddd",
+                                            padding: "8px",
+                                            textAlign: "left"
+                                          }}
+                                        >
+                                          Version
+                                        </th>
+                                        <th
+                                          style={{
+                                            width: "25%",
+                                            borderBottom: "1px solid #ddd",
+                                            padding: "8px",
+                                            textAlign: "left"
+                                          }}
+                                        >
+                                          Uploaded On
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {selectedDocument.policy_files
+                                        .filter(
+                                          (file) =>
+                                            file.version === selectedDocument.version &&
+                                            file.type === 1
+                                        )
+                                        .map((file, index) => (
+                                          <tr key={index}>
+                                            <td
+                                              style={{
+                                                width: "15%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {index + 1}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              <a
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                download
+                                                style={{ cursor: "pointer" }}
+                                              >
+                                                <div className="img-wrapper">
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
+                                                </div>
+                                              </a>
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {file.version}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "25%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {new Date(file.createdAt).toLocaleDateString("en-GB")}
+                                            </td>
+                                          </tr>
+                                        ))}
+                                    </tbody>
+                                  </table>
+                                  </div>
+                                </>
+                              )}
+                              {selectedDocument.version !== "1.0" && (
+                                <>
+                                  <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                    <b>Previous files sent for review :</b>
+                                  </Typography>
+                                  {Object.keys(groupedFiles).map((version, tableIndex) => (
+                                    <>
+                                    <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                      Remarks - Version {version}:
+                                    </Typography>
+                                    <Typography sx={{ marginBottom: 2 }}>
+                                      {remarksArray[tableIndex]}
+                                    </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
+                                    <table
+                                      key={tableIndex}
+                                      style={{
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
+                                        borderCollapse: "collapse",
+                                        marginBottom: "20px"
+                                      }}
+                                    >
+                                      <thead>
+                                        <tr>
+                                          <th
+                                            style={{
+                                              width: "15%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            S.no
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            File
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Version
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "25%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Uploaded On
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {groupedFiles[version].map((file, index) => (
+                                          <tr key={index}>
+                                            <td
+                                              style={{
+                                                width: "15%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {index + 1}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              <a
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                download
+                                                style={{ cursor: "pointer" }}
+                                              >
+                                                <div className="img-wrapper">
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
+                                                </div>
+                                              </a>
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {file.version}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "25%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {new Date(file.createdAt).toLocaleDateString("en-GB")}
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                    </div>
+                                    </>
+                                  ))}
+                                  <Typography
+                                    sx={{
+                                      marginBottom: 2,
+                                      marginTop: 2,
+                                      textDecoration: "underline"
+                                    }}
+                                  >
+                                    <b>Previous files uploaded by the initiator :</b>
+                                  </Typography>
+                                  {Object.keys(groupedFiles1).map((version, tableIndex) => (
+                                    <>
+                                    <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                      Version {version}:
+                                    </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
+                                    <table
+                                      key={tableIndex}
+                                      style={{
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
+                                        borderCollapse: "collapse",
+                                        marginBottom: "20px"
+                                      }}
+                                    >
+                                      <thead>
+                                        <tr>
+                                          <th
+                                            style={{
+                                              width: "15%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            S.no
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            File
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Version
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "25%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Uploaded On
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {groupedFiles1[version].map((file, index) => (
+                                          <tr key={index}>
+                                            <td
+                                              style={{
+                                                width: "15%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {index + 1}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              <a
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                download
+                                                style={{ cursor: "pointer" }}
+                                              >
+                                                <div className="img-wrapper">
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
+                                                </div>
+                                              </a>
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {file.version}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "25%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {new Date(file.createdAt).toLocaleDateString("en-GB")}
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                    </div>
+                                    </>
+                                  ))}
+                                </>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        </>
+                      ) : selectedDocument.status == 2 || selectedDocument.status == 3 ? (
+                        <>
+                          <TableRow>
+                            <TableCell sx={{ pt: 3, pl: 2, verticalAlign: "top" }}>
+                              <b>Files</b>
+                            </TableCell>
+                            <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
+                              {selectedDocument.version === "1.0" &&
+                                selectedDocument.pending_at_id ===
+                                selectedDocument.initiator_id && (
+                                  <>
+                                    <Typography
+                                      sx={{ marginBottom: 2, textDecoration: "underline" }}
+                                    >
+                                      <b>Files sent for review :</b>
+                                    </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
+                                    <table
+                                      style={{
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
+                                        borderCollapse: "collapse",
+                                        marginBottom: "20px"
+                                      }}
+                                    >
+                                      <thead>
+                                        <tr>
+                                          <th
+                                            style={{
+                                              width: "15%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            S.no
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            File
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Version
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "25%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Uploaded On
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {selectedDocument.policy_files
+                                          .filter(
+                                            (file) =>
+                                              file.version === selectedDocument.version &&
+                                              file.type === 2
+                                          )
+                                          .map((file, index) => (
+                                            <tr key={index}>
+                                              <td
+                                                style={{
+                                                  width: "15%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                {index + 1}
+                                              </td>
+                                              <td
+                                                style={{
+                                                  width: "20%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                <a
+                                                  href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  download
+                                                  style={{ cursor: "pointer" }}
+                                                >
+                                                  <div className="img-wrapper">
+                                                    <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
+                                                      <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                    </Box>
+                                                  </div>
+                                                </a>
+                                              </td>
+                                              <td
+                                                style={{
+                                                  width: "20%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                {file.version}
+                                              </td>
+                                              <td
+                                                style={{
+                                                  width: "25%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                {new Date(file.createdAt).toLocaleDateString(
+                                                  "en-GB"
+                                                )}
+                                              </td>
+                                            </tr>
+                                          ))}
+                                      </tbody>
+                                    </table>
+                                    </div>
+                                  </>
+                                )}
+
+                              {selectedDocument.version === "1.0" && (
+                                <>
+                                  <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                    <b>Files uploaded by initiator :</b>
+                                  </Typography>
+                                  <div style={{ overflowX: 'auto', width: '100%' }}>
+                                  <table
+                                    style={{
+                                      minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
+                                      borderCollapse: "collapse",
+                                      marginBottom: "20px"
+                                    }}
+                                  >
+                                    <thead>
+                                      <tr>
+                                        <th
+                                          style={{
+                                            width: "15%",
+                                            borderBottom: "1px solid #ddd",
+                                            padding: "8px",
+                                            textAlign: "left"
+                                          }}
+                                        >
+                                          S.no
+                                        </th>
+                                        <th
+                                          style={{
+                                            width: "20%",
+                                            borderBottom: "1px solid #ddd",
+                                            padding: "8px",
+                                            textAlign: "left"
+                                          }}
+                                        >
+                                          File
+                                        </th>
+                                        <th
+                                          style={{
+                                            width: "20%",
+                                            borderBottom: "1px solid #ddd",
+                                            padding: "8px",
+                                            textAlign: "left"
+                                          }}
+                                        >
+                                          Version
+                                        </th>
+                                        <th
+                                          style={{
+                                            width: "25%",
+                                            borderBottom: "1px solid #ddd",
+                                            padding: "8px",
+                                            textAlign: "left"
+                                          }}
+                                        >
+                                          Uploaded On
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {selectedDocument.policy_files
+                                        .filter(
+                                          (file) =>
+                                            file.version === selectedDocument.version &&
+                                            file.type === 1
+                                        )
+                                        .map((file, index) => (
+                                          <tr key={index}>
+                                            <td
+                                              style={{
+                                                width: "15%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {index + 1}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              <a
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                download
+                                                style={{ cursor: "pointer" }}
+                                              >
+                                                <div className="img-wrapper">
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
+                                                </div>
+                                              </a>
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {file.version}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "25%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {new Date(file.createdAt).toLocaleDateString("en-GB")}
+                                            </td>
+                                          </tr>
+                                        ))}
+                                    </tbody>
+                                  </table>
+                                  </div>
+                                </>
+                              )}
+
+                              {selectedDocument.version !== "1.0" &&
+                                selectedDocument.pending_at_id ===
+                                selectedDocument.initiator_id && (
+                                  <>
+                                    <Typography
+                                      sx={{ marginBottom: 2, textDecoration: "underline" }}
+                                    >
+                                      <b>Latest files sent for review :</b>
+                                    </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
+                                    <table
+                                      style={{
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
+                                        borderCollapse: "collapse",
+                                        marginBottom: "20px"
+                                      }}
+                                    >
+                                      <thead>
+                                        <tr>
+                                          <th
+                                            style={{
+                                              width: "15%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            S.no
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            File
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Version
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "25%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Uploaded On
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {selectedDocument.policy_files
+                                          .filter(
+                                            (file) =>
+                                              file.version === selectedDocument.version &&
+                                              file.type === 2
+                                          )
+                                          .map((file, index) => (
+                                            <tr key={index}>
+                                              <td
+                                                style={{
+                                                  width: "15%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                {index + 1}
+                                              </td>
+                                              <td
+                                                style={{
+                                                  width: "20%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                <a
+                                                  href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  download
+                                                  style={{ cursor: "pointer" }}
+                                                >
+                                                  <div className="img-wrapper">
+                                                    <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
+                                                      <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                    </Box>
+                                                  </div>
+                                                </a>
+                                              </td>
+                                              <td
+                                                style={{
+                                                  width: "20%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                {file.version}
+                                              </td>
+                                              <td
+                                                style={{
+                                                  width: "25%",
+                                                  padding: "8px",
+                                                  borderBottom: "1px solid #ddd"
+                                                }}
+                                              >
+                                                {new Date(file.createdAt).toLocaleDateString(
+                                                  "en-GB"
+                                                )}
+                                              </td>
+                                            </tr>
+                                          ))}
+                                      </tbody>
+                                    </table>
+                                    </div>
+                                  </>
+                                )}
+                              {selectedDocument.version !== "1.0" && (
+                                <>
+                                  <Typography
+                                    sx={{
+                                      marginBottom: 2,
+                                      marginTop: 2,
+                                      textDecoration: "underline"
+                                    }}
+                                  >
+                                    <b>Latest files uploaded by the initiator:</b>
+                                  </Typography>
+                                  <div style={{ overflowX: 'auto', width: '100%' }}>
+                                  <table
+                                    style={{
+                                      minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
+                                      borderCollapse: "collapse",
+                                      marginBottom: "20px"
+                                    }}
+                                  >
+                                    <thead>
+                                      <tr>
+                                        <th
+                                          style={{
+                                            width: "15%",
+                                            borderBottom: "1px solid #ddd",
+                                            padding: "8px",
+                                            textAlign: "left"
+                                          }}
+                                        >
+                                          S.no
+                                        </th>
+                                        <th
+                                          style={{
+                                            width: "20%",
+                                            borderBottom: "1px solid #ddd",
+                                            padding: "8px",
+                                            textAlign: "left"
+                                          }}
+                                        >
+                                          File
+                                        </th>
+                                        <th
+                                          style={{
+                                            width: "20%",
+                                            borderBottom: "1px solid #ddd",
+                                            padding: "8px",
+                                            textAlign: "left"
+                                          }}
+                                        >
+                                          Version
+                                        </th>
+                                        <th
+                                          style={{
+                                            width: "25%",
+                                            borderBottom: "1px solid #ddd",
+                                            padding: "8px",
+                                            textAlign: "left"
+                                          }}
+                                        >
+                                          Uploaded On
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {selectedDocument.policy_files
+                                        .filter(
+                                          (file) =>
+                                            file.version === selectedDocument.version &&
+                                            file.type === 1
+                                        )
+                                        .map((file, index) => (
+                                          <tr key={index}>
+                                            <td
+                                              style={{
+                                                width: "15%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {index + 1}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              <a
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                download
+                                                style={{ cursor: "pointer" }}
+                                              >
+                                                <div className="img-wrapper">
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
+                                                </div>
+                                              </a>
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {file.version}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "25%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {new Date(file.createdAt).toLocaleDateString("en-GB")}
+                                            </td>
+                                          </tr>
+                                        ))}
+                                    </tbody>
+                                  </table>
+                                  </div>
+                                </>
+                              )}
+                              {selectedDocument.version !== "1.0" && (
+                                <>
+                                  <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                    <b>Previous files sent for review :</b>
+                                  </Typography>
+                                  {Object.keys(groupedFiles).map((version, tableIndex) => (
+                                    <>
+                                    <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                      Remarks - Version {version}:
+                                    </Typography>
+                                    <Typography sx={{ marginBottom: 2 }}>
+                                      {remarksArray[tableIndex]}
+                                    </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
+                                    <table
+                                      key={tableIndex}
+                                      style={{
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
+                                        borderCollapse: "collapse",
+                                        marginBottom: "20px"
+                                      }}
+                                    >
+                                      <thead>
+                                        <tr>
+                                          <th
+                                            style={{
+                                              width: "15%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            S.no
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            File
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Version
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "25%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Uploaded On
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {groupedFiles[version].map((file, index) => (
+                                          <tr key={index}>
+                                            <td
+                                              style={{
+                                                width: "15%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {index + 1}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              <a
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                download
+                                                style={{ cursor: "pointer" }}
+                                              >
+                                                <div className="img-wrapper">
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
+                                                </div>
+                                              </a>
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {file.version}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "25%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {new Date(file.createdAt).toLocaleDateString("en-GB")}
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                    </div>
+                                    </>
+                                  ))}
+
+                                  <Typography
+                                    sx={{
+                                      marginBottom: 2,
+                                      marginTop: 2,
+                                      textDecoration: "underline"
+                                    }}
+                                  >
+                                    <b>Previous files uploaded by the initiator :</b>
+                                  </Typography>
+                                  {Object.keys(groupedFiles1).map((version, tableIndex) => (
+                                    <>
+                                    <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                      Version {version}:
+                                    </Typography>
+                                    <div style={{ overflowX: 'auto', width: '100%' }}>
+                                    <table
+                                      key={tableIndex}
+                                      style={{
+                                        minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
+                                        borderCollapse: "collapse",
+                                        marginBottom: "20px"
+                                      }}
+                                    >
+                                      <thead>
+                                        <tr>
+                                          <th
+                                            style={{
+                                              width: "15%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            S.no
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            File
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "20%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Version
+                                          </th>
+                                          <th
+                                            style={{
+                                              width: "25%",
+                                              borderBottom: "1px solid #ddd",
+                                              padding: "8px",
+                                              textAlign: "left"
+                                            }}
+                                          >
+                                            Uploaded On
+                                          </th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        {groupedFiles1[version].map((file, index) => (
+                                          <tr key={index}>
+                                            <td
+                                              style={{
+                                                width: "15%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {index + 1}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              <a
+                                                href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                download
+                                                style={{ cursor: "pointer" }}
+                                              >
+                                                <div className="img-wrapper">
+                                                  <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
+                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                  </Box>
+                                                </div>
+                                              </a>
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "20%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {file.version}
+                                            </td>
+                                            <td
+                                              style={{
+                                                width: "25%",
+                                                padding: "8px",
+                                                borderBottom: "1px solid #ddd"
+                                              }}
+                                            >
+                                              {new Date(file.createdAt).toLocaleDateString("en-GB")}
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                    </div>
+                                    </>
+                                  ))}
+                                </>
+                              )}
+                            </TableCell>
+                          </TableRow>
                         </>
                       ) : (
                         <>
@@ -909,9 +2110,10 @@ export default function PolicyDetails() {
                               <b>Final files</b>
                             </TableCell>
                             <TableCell sx={{ pl: 2, verticalAlign: "top"}}>
+                            <div style={{ overflowX: 'auto', width: '100%' }}>
                               <table
                                 style={{
-                                  width: "100%",
+                                  minWidth: isXs ? "200%" : isMd ? "150%" : "100%",
                                   borderCollapse: "collapse",
                                   marginBottom: "20px"
                                 }}
@@ -987,7 +2189,9 @@ export default function PolicyDetails() {
                                           style={{ cursor: "pointer" }}
                                         >
                                           <div className="img-wrapper">
-                                            <img src={img1} width="45%" alt="" />
+                                            <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
+                                              <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                            </Box>
                                           </div>
                                         </a>
                                       </td>
@@ -1013,6 +2217,7 @@ export default function PolicyDetails() {
                                   ))}
                                 </tbody>
                               </table>
+                              </div>
                             </TableCell>
                           </TableRow>
                         </>
@@ -1023,11 +2228,10 @@ export default function PolicyDetails() {
               </>
             )}
           </Grid>
-          {selectedDocument && (selectedDocument.status == 1 || selectedDocument.status == 3) && (
           <Grid
             item
             lg={5}
-            md={5}
+            md={12}
             sm={12}
             xs={12}
             sx={{
@@ -1038,6 +2242,8 @@ export default function PolicyDetails() {
               marginRight: 2
             }}
           >
+          {selectedDocument && (selectedDocument.status == 1 || selectedDocument.status == 3) && (
+            <>
             <div style={{ marginBottom: "16px" }}>
               <Typography
                 variant="h5"
@@ -1126,8 +2332,9 @@ export default function PolicyDetails() {
             ) : (
               <Typography>Loading...</Typography>
             )}
-          </Grid>
+            </>
           )}
+          </Grid>
         </Grid>
       </Card>
     </ContentBox>
