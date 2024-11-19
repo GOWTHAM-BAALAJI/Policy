@@ -5,11 +5,8 @@ import { setupActivityListeners, clearActivityListeners } from '../redux/idleTim
 import { useDispatch } from 'react-redux';
 import SettingsProvider from "./contexts/SettingsContext";
 import { MatxTheme } from "./components";
-// ROUTES
 import routes from "./routes";
 import { Toaster } from 'react-hot-toast';
-// FAKE SERVER
-// import "../fake-db";
 
 function IdleTimeoutHandler() {
   const dispatch = useDispatch();

@@ -1,151 +1,53 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useForm, Controller } from "react-hook-form";
-import { NavLink, useNavigate } from "react-router-dom";
-import {
-  Autocomplete,
-  Button,
-  Card,
-  Chip,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  ListItemText,
-  MenuItem,
-  FormControl,
-  Grid,
-  IconButton,
-  InputLabel,
-  styled,
-  Select,
-  Typography,
-  TextField
-} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { Button, Card, Checkbox, ListItemText, MenuItem, FormControl, Grid, IconButton, styled, Select, Typography, TextField } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
 const ContentBox = styled("div")(({ theme }) => ({
-  margin: "20px",
+  margin: "15px",
   [theme.breakpoints.down("sm")]: { margin: "16px" }
 }));
 
 const StyledSelect = styled(Select)(() => ({
   width: "100%",
-  height: "30px", // Ensure the select component itself has a defined height
+  height: "30px",
   fontFamily: "sans-serif",
   fontSize: "0.875rem",
   "& .MuiInputBase-root": {
-    height: "30px", // Apply the height to the input base
-    alignItems: "center", // Align the content vertically
+    height: "30px",
+    alignItems: "center",
     fontFamily: "sans-serif",
     fontSize: "1.10rem"
   },
   "& .MuiInputLabel-root": {
-    lineHeight: "30px", // Set the line height to match the height of the input
-    top: "40", // Align the label at the top of the input
-    transform: "none", // Ensure there's no unwanted transformation
-    left: "20px", // Add padding for better spacing
+    lineHeight: "30px",
+    top: "40",
+    transform: "none",
+    left: "20px",
     fontFamily: "sans-serif",
     fontSize: "0.875rem"
   },
   "& .MuiInputLabel-shrink": {
-    top: "-6px" // Move the label when focused or with content
-  }
-}));
-
-const StyledAutocomplete = styled(Autocomplete)(() => ({
-  width: "100%",
-  "& .MuiInputLabel-root": {
-    textAlign: "center",
-    position: "absolute",
-    top: "50%",
-    left: "10px",
-    transform: "translateY(-50%)",
-    fontFamily: "sans-serif",
-    fontSize: "0.875rem",
-    transition: "top 0.2s ease-out, font-size 0.2s ease-out"
-  },
-  "& .MuiInputLabel-shrink": {
-    top: "2px", // Adjust this value to move the label to the border of the box outline
-    fontSize: "0.75rem" // Optional: Reduce font size when the label is shrunk
-  },
-  "& .MuiInputBase-root": {
-    height: 30, // Adjust the height as needed
-    fontFamily: "sans-serif",
-    fontSize: "0.875rem",
-    backgroundColor: "transparent" // Default background color
-  },
-
-  "& .MuiOutlinedInput-root": {
-    position: "relative" // Ensure the label is positioned relative to the input
-  },
-
-  "& .MuiInputBase-input": {
-    backgroundColor: "transparent", // Input remains transparent
-    height: "100%", // Ensure input takes full height
-    boxSizing: "border-box"
-  },
-  // Override focus and auto-fill background colors
-  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-input": {
-    backgroundColor: "transparent" // Remove blue background when focused
-  },
-  "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-input": {
-    backgroundColor: "transparent" // Remove blue background on hover
-  },
-  "& input:-webkit-autofill": {
-    WebkitBoxShadow: "0 0 0 1000px transparent inset", // Remove autofill background
-    transition: "background-color 5000s ease-in-out 0s"
-  },
-  "& input:-webkit-autofill:hover, & input:-webkit-autofill:focus": {
-    WebkitBoxShadow: "0 0 0 1000px transparent inset" // Remove autofill background on hover and focus
-  }
-}));
-
-const CustomDialog = styled(Dialog)(({ theme }) => ({
-  "& .MuiPaper-root": {
-    backgroundColor: "rgb(27,28,54)",
-    color: "white"
-  }
-}));
-
-const CustomDialogTitle = styled(DialogTitle)(({ theme }) => ({
-  color: "white"
-}));
-
-const CustomDialogContent = styled(DialogContent)(({ theme }) => ({
-  color: "white"
-}));
-
-const CustomDialogActions = styled(DialogActions)(({ theme }) => ({
-  "& .MuiButton-root": {
-    color: "white"
+    top: "-6px"
   }
 }));
 
 const InitiatePSG = () => {
-  const {
-    control,
-    setValue,
-    formState: { errors }
-  } = useForm();
+  const { control } = useForm();
   const navigate = useNavigate();
   const customFetchWithAuth=useCustomFetch();
 
   const [documentType, setDocumentType] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [uploadFilename, setUploadFilename] = useState("");
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [uploadFilenames, setUploadFilenames] = useState([]); // Store multiple filenames
-  const [uploadedFiles, setUploadedFiles] = useState([]); // Store multiple file objects
-  const [employeeOptions, setEmployeeOptions] = useState([]);
+  const [uploadFilenames, setUploadFilenames] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [reviewers, setReviewers] = useState([]);
   const [selectedReviewer, setSelectedReviewer] = useState("");
-  const [reviewerId, setReviewerId] = useState("");
   const [approvalMembers, setApprovalMembers] = useState([]);
   const [selectedApprovalMembers, setSelectedApprovalMembers] = useState([]);
   const [priorityOrder, setPriorityOrder] = useState([]);
@@ -155,48 +57,22 @@ const InitiatePSG = () => {
   const [userGroupStoreSum, setUserGroupStoreSum] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogtitle, setDialogTitle] = useState("");
-  const [dialogMessage, setDialogMessage] = useState("");
-
   const types = [
     { value: "1", label: "  Policy" },
     { value: "2", label: "  SOP" },
     { value: "3", label: "  Guidance Note" }
   ];
 
-  // const reviewers = [
-  //     { value:'572', label: 'testUser2' }
-  // ]
-
-  // const approvalMembersOptions = [
-  //     { value: '573', label: 'testUser3' },
-  //     { value: '574', label: 'testUser4' },
-  //     { value: '575', label: 'testUser5' },
-  // ];
-
-  // const userGroupOptions = [
-  //   { value: "1", label: "HO Staff" },
-  //   { value: "2", label: "Field Staff" }
-  //   // { value: '3', label: 'Both' },
-  // ];
-
   const handleSelectChangeApprovalMembers = (event) => {
-    const {
-      target: { value }
-    } = event;
-
-    // Update the selected members state
+    const { target: { value }} = event;
     setSelectedApprovalMembers(value);
-
-    // Update the priority order
-    setPriorityOrder(value); // Set the priority order directly based on the current selection
+    setPriorityOrder(value);
   };
 
   const renderPriorityValue = (selected) => {
     return selected
       .map((val) => {
-        const priority = priorityOrder.indexOf(val) + 1; // Get the priority based on the current order
+        const priority = priorityOrder.indexOf(val) + 1;
         return `${priority}. ${approvalMembers.find((opt) => opt.value === val)?.label}`;
       })
       .join(", ");
@@ -205,10 +81,8 @@ const InitiatePSG = () => {
   const handleCheckboxChange = (optionValue) => {
     setSelectedUserGroup((prevSelected) => {
       const updatedSelection = prevSelected.includes(optionValue)
-        ? prevSelected.filter((item) => item !== optionValue) // Deselect if already selected
-        : [...prevSelected, optionValue]; // Add if not selected
-
-      // Calculate the sum of selected values
+        ? prevSelected.filter((item) => item !== optionValue)
+        : [...prevSelected, optionValue];
       const newTotalValue = updatedSelection.reduce((sum, value) => sum + value, 0);
       setSelectedUserGroupSum(newTotalValue);
       return updatedSelection;
@@ -226,37 +100,24 @@ const InitiatePSG = () => {
       return;
     }
     files.forEach((file) => {
-      setUploadFilenames((prev) => [...prev, file.name]); // Store the filenames in state
-      setUploadedFiles((prev) => [...prev, file]); // Store the file objects
+      setUploadFilenames((prev) => [...prev, file.name]);
+      setUploadedFiles((prev) => [...prev, file]);
     });
   };
 
   const openUploadedFile = (index) => {
     const fileURL = URL.createObjectURL(uploadedFiles[index]);
-    window.open(fileURL); // Open the file in a new tab
+    window.open(fileURL);
   };
 
   const handleRemoveFile = (index) => {
-    setUploadFilenames((prev) => prev.filter((_, i) => i !== index)); // Remove the filename
-    setUploadedFiles((prev) => prev.filter((_, i) => i !== index)); // Remove the file object
-  };
-
-  const handleDialogClose = () => {
-    setDialogOpen(false);
+    setUploadFilenames((prev) => prev.filter((_, i) => i !== index));
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const userToken = useSelector((state) => {
-    return state.token; //.data;
+    return state.token;
   });
-
-  const headers = {
-    Accept: "application/json",
-    "Content-Type": "multipart/form-data",
-    Authorization: "Bearer " + userToken // Ensure userToken is defined
-  };
-  const headerData = {
-    headers: headers
-  };
 
   useEffect(() => {
     const fetchReviewers = async() => {
@@ -314,7 +175,7 @@ const InitiatePSG = () => {
             };
 
             if (!acc[category]) {
-              acc[category] = []; // Initialize array for a new category
+              acc[category] = [];
             }
 
             acc[category].push(option);
@@ -362,20 +223,10 @@ const InitiatePSG = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-
     setIsBtnDisabled(true);
     setTitle(title.trimEnd());
     setDescription(description.trimEnd());
-
-    if (
-      !documentType ||
-      !title ||
-      !description ||
-      uploadedFiles.length === 0 ||
-      !selectedReviewer ||
-      selectedApprovalMembers.length === 0 ||
-      (selectedUserGroup.length === 0 && selectedUserGroupSum === 0)
-    ) {
+    if ( !documentType || !title || !description || uploadedFiles.length === 0 || !selectedReviewer || selectedApprovalMembers.length === 0 || (selectedUserGroup.length === 0 && selectedUserGroupSum === 0) ) {
       toast.error("Please fill in all the required fields");
       setIsBtnDisabled(true);
       setTimeout(() => {
@@ -383,7 +234,6 @@ const InitiatePSG = () => {
       }, 4000);
       return;
     }
-
     if (uploadedFiles.length > 10) {
       toast.error("You can upload a maximum of 10 files only");
       setIsBtnDisabled(true);
@@ -392,10 +242,8 @@ const InitiatePSG = () => {
       }, 4000);
       return;
     }
-
     const maxFileSizeMB = 5;
     const maxFileSizeBytes = maxFileSizeMB * 1024 * 1024;
-
     const oversizedFile = uploadedFiles.some((file) => file.size > maxFileSizeBytes);
     if (oversizedFile) {
       toast.error(`Each file must be smaller than ${maxFileSizeMB} MB`);
@@ -405,42 +253,28 @@ const InitiatePSG = () => {
       }, 4000);
       return;
     }
-    // setDialogTitle("Success");
-    // setDialogMessage("Form submitted successfully");
-    // setDialogOpen(true);
-    // setTimeout(() => {
-    //     navigate('/list/psg');
-    // }, 2000);
-
     const isValidFileFormat = uploadedFiles.every(
       (file) => file.name.endsWith(".doc") || file.name.endsWith(".docx")
     );
-
     if (!isValidFileFormat) {
       toast.error("Please upload only .doc or .docx files");
       setIsBtnDisabled(true);
       setTimeout(() => {
         setIsBtnDisabled(false);
       }, 4000);
-      // setLoading(false);
       return;
     }
-
     const url = "https://policyuat.spandanasphoorty.com/policy_apis/policy/";
     const formData = new FormData();
-
     uploadedFiles.forEach((file) => {
       formData.append("files[]", file);
     });
-
     formData.append("type", documentType);
     formData.append("title", title.trimStart());
     formData.append("description", description.trimStart());
-    // formData.append("files",uploadedFiles);
     formData.append("reviewer_id", selectedReviewer || null);
-    formData.append("approver_ids", JSON.stringify(selectedApprovalMembers || [])); // Convert array to string
+    formData.append("approver_ids", JSON.stringify(selectedApprovalMembers || []));
     formData.append("user_group", selectedUserGroupSum || 0);
-
     const submitPromise = customFetchWithAuth(url, "POST", 3,formData)
       .then((response) => {
         if (!response.ok) {
@@ -465,7 +299,6 @@ const InitiatePSG = () => {
         setLoading(false);
         throw error;
       });
-
     toast.promise(submitPromise, {
       loading: "Submitting...",
       success: (data) => getSuccessMessage(),
@@ -479,16 +312,7 @@ const InitiatePSG = () => {
         <form onSubmit={handleSubmit} encType="multipart/form-data">
           <Grid container spacing={2}>
             <Grid item lg={12} md={12} sm={12} xs={12}>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontFamily: "sans-serif",
-                  fontSize: "1.4rem",
-                  marginLeft: { sm: 2, xs: 2 },
-                  marginTop: { sm: 2, xs: 2 },
-                  marginRight: { sm: 2, xs: 2 }
-                }}
-              >
+              <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "1.4rem", marginLeft: { sm: 2, xs: 2 }, marginTop: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
                 Initiate a Policy, SOP or Guidance note
               </Typography>
             </Grid>
@@ -497,14 +321,7 @@ const InitiatePSG = () => {
                 Fields marked with (<span style={{ color: "red" }}>*</span>) are mandatory
               </span>
             </Grid>
-            <Grid
-              item
-              lg={12}
-              md={12}
-              sm={12}
-              xs={12}
-              sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
-            >
+            <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
@@ -542,14 +359,7 @@ const InitiatePSG = () => {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid
-              item
-              lg={12}
-              md={12}
-              sm={12}
-              xs={12}
-              sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
-            >
+            <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
@@ -562,45 +372,26 @@ const InitiatePSG = () => {
                       <TextField
                         id="title"
                         value={title}
-                        // onChange={(e) => setTitle(e.target.value)}
                         onChange={handleTitleChange}
-                        // multiline
                         rows={1}
                         maxRows={1}
                         variant="outlined"
                         fullWidth
                         placeholder="Enter the title"
-                        // required
                         inputProps={{ maxLength: 100 }}
-                        InputProps={{
-                          style: {
-                            fontFamily: "sans-serif",
-                            fontSize: "0.875rem",
-                            height: "30px"
-                          }
-                        }}
+                        InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: "30px" } }}
                       />
                     </Grid>
                   </Grid>
                   <Grid item xs={12} sx={{ textAlign: "right", marginTop: 1 }}>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
-                    >
+                    <Typography variant="body2" sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}>
                       {title.length}/100 characters
                     </Typography>
                   </Grid>
                 </Grid>
               </Grid>
             </Grid>
-            <Grid
-              item
-              lg={12}
-              md={12}
-              sm={12}
-              xs={12}
-              sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
-            >
+            <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
@@ -620,76 +411,32 @@ const InitiatePSG = () => {
                         variant="outlined"
                         fullWidth
                         placeholder="Enter the description"
-                        // required
                         inputProps={{ maxLength: 1000 }}
-                        InputProps={{
-                          style: {
-                            fontFamily: "sans-serif",
-                            fontSize: "0.875rem"
-                            // height: '30px',
-                          }
-                        }}
+                        InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem" } }}
                       />
                     </Grid>
                   </Grid>
                   <Grid item xs={12} sx={{ textAlign: "right", marginTop: 1 }}>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
-                    >
+                    <Typography variant="body2" sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}>
                       {description.length}/1000 characters
                     </Typography>
                   </Grid>
                 </Grid>
               </Grid>
             </Grid>
-            <Grid
-              item
-              lg={12}
-              md={12}
-              sm={12}
-              xs={12}
-              sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
-            >
+            <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
               <Grid container alignItems="flex-start" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
-                  <Typography
-                    variant="h5"
-                    sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", alignSelf: "flex-start" }} // Adjust lineHeight to match button height
-                  >
+                  <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", alignSelf: "flex-start" }}>
                     Upload <span style={{ color: "red" }}>*</span>
                   </Typography>
-                  <Typography
-                    variant="body2" // Use a smaller variant for the message
-                    sx={{
-                      fontFamily: "sans-serif",
-                      fontSize: "0.7rem",
-                      color: "#666",
-                      marginTop: 0.5
-                    }} // Style the message
-                  >
+                  <Typography variant="body2" sx={{ fontFamily: "sans-serif", fontSize: "0.7rem", color: "#666", marginTop: 0.5 }}>
                     Maximum 10 files allowed
                   </Typography>
-                  <Typography
-                    variant="body2" // Use a smaller variant for the message
-                    sx={{
-                      fontFamily: "sans-serif",
-                      fontSize: "0.7rem",
-                      color: "#666",
-                      marginTop: 0.5
-                    }} // Style the message
-                  >
+                  <Typography variant="body2" sx={{ fontFamily: "sans-serif", fontSize: "0.7rem", color: "#666", marginTop: 0.5 }}>
                     Allowed extension .doc/.docx
                   </Typography>
-                  <Typography
-                    variant="body2" // Use a smaller variant for the message
-                    sx={{
-                      fontFamily: "sans-serif",
-                      fontSize: "0.7rem",
-                      color: "#666",
-                      marginTop: 0.5
-                    }} // Style the message
-                  >
+                  <Typography variant="body2" sx={{ fontFamily: "sans-serif", fontSize: "0.7rem", color: "#666", marginTop: 0.5 }}>
                     Max file size 5Mb
                   </Typography>
                 </Grid>
@@ -698,104 +445,41 @@ const InitiatePSG = () => {
                     <Grid item>
                       <Grid container alignItems="center">
                         <Grid item>
-                          <Button
-                            variant="contained"
-                            component="label"
-                            sx={{
-                              fontFamily: "sans-serif",
-                              fontSize: "0.875rem",
-                              height: "30px",
-                              backgroundColor: "#ee8812",
-                              "&:hover": {
-                                backgroundColor: "rgb(249, 83, 22)"
-                              }
-                            }}
-                          >
+                          <Button variant="contained" component="label" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", height: "30px", backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }}>
                             Upload
                             <input
                               type="file"
                               hidden
                               accept=".doc, .docx"
                               multiple
-                              onChange={(e) => handleFileUpload(e)} // Handle file upload
+                              onChange={(e) => handleFileUpload(e)}
                             />
                           </Button>
                         </Grid>
                       </Grid>
                     </Grid>
-                    {/* Display uploaded filenames below the upload button */}
                     <Grid item>
                       <Grid container direction="column" spacing={0}>
                         {uploadFilenames.map((filename, index) => (
-                          <Grid
-                            item
-                            key={index}
-                            container
-                            alignItems="center"
-                            justifyContent="space-between"
-                            spacing={1}
-                          >
-                            {/* Left side: Filename */}
+                          <Grid item key={index} container alignItems="center" justifyContent="space-between" spacing={1}>
                             <Grid item xs>
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  cursor: "pointer",
-                                  fontFamily: "sans-serif",
-                                  fontSize: "0.875rem",
-                                  overflow: "hidden",
-                                  whiteSpace: "nowrap",
-                                  textOverflow: "ellipsis",
-                                  color:
-                                    filename.slice(-4) == "docx" || filename.slice(-4) == ".doc"
-                                      ? "green"
-                                      : "red"
-                                }}
-                                onClick={() => openUploadedFile(index)} // Open specific file on click
-                              >
+                              <Typography variant="body2" sx={{ cursor: "pointer", fontFamily: "sans-serif", fontSize: "0.875rem", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis", color: filename.slice(-4) == "docx" || filename.slice(-4) == ".doc" ? "green" : "red" }} onClick={() => openUploadedFile(index)}>
                                 {index + 1}.{" "}
                                 {filename.length > 40
                                   ? filename.substring(0, 37) + "... ." + filename.split(".").pop()
                                   : filename}
                               </Typography>
                             </Grid>
-
-                            {/* Right side: Size and Remove Button */}
-                            <Grid
-                              item
-                              container
-                              direction="row"
-                              alignItems="center"
-                              justifyContent="flex-end"
-                              xs
-                            >
-                              <Typography
-                                sx={{
-                                  marginRight: 1,
-                                  color:
-                                    uploadedFiles[index].size >= 5 * 1024 * 1024 ? "red" : "green"
-                                }}
-                              >
+                            <Grid item container direction="row" alignItems="center" justifyContent="flex-end" xs>
+                              <Typography sx={{ marginRight: 1, color: uploadedFiles[index].size >= 5 * 1024 * 1024 ? "red" : "green" }}>
                                 {(uploadedFiles[index].size / (1024 * 1024)).toFixed(2)} MB
                               </Typography>
-                              <IconButton
-                                onClick={() => handleRemoveFile(index)}
-                                aria-label="remove file"
-                                size="small"
-                              >
+                              <IconButton onClick={() => handleRemoveFile(index)} aria-label="remove file" size="small" >
                                 <CloseIcon />
                               </IconButton>
                             </Grid>
-
-                            {/* Horizontal line */}
                             <Grid item xs={12}>
-                              <hr
-                                style={{
-                                  border: "none",
-                                  borderTop: "1px solid #ccc",
-                                  margin: "5px 0"
-                                }}
-                              />
+                              <hr style={{ border: "none", borderTop: "1px solid #ccc", margin: "5px 0" }}/>
                             </Grid>
                           </Grid>
                         ))}
@@ -805,14 +489,7 @@ const InitiatePSG = () => {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid
-              item
-              lg={12}
-              md={12}
-              sm={12}
-              xs={12}
-              sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
-            >
+            <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
@@ -828,7 +505,6 @@ const InitiatePSG = () => {
                         labelId="reviewer-label"
                         id="reviewer"
                         value={selectedReviewer}
-                        // required
                         displayEmpty
                         onChange={(e) => {
                           setSelectedReviewer(e.target.value);
@@ -848,14 +524,7 @@ const InitiatePSG = () => {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid
-              item
-              lg={12}
-              md={12}
-              sm={12}
-              xs={12}
-              sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
-            >
+            <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
@@ -877,8 +546,8 @@ const InitiatePSG = () => {
                               value={selectedApprovalMembers}
                               displayEmpty
                               onChange={(e) => {
-                                handleSelectChangeApprovalMembers(e); // Update local state
-                                field.onChange(e); // Update react-hook-form state
+                                handleSelectChangeApprovalMembers(e);
+                                field.onChange(e);
                               }}
                               renderValue={(selected) => {
                                 if (selected.length === 0) {
@@ -886,22 +555,17 @@ const InitiatePSG = () => {
                                     <span style={{ color: "#bdbdbd" }}>
                                       Select the approval members
                                     </span>
-                                  ); // Placeholder text
+                                  );
                                 }
-                                return renderPriorityValue(selected); // Render selected values
+                                return renderPriorityValue(selected);
                               }}
                             >
                               <MenuItem value="" disabled>
-                                <ListItemText
-                                  style={{ color: "#bdbdbd" }}
-                                  primary="Select the approval members"
-                                />
+                                <ListItemText style={{ color: "#bdbdbd" }} primary="Select the approval members" />
                               </MenuItem>
                               {filteredApprovalMembers.map((member) => (
                                 <MenuItem key={member.value} value={member.value}>
-                                  <Checkbox
-                                    checked={selectedApprovalMembers.indexOf(member.value) > -1}
-                                  />
+                                  <Checkbox checked={selectedApprovalMembers.indexOf(member.value) > -1}/>
                                   <ListItemText
                                     primary={`${
                                       priorityOrder.indexOf(member.value) > -1
@@ -920,14 +584,7 @@ const InitiatePSG = () => {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid
-              item
-              lg={12}
-              md={12}
-              sm={12}
-              xs={12}
-              sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}
-            >
+            <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
@@ -948,7 +605,7 @@ const InitiatePSG = () => {
                               value={selectedUserGroup}
                               multiple
                               displayEmpty
-                              onChange={(e) => field.onChange(selectedUserGroup)} // Pass the current state directly
+                              onChange={(e) => field.onChange(selectedUserGroup)}
                               renderValue={(selected) =>
                                 selected.length > 0 ? (
                                   selected
@@ -965,31 +622,18 @@ const InitiatePSG = () => {
                               }
                             >
                               <MenuItem value="" disabled>
-                                <ListItemText
-                                  style={{ color: "#bdbdbd" }}
-                                  primary="Select a user group"
-                                />
+                                <ListItemText style={{ color: "#bdbdbd" }} primary="Select a user group" />
                               </MenuItem>
                               {Object.entries(userGroupOptions).map(([category, options]) => (
                                 <div key={category}>
-                                  {/* Category Header */}
                                   <MenuItem>
                                     <Typography variant="h8" color="#ee8812" fontWeight="bolder">
                                       {category}
                                     </Typography>
                                   </MenuItem>
-                                  {/* User Group Options */}
                                   {options.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>
-                                      <Checkbox
-                                        sx={{
-                                          "&.Mui-checked": {
-                                            color: "#ee8812" // Change this to your desired color
-                                          }
-                                        }}
-                                        checked={selectedUserGroup.includes(option.value)}
-                                        onChange={() => handleCheckboxChange(option.value)} // Use option.value directly
-                                      />
+                                      <Checkbox sx={{ "&.Mui-checked": { color: "#ee8812" } }} checked={selectedUserGroup.includes(option.value)} onChange={() => handleCheckboxChange(option.value)} />
                                       <ListItemText primary={option.label} />
                                     </MenuItem>
                                   ))}
@@ -1004,44 +648,12 @@ const InitiatePSG = () => {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid
-              container
-              justifyContent="center"
-              alignItems="center"
-              sx={{ marginTop: 1.5, marginBottom: 1.5 }}
-            >
-              <Button
-                type="submit"
-                disabled={isBtnDisabled}
-                variant="contained"
-                sx={{
-                  height: "30px",
-                  fontFamily: "sans-serif",
-                  fontSize: "0.875rem",
-                  backgroundColor: "#ee8812",
-                  "&:hover": { backgroundColor: "rgb(249, 83, 22)" }
-                }}
-              >
+            <Grid container justifyContent="center" alignItems="center" sx={{ marginTop: 1.5, marginBottom: 1.5 }}>
+              <Button type="submit" disabled={isBtnDisabled} variant="contained" sx={{ height: "30px", fontFamily: "sans-serif", fontSize: "0.875rem", backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }}>
                 Submit
               </Button>
             </Grid>
           </Grid>
-          <CustomDialog
-            open={dialogOpen}
-            onClose={handleDialogClose}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-          >
-            <CustomDialogTitle id="alert-dialog-title">{dialogtitle}</CustomDialogTitle>
-            <CustomDialogContent>
-              <Typography id="alert-dialog-description">{dialogMessage}</Typography>
-            </CustomDialogContent>
-            <CustomDialogActions>
-              <Button onClick={handleDialogClose} color="primary">
-                OK
-              </Button>
-            </CustomDialogActions>
-          </CustomDialog>
         </form>
       </Card>
     </ContentBox>

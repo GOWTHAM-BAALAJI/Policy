@@ -5,39 +5,21 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import toast from "react-hot-toast";
-import Profile from "app/views/profile/Profile";
-
-import {
-  Box,
-  styled,
-  Avatar,
-  Hidden,
-  useTheme,
-  MenuItem,
-  IconButton,
-  useMediaQuery
-} from "@mui/material";
-
-// Remove useAuth import and related logic
-// import useAuth from "app/hooks/useAuth";
+import { Box, styled, Avatar, Hidden, useTheme, MenuItem, IconButton, useMediaQuery } from "@mui/material";
 import useSettings from "app/hooks/useSettings";
-
 import { Span } from "app/components/Typography";
 import { MatxMenu, MatxSearchBox } from "app/components";
 import { themeShadows } from "app/components/MatxTheme/themeColors";
-
 import { topBarHeight } from "app/utils/constant";
-
 import { Home, Menu, Person, PowerSettingsNew, Settings } from "@mui/icons-material";
 
-// STYLED COMPONENTS
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
   width: "55px",
   height: "55px",
   borderRadius: "50%",
   color: theme.palette.text.primary,
   "&:hover": {
-    boxShadow: "none" // Remove any default shadow if needed
+    boxShadow: "none"
   }
 }));
 
@@ -75,7 +57,6 @@ const StyledItem = styled(MenuItem)(({ theme }) => ({
   display: "flex",
   alignItems: "flex-end",
   justifyContent: "flex-end",
-  // minWidth: 125,
   "& a": {
     width: "100%",
     display: "flex",
@@ -83,11 +64,6 @@ const StyledItem = styled(MenuItem)(({ theme }) => ({
     textDecoration: "none"
   },
   "& span": { marginRight: "10px", color: theme.palette.text.primary }
-}));
-
-const IconBox = styled("div")(({ theme }) => ({
-  display: "inherit",
-  [theme.breakpoints.down("md")]: { display: "none !important" }
 }));
 
 const Layout1Topbar = () => {
@@ -98,19 +74,16 @@ const Layout1Topbar = () => {
   const [roleId, setRoleId] = useState(null);
   const [userName, setUsername] = useState(null);
   const userToken = useSelector((state) => {
-    return state.token; //.data;
+    return state.token;
   });
-
   const userProfile = useSelector((state) => state.userData);
   const { profile_pic } = userProfile;
   const [profileImage, setProfileImage] = useState("");
   useEffect(() => {
     if (userToken) {
       const decodedToken = jwtDecode(userToken);
-      // Set profile image using decodedToken's profile_pic initially
       setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
     }
-    // If profile_pic exists, override with its value
     if (profile_pic) {
       setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
     }
@@ -126,17 +99,13 @@ const Layout1Topbar = () => {
         if (decodedToken.role_id) {
           setRoleId(decodedToken.role_id);
         }
-        // if (decodedToken.profile_pic) {
-        //   setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
-        // }
       } catch (error) {
         console.error("Error decoding token:", error);
-        setUsername(null); // Reset roleId if decoding fails
+        setUsername(null);
       }
     }
   }, [userToken]);
-  // Remove useAuth hook
-  // const { logout, user } = useAuth();
+  
   const isMdScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const updateSidebarMode = (sidebarSettings) => {

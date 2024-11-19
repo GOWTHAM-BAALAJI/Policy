@@ -1,36 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "@mui/material/styles";
 import ReactEcharts from "echarts-for-react";
-import { useDispatch, useSelector } from "react-redux";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
-export default function DoughnutChart({
-  height = "100%",
-  width = "100%",
-  color = [],
-  selectedTab,
-  onClickSection
-}) {
+export default function DoughnutChart({ height = "100%", width = "100%", selectedTab, onClickSection }) {
   const theme = useTheme();
   const customFetchWithAuth=useCustomFetch();
   const [loading, setLoading] = useState(true);
   const [selectedSection, setSelectedSection] = useState(selectedTab || null);
-
   const [approvedCount, setApprovedCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
   const [waitingForActionCount, setWaitingForActionCount] = useState(0);
-
-  const userToken = useSelector((state) => {
-    return state.token; //.data;
-  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count","GET",1,{});
         const data = await response.json();
-
         if (data && data.status) {
           const approvedCount = data.approved;
           const rejectedCount = data.rejected;
@@ -41,8 +28,6 @@ export default function DoughnutChart({
           setPendingCount(pendingCount || 0);
           setWaitingForActionCount(waitingForActionCount || 0);
         }
-
-        // setPsgList(formattedData);
       } catch (error) {
         console.error("Error fetching data", error);
       } finally {
@@ -67,20 +52,17 @@ export default function DoughnutChart({
       { value: pendingCount, name: "Pending" },
       { value: waitingForActionCount, name: "Waiting for Action" }
     ];
-
     return data.map((item, index) => ({
       ...item,
       itemStyle: {
-        // Keep the original color but apply shadow and pop-out effect for the selected section
         color: colors[index],
-        shadowBlur: item.name === selectedSection ? 15 : 0, // Pop-out effect with shadow for the selected section
+        shadowBlur: item.name === selectedSection ? 15 : 0,
         shadowOffsetX: 0,
-        shadowColor: item.name === selectedSection ? "rgba(0, 0, 0, 0.8)" : "none", // Shadow only for the selected
-        opacity: selectedSection && item.name !== selectedSection ? 0.6 : 1 // Blur (reduce opacity) for unselected sections
+        shadowColor: item.name === selectedSection ? "rgba(0, 0, 0, 0.8)" : "none",
+        opacity: selectedSection && item.name !== selectedSection ? 0.6 : 1
       },
-      // Add radius changes for the pop-out effect
-      selected: item.name === selectedSection, // Mark the section as selected
-      selectedOffset: item.name === selectedSection ? 10 : 0 // Pop out the selected section
+      selected: item.name === selectedSection,
+      selectedOffset: item.name === selectedSection ? 10 : 0
     }));
   };
 
@@ -99,7 +81,6 @@ export default function DoughnutChart({
         fontFamily: "roboto"
       },
       formatter: function (name) {
-        // Define a mapping between section names and their counts
         const counts = {
           Approved: approvedCount,
           Rejected: rejectedCount,
@@ -107,9 +88,8 @@ export default function DoughnutChart({
           "Waiting for Action": waitingForActionCount
         };
 
-        // Display the name along with the count in brackets
         const count = counts[name] || 0;
-        return `${name} (${count})`; // Return the name with the count in brackets
+        return `${name} (${count})`;
       }
     },
     tooltip: { show: false, trigger: "item", formatter: "{a} <br/>{b}: {c} ({d}%)" },
@@ -134,7 +114,7 @@ export default function DoughnutChart({
           emphasis: {
             show: true,
             position: "inside",
-            formatter: "{b} \n{c} ({d}%)", // Show section details inside the slice when clicked
+            formatter: "{b} \n{c} ({d}%)",
             textStyle: { fontSize: "14", fontWeight: "bold", color: "black" }
           }
         },
@@ -161,7 +141,6 @@ export default function DoughnutChart({
       onClickSection(clickedSection);
     }
     const selectedData = option.series[0].data.find((item) => item.name === params.data.name);
-
     if (selectedData) {
       option.series[0].label.normal = {
         show: true,
@@ -169,15 +148,12 @@ export default function DoughnutChart({
         formatter: "Dashboard",
         textStyle: { fontSize: 14, fontWeight: "bold", color: theme.palette.text.secondary }
       };
-
       option.series[0].label.emphasis = {
         show: true,
-        position: "inside", // Keep the info inside the section when clicked (same as hover position)
-        formatter: "{b} \n{c} ({d}%)", // Show section's details on click (name, value, and percentage)
+        position: "inside",
+        formatter: "{b} \n{c} ({d}%)",
         textStyle: { fontSize: "14", fontWeight: "bold", color: "black" }
       };
-
-      // Ensure that emphasis remains on the clicked section (highlighting and shadow)
       selectedData.selected = true;
     }
     option.series[0].data = getSeriesData();
@@ -188,7 +164,7 @@ export default function DoughnutChart({
       style={{ height: height, width: width }}
       option={option}
       onEvents={{
-        click: onChartClick // Register the click event
+        click: onChartClick
       }}
     />
   );

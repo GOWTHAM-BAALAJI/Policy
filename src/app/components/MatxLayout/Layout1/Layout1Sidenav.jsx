@@ -1,16 +1,12 @@
 import { memo } from "react";
 import { Hidden, Switch, Box, styled, useTheme } from "@mui/material";
-
 import useSettings from "app/hooks/useSettings";
-
 import Brand from "app/components/Brand";
 import Sidenav from "app/components/Sidenav";
 import { themeShadows } from "app/components/MatxTheme/themeColors";
-
 import { convertHexToRGB } from "app/utils/utils";
 import { sidenavCompactWidth, sideNavWidth } from "app/utils/constant";
 
-// STYLED COMPONENTS
 const SidebarNavRoot = styled(Box)(({ theme, width, bg, image }) => ({
   position: "fixed",
   top: 0,

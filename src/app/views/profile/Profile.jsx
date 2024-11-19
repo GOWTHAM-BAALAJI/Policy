@@ -1,82 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useForm, Controller } from "react-hook-form";
-import * as Yup from "yup";
-import { LoadingButton } from "@mui/lab";
-import { Formik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import useCustomFetch from "../../hooks/useFetchWithAuth";
-
-import axios from "axios";
-import {
-  Box,
-  Button,
-  Table,
-  TableRow,
-  TableCell,
-  TableBody,
-  TableContainer,
-  // Checkbox,
-  // FormControlLabel,
-  Grid,
-  // Radio,
-  // RadioGroup,
-  styled,
-  TextField as MuiTextField,
-  Select as MuiSelect,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  InputAdornment,
-  Typography,
-  TextField,
-  IconButton
-} from "@mui/material";
+import {Box, Button, Table, TableRow, TableCell, TableBody, Grid, InputAdornment, Typography, TextField, IconButton} from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import { CameraAlt as CameraIcon } from "@mui/icons-material";
-import { Span } from "../../../app/components/Typography";
 import { setUserData } from "../../../redux/actions/userActions";
-// import '../../../src/App.css';
-
-const StyledTextField = styled(MuiTextField)(() => ({
-  width: "100%",
-  marginBottom: "16px",
-  "& .MuiInputLabel-root": {
-    textAlign: "center",
-    position: "absolute",
-    top: "-40%"
-  },
-  "& .MuiInputBase-root": {
-    height: 28 // Adjust the height as needed
-  }
-}));
-
-const validationSchema = Yup.object().shape({
-  oldpw: Yup.string().required("Old Password is required"),
-  newpw: Yup.string().required("New Password is required"),
-  confirmnewpw: Yup.string().required("Confirm New Password is required")
-});
 
 const Profile = () => {
-  const {
-    control,
-    watch,
-    setValue,
-    formState: { errors },
-    reset,
-    // setValue,
-    getValues
-  } = useForm({});
-
   const [showFields, setShowFields] = useState(false);
-
   const handleUpdatePasswordClick = () => {
     setShowFields((prev) => !prev);
   };
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const customFetchWithAuth=useCustomFetch();
@@ -85,50 +23,35 @@ const Profile = () => {
   const userProfile = useSelector((state) => state.userData);
   const { profile_pic } = userProfile;
   const [profileImage, setProfileImage] = useState("");
-
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  // const [profileImage, setProfileImage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [newpassword, setNewPassword] = useState("");
   const [confirmnewpassword, setConfirmNewPassword] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-
   const handleToggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
-
   const [empId, setEmpId] = useState(null);
   const [empName, setEmpName] = useState(null);
   const [empEmail, setEmpEmail] = useState(null);
   const [empMobile, setEmpMobile] = useState(null);
-  const [empDesignation, setEmpDesignation] = useState(null);
-
-  // const userProfile = useSelector((state) => state.userData);
-  // const [profileImage, setProfileImage] = useState(localStorage.getItem('userData.profile_pic') || "");
-
   const userToken = useSelector((state) => {
-    return state.token; //.data;
+    return state.token;
   });
 
   useEffect(() => {
     if (!userToken) {
       navigate("/");
     }
-  }, [userToken]);
+  }, [navigate, userToken]);
 
   useEffect(() => {
     const decodedToken = jwtDecode(userToken);
-    // Set profile image using decodedToken's profile_pic initially
     setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
-
-    // If profile_pic exists, override with its value
     if (profile_pic) {
       setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
     }
@@ -150,9 +73,6 @@ const Profile = () => {
         if (decodedToken.emp_mobile) {
           setEmpMobile(decodedToken.emp_mobile);
         }
-        if (decodedToken.designation) {
-          setEmpDesignation(decodedToken.designation);
-        }
       } catch (error) {
         console.error("Invalid token:", error);
       }
@@ -161,10 +81,7 @@ const Profile = () => {
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-
-    const isValidFileFormat =
-      file.name.endsWith(".jpeg") || file.name.endsWith(".jpg") || file.name.endsWith(".png");
-
+    const isValidFileFormat = file.name.endsWith(".jpeg") || file.name.endsWith(".jpg") || file.name.endsWith(".png");
     if (!isValidFileFormat) {
       toast.error("Please upload only .jpeg, .jpg or .png files");
       setIsBtnDisabled1(true);
@@ -183,7 +100,6 @@ const Profile = () => {
       setStoreImage(imageDataUrl);
     };
     reader.readAsDataURL(file);
-    // }
   };
 
   const [isBtnDisabled1, setIsBtnDisabled1] = useState(false);
@@ -192,7 +108,6 @@ const Profile = () => {
   const handleFileUpload = async (event) => {
     event.preventDefault();
     setLoading(true);
-
     if (!selectedFile) {
       toast.error("Please select a file");
       setIsBtnDisabled1(true);
@@ -201,12 +116,9 @@ const Profile = () => {
       }, 4000);
       return;
     }
-
     const formData = new FormData();
     formData.append("files[]", selectedFile);
-
     const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/updateProfile";
-
     const submitPromise1 = customFetchWithAuth(url,"POST",3,formData)
       .then((response) => {
         return response.json();
@@ -225,7 +137,6 @@ const Profile = () => {
         setIsBtnDisabled1(false);
         setLoading(false);
       });
-
     toast.promise(submitPromise1, {
       loading: "Uploading...",
       success: (data) => `Profile Image Uploaded Successfully`,
@@ -236,7 +147,6 @@ const Profile = () => {
   const handlePasswordUpdate = async (event) => {
     event.preventDefault();
     setLoading(true);
-
     if (!newpassword || !confirmnewpassword) {
       toast.error("Please fill in all the required fields");
       setIsBtnDisabled2(true);
@@ -245,7 +155,6 @@ const Profile = () => {
       }, 4000);
       return;
     }
-
     if (newpassword.length < 6 || confirmnewpassword.length < 6) {
       toast.error("New password must be atleast 6 characters long");
       setIsBtnDisabled2(true);
@@ -254,7 +163,6 @@ const Profile = () => {
       }, 4000);
       return;
     }
-
     if (newpassword !== confirmnewpassword) {
       toast.error("New password must match with Confirm new password");
       setIsBtnDisabled2(true);
@@ -263,12 +171,10 @@ const Profile = () => {
       }, 4000);
       return;
     }
-
     const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/updatePassword";
     const requestData = {
       newPassword: newpassword
     };
-
     const submitPromise2 = customFetchWithAuth(url,"POST",2,JSON.stringify(requestData))
       .then((response) => {
         return response.json();
@@ -288,7 +194,6 @@ const Profile = () => {
         setIsBtnDisabled2(false);
         setLoading(false);
       });
-
     toast.promise(submitPromise2, {
       loading: "Updating...",
       success: (data) => `New password updated successfully`,
@@ -298,45 +203,13 @@ const Profile = () => {
 
   return (
     <>
-      <Grid container sx={{ ml: 0, p: 4, mr: 1 }}>
-        <Grid
-          container
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            maxWidth: '100%'
-          }}
-        >
+      <Grid container sx={{ ml: 0, p: { lg: 4, md: 4, sm: 0, xs: 0}, mr: 1 }}>
+        <Grid container sx={{ display: "flex", justifyContent: "center", alignItems: "center", maxWidth: '100%' }}>
           <Grid item xs={12}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", sm: "column", md: "row", lg: "row" },
-                justifyContent: { md: "space-between", lg: "space-between" },
-                border: "1px solid #e0e0e0",
-                boxShadow: "0px 0px 8px 2px rgba(0, 0, 0, 0.1)",
-                p: 4,
-                textAlign: "center",
-                width: "fit-content",
-                margin: "0 auto",
-                gap: 4
-              }}
-            >
+            <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "column", md: "row", lg: "row" }, justifyContent: { md: "space-between", lg: "space-between" }, border: "1px solid #e0e0e0", boxShadow: "0px 0px 8px 2px rgba(0, 0, 0, 0.1)", p: 4, textAlign: "center", width: "fit-content", margin: "0 auto", gap: 4 }}>
               <form onSubmit={handleFileUpload} encType="multipart/form-data">
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center"
-                  }}
-                >
-                  <Avatar
-                    src={profileImage}
-                    alt="Profile Picture"
-                    sx={{ width: 160, height: 162, borderRadius: "50%", border: "1px solid #000" }}
-                  />
+                <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
+                  <Avatar src={profileImage} alt="Profile Picture" sx={{ width: 160, height: 162, borderRadius: "50%", border: "1px solid #000" }}/>
                   <input
                     accept=".jpeg,.jpg,.png"
                     id="upload-button-file"
@@ -349,34 +222,16 @@ const Profile = () => {
                       <CameraIcon />
                     </IconButton>
                   </label>
-                  <Button
-                    variant="contained"
-                    disabled={isBtnDisabled1}
-                    type="submit"
-                    sx={{
-                      marginTop: 1,
-                      marginBottom: 1,
-                      padding: "4px 8px",
-                      fontSize: "0.75rem",
-                      backgroundColor: "#ee8812",
-                      "&:hover": { backgroundColor: "rgb(249, 83, 22)" }
-                    }}
-                  >
+                  <Button variant="contained" disabled={isBtnDisabled1} type="submit" sx={{ marginTop: 1, marginBottom: 1, padding: "4px 8px", fontSize: "0.75rem", backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }}>
                     Upload
                   </Button>
                   <Grid item xs={12} sx={{ textAlign: "right" }}>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
-                    >
+                    <Typography variant="body2" sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}>
                       Max image size 5MB
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sx={{ textAlign: "right" }}>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}
-                    >
+                    <Typography variant="body2" sx={{ fontFamily: "sans-serif", fontSize: "0.7rem" }}>
                       .jpg/.jpeg/.png allowed
                     </Typography>
                   </Grid>
@@ -388,110 +243,48 @@ const Profile = () => {
                   <TableBody>
                     <TableRow sx={{ display: { xs: "flex", sm: "table-row" }, flexDirection: { xs: "column", sm: "row" } }}>
                       <TableCell>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontFamily: "sans-serif",
-                            fontSize: "0.875rem",
-                            marginRight: { sm: "40px", xs: 0 }
-                          }}
-                        >
+                        <Typography variant="h6" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", marginRight: { sm: "40px", xs: 0 } }}>
                           <b>Employee ID:</b>
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography
-                          variant="h6"
-                          sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}
-                        >
+                        <Typography variant="h6" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                           {empId}
                         </Typography>
                       </TableCell>
                     </TableRow>
                     <TableRow sx={{ display: { xs: "flex", sm: "table-row" }, flexDirection: { xs: "column", sm: "row" }, }}>
                       <TableCell>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontFamily: "sans-serif",
-                            fontSize: "0.875rem",
-                            marginRight: { sm: "40px", xs: 0 },
-                          }}
-                        >
+                        <Typography variant="h6" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", marginRight: { sm: "40px", xs: 0 }, }}>
                           <b>Name:</b>
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography
-                          variant="h6"
-                          sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}
-                        >
+                        <Typography variant="h6" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                           {empName}
                         </Typography>
                       </TableCell>
                     </TableRow>
                     <TableRow sx={{ display: { xs: "flex", sm: "table-row" }, flexDirection: { xs: "column", sm: "row" }, }}>
                       <TableCell>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontFamily: "sans-serif",
-                            fontSize: "0.875rem",
-                            marginRight: { sm: "40px", xs: 0 },
-                          }}
-                        >
-                          <b>Designation:</b>
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography
-                          variant="h6"
-                          sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}
-                        >
-                          {empDesignation}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow sx={{ display: { xs: "flex", sm: "table-row" }, flexDirection: { xs: "column", sm: "row" }, }}>
-                      <TableCell>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontFamily: "sans-serif",
-                            fontSize: "0.875rem",
-                            marginRight: { sm: "40px", xs: 0 },
-                          }}
-                        >
+                        <Typography variant="h6" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", marginRight: { sm: "40px", xs: 0 }, }}>
                           <b>Email:</b>
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography
-                          variant="h6"
-                          sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}
-                        >
+                        <Typography variant="h6" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                           {empEmail}
                         </Typography>
                       </TableCell>
                     </TableRow>
                     <TableRow sx={{ display: { xs: "flex", sm: "table-row" }, flexDirection: { xs: "column", sm: "row" }, }}>
                       <TableCell>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontFamily: "sans-serif",
-                            fontSize: "0.875rem",
-                            marginRight: { sm: "40px", xs: 0 },
-                          }}
-                        >
+                        <Typography variant="h6" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", marginRight: { sm: "40px", xs: 0 }, }}>
                           <b>Mobile:</b>
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography
-                          variant="h6"
-                          sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}
-                        >
+                        <Typography variant="h6" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                           {empMobile}
                         </Typography>
                       </TableCell>
@@ -501,28 +294,8 @@ const Profile = () => {
               </Box>
 
               <form onSubmit={handlePasswordUpdate} encType="multipart/form-data">
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginTop: "50px",
-                    marginRight: "20px",
-                    mt:{md: 8, sm:-3, xs:-2}
-                  }}
-                >
-                  <Button
-                    variant="contained"
-                    sx={{
-                      marginBottom: 2,
-                      padding: "4px 8px",
-                      fontSize: "0.75rem",
-                      backgroundColor: "#ee8812",
-                      "&:hover": { backgroundColor: "rgb(249, 83, 22)" }
-                    }}
-                    onClick={handleUpdatePasswordClick}
-                  >
+                <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", marginTop: "50px", marginRight: "20px", mt:{md: 8, sm:-3, xs:-2} }}>
+                  <Button variant="contained" sx={{ marginBottom: 2, padding: "4px 8px", fontSize: "0.75rem", backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }} onClick={handleUpdatePasswordClick}>
                     Update Password
                   </Button>
                   {showFields && (
@@ -537,20 +310,10 @@ const Profile = () => {
                         value={newpassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder="Enter the new password"
-                        InputProps={{
-                          style: {
-                            fontFamily: "sans-serif",
-                            fontSize: "0.875rem",
-                            height: "30px",
-                            marginBottom: "10px"
-                          },
+                        InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: "30px", marginBottom: "10px" },
                           endAdornment: (
                             <InputAdornment position="end">
-                              <IconButton
-                                onClick={handleTogglePasswordVisibility}
-                                edge="end"
-                                aria-label="toggle password visibility"
-                              >
+                              <IconButton onClick={handleTogglePasswordVisibility} edge="end" aria-label="toggle password visibility">
                                 {showPassword ? <VisibilityOff /> : <Visibility />}
                               </IconButton>
                             </InputAdornment>
@@ -567,37 +330,17 @@ const Profile = () => {
                         value={confirmnewpassword}
                         onChange={(e) => setConfirmNewPassword(e.target.value)}
                         placeholder="Confirm the new password"
-                        InputProps={{
-                          style: {
-                            fontFamily: "sans-serif",
-                            fontSize: "0.875rem",
-                            height: "30px",
-                            marginBottom: "10px"
-                          },
+                        InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: "30px", marginBottom: "10px" },
                           endAdornment: (
                             <InputAdornment position="end">
-                              <IconButton
-                                onClick={handleToggleConfirmPasswordVisibility}
-                                edge="end"
-                                aria-label="toggle password visibility"
-                              >
+                              <IconButton onClick={handleToggleConfirmPasswordVisibility} edge="end" aria-label="toggle password visibility">
                                 {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                               </IconButton>
                             </InputAdornment>
                           )
                         }}
                       />
-                      <Button
-                        variant="contained"
-                        disabled={isBtnDisabled2}
-                        type="submit"
-                        sx={{
-                          padding: "4px 8px",
-                          fontSize: "0.75rem",
-                          backgroundColor: "#ee8812",
-                          "&:hover": { backgroundColor: "rgb(249, 83, 22)" }
-                        }}
-                      >
+                      <Button variant="contained" disabled={isBtnDisabled2} type="submit" sx={{ padding: "4px 8px", fontSize: "0.75rem", backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }}>
                         Submit
                       </Button>
                     </>

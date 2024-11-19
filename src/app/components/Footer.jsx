@@ -1,10 +1,7 @@
-import { AppBar, Button, ThemeProvider, Toolbar, styled, useTheme } from "@mui/material";
-
-import { Paragraph, Span } from "./Typography";
+import { AppBar, ThemeProvider, Toolbar, styled, useTheme } from "@mui/material";
 import useSettings from "app/hooks/useSettings";
 import { topBarHeight } from "app/utils/constant";
 
-// STYLED COMPONENTS
 const AppFooter = styled(Toolbar)(() => ({
   display: "flex",
   alignItems: "center",
@@ -21,8 +18,6 @@ const AppFooter = styled(Toolbar)(() => ({
   },
   backgroundColor: 'white',
   color: 'black',
-  // fontFamily: 'sans-serif',
-  // fontWeight: '500',
   opacity: '1',
   border: '1px solid #e0e0e0',
   boxShadow: '0px 0px 8px 2px rgba(0, 0, 0, 0.1)'
@@ -36,8 +31,6 @@ const FooterContent = styled("div")(() => ({
   maxWidth: "1170px",
   margin: "0 auto",
   opacity: '0.4',
-  // fontWeight: '20',
-  // fontFamily: 'sans-serif',
 }));
 
 export default function Footer() {
@@ -52,12 +45,6 @@ export default function Footer() {
         <AppFooter>
           <FooterContent>
             2024 © Policies & Circulars by Spandana
-
-            {/* <Span m="auto"></Span>
-
-            <Paragraph m={0}>
-              Design and Developed by <a href="http://ui-lib.com">UI Lib</a>
-            </Paragraph> */}
           </FooterContent>
         </AppFooter>
       </AppBar>

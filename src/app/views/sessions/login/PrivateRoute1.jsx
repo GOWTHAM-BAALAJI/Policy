@@ -5,9 +5,8 @@ import { jwtDecode } from "jwt-decode";
 
 const PrivateRoute1 = ({ element }) => {
     const [roleId, setRoleId] = useState(null);
-
     const userToken = useSelector((state)=>{
-        return state.token;//.data;
+        return state.token;
         });
 
     useEffect(() => {
@@ -19,7 +18,7 @@ const PrivateRoute1 = ({ element }) => {
             }
           } catch (error) {
             console.error("Error decoding token:", error);
-            setRoleId(null); // Reset roleId if decoding fails
+            setRoleId(null);
           }
         }
     }, [userToken]);

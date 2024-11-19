@@ -1,14 +1,12 @@
 import { Fragment, useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import Scrollbar from "react-perfect-scrollbar";
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { jwtDecode } from "jwt-decode";
-
 import { MatxVerticalNav } from "app/components";
 import useSettings from "app/hooks/useSettings";
 import { navigations1, navigations2, navigations3 } from "app/navigations";
 
-// STYLED COMPONENTS
 const StyledScrollBar = styled(Scrollbar)(() => ({
   paddingLeft: "1rem",
   paddingRight: "1rem",
@@ -48,7 +46,7 @@ export default function Sidenav({ children }) {
   };
 
   const userToken = useSelector((state)=>{
-    return state.token;//.data;
+    return state.token;
   });
 
   const isAdmin = (role_id) => {
@@ -66,7 +64,7 @@ export default function Sidenav({ children }) {
         }
       } catch (error) {
         console.error("Error decoding token:", error);
-        setRoleId(null); // Reset roleId if decoding fails
+        setRoleId(null);
       }
     }
   }, [userToken]);

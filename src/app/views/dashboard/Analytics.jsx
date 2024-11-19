@@ -1,12 +1,10 @@
 import { Fragment, useState, useEffect } from "react";
-import { Box, Card, Grid, styled, useTheme } from "@mui/material";
+import { Box, Card, Grid, styled } from "@mui/material";
 import DoughnutChart from "./shared/Doughnut";
-import { useDispatch, useSelector } from 'react-redux';
-import { jwtDecode } from "jwt-decode";
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import PolicyList from "../material-kit/list/PolicyList";
 
-// STYLED COMPONENTS
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
   [theme.breakpoints.down("sm")]: { margin: "16px" }
@@ -25,11 +23,9 @@ const SubTitle = styled("span")(({ theme }) => ({
 }));
 
 export default function Analytics() {
-  const { palette } = useTheme();
   const navigate = useNavigate();
-
   const userToken = useSelector((state)=>{
-    return state.token;//.data;
+    return state.token;
     });
 
   useEffect(() => {
@@ -39,13 +35,8 @@ export default function Analytics() {
   }, [userToken]);
 
   const [selectedSection, setSelectedSection] = useState('');
-
   const onClickSection = (section) => {
     setSelectedSection(section);
-  };
-
-  const handleChartClick = (sectionName) => {
-    setSelectedSection(sectionName); // Update state based on the clicked section
   };
 
   const handleTabChange = (tabIndex) => {
@@ -59,7 +50,6 @@ export default function Analytics() {
     setSelectedSection(sectionName);
   };
 
-  // Render the table based on the selected chart section
   const renderTable = () => {
     switch (selectedSection) {
       case 'Approved':
@@ -79,12 +69,10 @@ export default function Analytics() {
     <Fragment>
       <ContentBox className="analytics">
         <Grid container spacing={2}>
-
           <Grid item lg={6} md={12} sm={12} xs={12}>
             <Card sx={{ px: 3, py: 3, minHeight: {lg:'80vh', md:'40vh', sm:'50vh', xs:'60vh', }, height: '100%', width: '100%' }}>
               <Title>Dashboard</Title>
               <SubTitle>Policy, SOP & Guidance Note</SubTitle>
-
               <Box sx={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <DoughnutChart height="100%" width="100%" onClickSection={onClickSection} selectedTab={selectedSection} />
               </Box>

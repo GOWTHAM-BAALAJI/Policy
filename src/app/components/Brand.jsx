@@ -4,10 +4,9 @@ import { Span } from "./Typography";
 import { Link } from 'react-router-dom';
 import img1 from "app/assets/spandana_logo_white.png"
 import useSettings from "app/hooks/useSettings";
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { jwtDecode } from "jwt-decode";
 
-// STYLED COMPONENTS
 const BrandRoot = styled(Box)(() => ({
   display: "flex",
   alignItems: "center",
@@ -31,7 +30,7 @@ export default function Brand({ children }) {
   const [roleId, setRoleId] = useState(null);
 
   const userToken = useSelector((state)=>{
-    return state.token;//.data;
+    return state.token;
     });
 
   useEffect(() => {

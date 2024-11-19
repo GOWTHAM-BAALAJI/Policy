@@ -6,13 +6,11 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
 import { setJwtToken } from "../../../../redux/actions/authActions";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import { IconButton, InputAdornment } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import img1 from "../../../assets/spandana_logo.png";
 import toast from "react-hot-toast";
-import { jwtDecode } from "jwt-decode";
 
 const FlexBox = styled(Box)(() => ({
   display: "flex"
@@ -24,28 +22,23 @@ const StyledRoot = styled("div")(() => ({
   justifyContent: "center",
   backgroundColor: "#fff",
   minHeight: "100vh !important",
-  // boxShadow: "0 16px 60px rgba(0, 0, 0, 0.8)",
-
   "& .card": {
     maxWidth: 800,
     margin: "1rem",
     borderRadius: 12
   },
-
   ".img-wrapper": {
     display: "flex",
-    // padding: "2rem",
     alignItems: "center",
     justifyContent: "center"
   }
 }));
 
-const ContentBox = styled("div")(({ theme }) => ({
+const ContentBox = styled("div")(() => ({
   padding: 32,
   background: "white"
 }));
 
-// initial login credentials
 const initialValues = {
   emailId: "",
   password: "",
@@ -53,7 +46,6 @@ const initialValues = {
   otp: ""
 };
 
-// form field validation schema
 const validationSchema = Yup.object().shape({
   emailId: Yup.string(),
   password: Yup.string().min(6, "Password must be 6 characters long")
@@ -71,24 +63,10 @@ export default function Login() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
-  const [profileImage, setProfileImage] = useState("");
 
   const userToken = useSelector((state) => {
-    return state.token; //.data;
+    return state.token;
   });
-
-  useEffect(() => {
-    if (userToken) {
-      try {
-        const decodedToken = jwtDecode(userToken);
-        if (decodedToken.profile_pic) {
-          setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
-        }
-      } catch (error) {
-        console.error("Invalid token:", error);
-      }
-    }
-  }, [userToken]);
 
   const headers = {
     Accept: "application/json",
@@ -97,7 +75,6 @@ export default function Login() {
     Authorization: "Bearer " + userToken
   };
 
-  // Cooldown timer effect
   useEffect(() => {
     let timer;
     if (resendCooldown > 0) {
@@ -136,16 +113,24 @@ export default function Login() {
       });
 
       const result = await response.json();
-      if (response.ok && result?.status) {
+      if(result?.status == false){
+        if(result.message === "invalid credentials"){
+          toast.error("Invalid employee ID or password");
+          setIsBtnDisabled(true);
+          setTimeout(() => {
+            setIsBtnDisabled(false);
+          }, 4000);
+        } else if(result.message === "account deactivated! , please contact admin"){
+          toast.error("Account deactivated!, Please contact admin");
+          setIsBtnDisabled(true);
+          setTimeout(() => {
+            setIsBtnDisabled(false);
+          }, 4000);
+        }
+      } else{
         setUsername(values.emailId.trim());
         setUserId(result.user_id);
-        setPasswordError(""); // Clear error if login is successful
-      } else {
-        toast.error("Invalid employee ID or password");
-        setIsBtnDisabled(true);
-        setTimeout(() => {
-          setIsBtnDisabled(false);
-        }, 4000);
+        setPasswordError("");
       }
     } catch (error) {
       console.error(error);
@@ -223,14 +208,9 @@ export default function Login() {
         toast.success("Logged in successfully");
         const token = result.jwt;
         // const loggedUser      = result.user_data;
-        // const permissionList  = result.permissionList;
-
         if (token) {
           await dispatch(setJwtToken(token));
           // await dispatch(setUserData(loggedUser));
-          // await dispatch(setPermissionData(permissionList));
-          //await dispatch(setPermissionData(permissionList));
-          // Navigate to dashboard after setting the token
           navigate("/dashboard");
         } else {
           toast.error("Token not found in response.");
@@ -259,9 +239,7 @@ export default function Login() {
   };
 
   const [showPassword, setShowPassword] = useState(false);
-
   const handleClickShowPassword = () => setShowPassword(!showPassword);
-
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
   };
@@ -270,27 +248,12 @@ export default function Login() {
     return (
       <StyledRoot>
         <Card className="card">
-          <Grid
-            container
-            sx={{
-              boxSizing: "border-box",
-              border: "2px solid #e0e0e0",
-              boxShadow: "0px 0px 16px 2px rgba(0, 0, 0, 0.5)"
-            }}
-          >
+          <Grid container sx={{ boxSizing: "border-box", border: "2px solid #e0e0e0", boxShadow: "0px 0px 16px 2px rgba(0, 0, 0, 0.5)" }}>
             <Grid item sm={12} xs={12}>
               <div className="img-wrapper">
                 <img src={img1} width="20%" alt="" />
               </div>
-              <Typography
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  fontSize: "24px",
-                  fontWeight: "bold"
-                }}
-              >
+              <Typography sx={{ display: "flex", justifyContent: "center", alignItems: "center", fontSize: "24px", fontWeight: "bold" }}>
                 Policies & Circulars
               </Typography>
               <ContentBox>
@@ -323,7 +286,7 @@ export default function Login() {
                         fullWidth
                         size="small"
                         name="password"
-                        type={showPassword ? "text" : "password"} // Toggle between text and password
+                        type={showPassword ? "text" : "password"}
                         label="Password"
                         variant="outlined"
                         onBlur={handleBlur}
@@ -331,7 +294,7 @@ export default function Login() {
                         onChange={(e) => {
                           handleChange(e);
                           if (e.target.value.length >= 6) {
-                            setPasswordError(""); // Clear error if password is valid length
+                            setPasswordError("");
                           }
                         }}
                         helperText={passwordError || (touched.password && errors.password)}
@@ -360,32 +323,15 @@ export default function Login() {
 
                       <LoadingButton
                         type="submit"
-                        // color="rgb(238, 136, 18)"
                         fullWidth
                         disabled={isBtnDisabled}
-                        // loading={loading}
                         variant="contained"
-                        sx={{
-                          my: 2,
-                          backgroundColor: "rgb(238, 136, 18)", // Use sx for color
-                          "&:hover": {
-                            backgroundColor: "rgba(235, 127, 2)" // Optional: Adjust hover color
-                          }
-                        }}
+                        sx={{ my: 2, backgroundColor: "rgb(238, 136, 18)", "&:hover": { backgroundColor: "rgba(235, 127, 2)" } }}
                       >
                         Login
                       </LoadingButton>
 
-                      <Typography
-                        sx={{
-                          fontSize: "12px",
-                          fontWeight: 10,
-                          fontFamily: "sans-serif",
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center"
-                        }}
-                      >
+                      <Typography sx={{ fontSize: "12px", fontWeight: 10, fontFamily: "sans-serif", display: "flex", justifyContent: "center", alignItems: "center" }}>
                         © 2024. Policies & Circulars by Spandana
                       </Typography>
                     </form>
@@ -402,27 +348,12 @@ export default function Login() {
   return (
     <StyledRoot>
       <Card className="card">
-        <Grid
-          container
-          sx={{
-            boxSizing: "border-box",
-            border: "2px solid #e0e0e0",
-            boxShadow: "0px 0px 16px 2px rgba(0, 0, 0, 0.5)"
-          }}
-        >
+        <Grid container sx={{ boxSizing: "border-box", border: "2px solid #e0e0e0", boxShadow: "0px 0px 16px 2px rgba(0, 0, 0, 0.5)" }}>
           <Grid item sm={12} xs={12}>
             <div className="img-wrapper">
               <img src={img1} width="20%" alt="" />
             </div>
-            <Typography
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                fontSize: "24px",
-                fontWeight: "bold"
-              }}
-            >
+            <Typography sx={{ display: "flex", justifyContent: "center", alignItems: "center", fontSize: "24px", fontWeight: "bold" }}>
               Policies & Circulars
             </Typography>
             <ContentBox>
@@ -462,20 +393,17 @@ export default function Login() {
                       value={values.otp}
                       onChange={(e) => {
                         let input = e.target.value;
-                        // Allow only digits and enforce maximum length of 4 digits
                         if (/^\d{0,4}$/.test(input)) {
                           handleChange(e);
-                          setPasswordError(""); // Clear error if input is valid
+                          setPasswordError("");
                           if (input.length === 4) {
-                            handleSubmit(); // Trigger form submission
+                            handleSubmit();
                           }
                         } else {
-                          // toast.error("OTP must be exactly 4 digits.");
-                          e.target.value = values.otp; // Revert to the last valid state
+                          e.target.value = values.otp;
                         }
                       }}
                       onKeyPress={(e) => {
-                        // Allow only numeric characters
                         if (!/[\d]/.test(e.key)) {
                           e.preventDefault();
                         }
@@ -485,82 +413,17 @@ export default function Login() {
                       sx={{ mb: 2 }}
                     />
 
-                    <Box
-                      display="flex"
-                      alignItems="flex-end"
-                      justifyContent="flex-end"
-                      sx={{ width: "100%" }}
-                    >
-                      {/* <LoadingButton
-                          type="submit"
-                          // color="primary"
-                          loading={loading}
-                          variant="contained"
-                          sx={{
-                            my: 2,
-                            backgroundColor: "rgb(238, 136, 18)", // Use sx for color
-                            "&:hover": {
-                              backgroundColor: "rgba(235, 127, 2)", // Optional: Adjust hover color
-                            },
-                          }}
-                        >
-                          Verify OTP
-                        </LoadingButton> */}
-
-                      <Typography
-                        component="a"
-                        href="#"
-                        onClick={handleResendOTP}
-                        sx={{
-                          ml: 2, // Optional: Add margin to the left of the Resend OTP link
-                          color: "#ee8812",
-                          fontWeight: "500",
-                          cursor: resendCooldown > 0 ? "not-allowed" : "pointer",
-                          textDecoration: "none", // Optional: Removes underline
-                          "&:hover": {
-                            color:
-                              resendCooldown > 0 ? theme.palette.primary.main : "rgb(249, 83, 22)"
-                          }
-                        }}
-                      >
+                    <Box display="flex" alignItems="flex-end" justifyContent="flex-end" sx={{ width: "100%" }}>
+                      <Typography component="a" href="#" onClick={handleResendOTP} sx={{ ml: 2, color: "#ee8812", fontWeight: "500", cursor: resendCooldown > 0 ? "not-allowed" : "pointer", textDecoration: "none", "&:hover": { color: resendCooldown > 0 ? theme.palette.primary.main : "rgb(249, 83, 22)" } }}>
                         {resendCooldown > 0 ? `Resend OTP (${resendCooldown}s)` : "Resend OTP"}
                       </Typography>
                     </Box>
-                    <Typography
-                      sx={{
-                        fontSize: "12px",
-                        fontWeight: 10,
-                        fontFamily: "sans-serif",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center"
-                      }}
-                    >
+                    <Typography sx={{ fontSize: "12px", fontWeight: 10, fontFamily: "sans-serif", display: "flex", justifyContent: "center", alignItems: "center" }}>
                       © 2024. Policies & Circulars by Spandana
                     </Typography>
                   </form>
                 )}
               </Formik>
-              {/* <CustomDialog
-                  open={dialogOpen}
-                  onClose={handleDialogClose}
-                  aria-labelledby="alert-dialog-title"
-                  aria-describedby="alert-dialog-description"
-                >
-                  <CustomDialogTitle id="alert-dialog-title">
-                    OTP Resend
-                  </CustomDialogTitle>
-                  <CustomDialogContent>
-                    <Typography id="alert-dialog-description">
-                      {dialogMessage}
-                    </Typography>
-                  </CustomDialogContent>
-                  <CustomDialogActions>
-                    <Button onClick={handleDialogClose} color="primary">
-                      OK
-                    </Button>
-                  </CustomDialogActions>
-                </CustomDialog> */}
             </ContentBox>
           </Grid>
         </Grid>

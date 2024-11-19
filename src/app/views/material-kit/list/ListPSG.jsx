@@ -2,12 +2,10 @@ import React, { useState, useEffect } from "react";
 import AddIcon from '@mui/icons-material/Add';
 import { Box, Button, Card, Grid, IconButton, MenuItem, Select, styled, Tabs, Tab, TextField, Typography } from "@mui/material";
 import { useForm, Controller } from 'react-hook-form';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DataTable from 'react-data-table-component';
 import { jwtDecode } from "jwt-decode";
-import axios from 'axios';
-import toast from "react-hot-toast";
 import CloseIcon from '@mui/icons-material/Close';
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
 import { useMediaQuery } from '@mui/material';
@@ -31,97 +29,76 @@ const StyledTextField = styled(TextField)(() => ({
     transition: "top 0.2s ease-out, font-size 0.2s ease-out",
   },
   "& .MuiInputLabel-shrink": {
-    top: "2px", // Adjust this value to move the label to the border of the box outline
-    fontSize: "0.75rem", // Optional: Reduce font size when the label is shrunk
+    top: "2px",
+    fontSize: "0.75rem",
   },
   '& .MuiInputBase-root': {
-    height: 30, // Adjust the height as needed
+    height: 30,
     fontFamily: 'sans-serif',
     fontSize: '0.875rem',
-    backgroundColor: 'transparent', // Default background color
+    backgroundColor: 'transparent',
   },
 
   "& .MuiOutlinedInput-root": {
-    position: "relative", // Ensure the label is positioned relative to the input
+    position: "relative",
   },
 
   "& .MuiInputBase-input": {
-    backgroundColor: "transparent", // Input remains transparent
-    height: "100%", // Ensure input takes full height
+    backgroundColor: "transparent",
+    height: "100%",
     boxSizing: "border-box",
   },
 }));
 
 const StyledSelect = styled(Select)(() => ({
     width: '100%',
-    height: '25px', // Ensure the select component itself has a defined height
+    height: '25px',
     fontFamily: 'sans-serif',
     fontSize: '0.875rem',
     '& .MuiInputBase-root': {
-      height: '30px', // Apply the height to the input base
-      alignItems: 'center', // Align the content vertically
+      height: '30px',
+      alignItems: 'center',
       fontFamily: 'sans-serif',
       fontSize: '1.10rem'
     },
     '& .MuiInputLabel-root': {
-      lineHeight: '30px', // Set the line height to match the height of the input
-      top: '40', // Align the label at the top of the input
-      transform: 'none', // Ensure there's no unwanted transformation
-      left: '20px', // Add padding for better spacing
+      lineHeight: '30px',
+      top: '40',
+      transform: 'none',
+      left: '20px',
       fontFamily: 'sans-serif',
       fontSize: '0.875rem'
     },
     '& .MuiInputLabel-shrink': {
-      top: '-6px', // Move the label when focused or with content
+      top: '-6px',
     },
 }));
-
-const customSort = (data, column, direction) => {
-  return [...data].sort((a, b) => {
-    const aValue = a[column] || ''; // Handle undefined values
-    const bValue = b[column] || ''; // Handle undefined values
-    if (aValue < bValue) {
-      return direction === 'asc' ? -1 : 1;
-    }
-    if (aValue > bValue) {
-      return direction === 'asc' ? 1 : -1;
-    }
-    return 0;
-  });
-};
 
 export default function PSGTable() {
   const { control } = useForm();
   const navigate = useNavigate();
   const location = useLocation();
-
   const queryParams = new URLSearchParams(location.search);
   const initialTab = Number(queryParams.get("tab")) || 4;
-
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [tabledata, setTableData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-
   const customFetchWithAuth=useCustomFetch();
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
     setCurrentPage(1);
-    // fetchData(newValue, currentPage, rowsPerPage);
     handleSearchType(newValue, currentPage, rowsPerPage, searchValue, selectedType);
   };
 
   const [psgList, setPsgList] = useState([]);
   const [userId, setUserId] = useState(null);
   const [roleId, setRoleId] = useState(null);
-
   const [loading, setLoading] = useState(true);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedRow, setSelectedRow] = useState(null);
-  const [sortColumn, setSortColumn] = useState(''); // Column being sorted
+  const [sortColumn, setSortColumn] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
   const [selectedDocument, setSelectedDocument] = useState(null);
-
   const [approvedCount, setApprovedCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
@@ -145,16 +122,10 @@ export default function PSGTable() {
   }, [waitingForActionCount, approvedCount, rejectedCount, pendingCount]);
 
   const [selectedType, setSelectedType] = useState('');
-
   const filteredData = selectedType ? psgList.filter(record => record.type === Number(selectedType)) : psgList;
 
-  const handleSort = (column, sortDirection) => {
-    setSortColumn(column.selector); // Store column to be sorted
-    setSortDirection(sortDirection); // Store sort direction
-  };
-
   const userToken = useSelector((state)=>{
-    return state.token;//.data;
+    return state.token;
   });
 
   useEffect(() => {
@@ -162,7 +133,6 @@ export default function PSGTable() {
       try {
         const response = await customFetchWithAuth('https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count', "GET",1,{});
         const data =await response.json();
-
         if (data && data.status) {
           const approvedCount = data.approved;
           const rejectedCount = data.rejected;
@@ -173,8 +143,6 @@ export default function PSGTable() {
           setPendingCount(pendingCount || 0);
           setWaitingForActionCount(waitingForActionCount || 0);
         }
-
-        // setPsgList(formattedData);
       } catch (error) {
         console.error('Error fetching data', error);
       } finally {
@@ -184,15 +152,13 @@ export default function PSGTable() {
     fetchData();
   }, []);
 
-  const totalLength = approvedCount + rejectedCount + pendingCount + waitingForActionCount;
-
   const fetchData = async (tab, page, rows) => {
     setLoading(true);
     try {
       let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
       const response = await customFetchWithAuth(url,"GET",1,{});
       const data = await response.json();
-      setPsgList(data); // Adjust this based on your API response structure
+      setPsgList(data);
       if (tab == 1){
         setCount(approvedCount || 0);
       }
@@ -214,42 +180,28 @@ export default function PSGTable() {
 
   const [searchValue, setSearchValue] = useState('');
   const [isSearching, setIsSearching] = useState(false);
-
   const handleInputChange = (event) => {
     setSearchValue(event.target.value);
   };
 
-  const [isBtnDisabled, setIsBtnDisabled] = useState(false);
-
   const handleSearchType = async (tab, page, rows, searchValue, selectedType) => {
     setLoading(true);
-
-    setIsBtnDisabled(true);
-        setTimeout(() => {
-            setIsBtnDisabled(false);
-        }, 1000);
-
     setIsSearching(true);
     setSelectedType(selectedType);
-  
     try {
       const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",1,{});
       const data =await response.json();
       setPsgList(data);
   
       const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, "GET",1,{});
-  
       if (!countResponse.status) {
         throw new Error('Failed to fetch count data');
       }
-  
       const countData = await countResponse.json();
-  
       if (tab == 1) setCount(countData.approved);
       if (tab == 2) setCount(countData.rejected);
       if (tab == 3) setCount(countData.pending);
       if (tab == 4) setCount(countData.waitingForAction);
-  
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -259,65 +211,28 @@ export default function PSGTable() {
 
   const handleSearchData = async (tab, page, rows, searchValue, selectedType) => {
     setLoading(true);
-
-    setIsBtnDisabled(true);
-        setTimeout(() => {
-            setIsBtnDisabled(false);
-        }, 1000);
-  
-    // Check for empty search value and return early if invalid
-    // if (!(searchValue.trimStart())) {
-    //   toast.error("Please provide some search words");
-    //   setLoading(false);
-    //   setIsBtnDisabled(true);
-    //     setTimeout(() => {
-    //         setIsBtnDisabled(false);
-    //     }, 1000);
-    //   return;
-    // }
-
     setIsSearching(true);
     setSearchValue(searchValue.trimStart());
-  
     try {
-      // First API call: Fetch data based on searchValue
       const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, "GET",1,{});
       const data = await  response.json();
       setPsgList(data);
   
-      // Second API call: Fetch the count data based on searchValue
       const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",1,{});
-  
       if (!countResponse.status) {
         throw new Error('Failed to fetch count data');
       }
-  
       const countData =await  countResponse.json();
-  
-      // Check tab values and set the count based on the tab
       if (tab == 1) setCount(countData.approved);
       if (tab == 2) setCount(countData.rejected);
       if (tab == 3) setCount(countData.pending);
       if (tab == 4) setCount(countData.waitingForAction);
-  
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
   };  
-
-  const pendingApprover = selectedDocument?.Policy_status?.find(
-    status => status.approver_id === selectedDocument?.pending_at_id
-  );
-
-  // If pendingApprover is not found and pending_at_id is equal to initiator_id, set name to initiator's name
-  const pendingApproverName = pendingApprover 
-      ? pendingApprover.approver_details?.emp_name 
-      : (selectedDocument?.pending_at_id === selectedDocument?.initiator_id 
-          ? 'Initiator' 
-          : 'No pending approver');
-
 
   const getDisplayPolicyId = (policy_id) => {
     return "PL" + String(policy_id).padStart(7, "0");
@@ -330,7 +245,6 @@ export default function PSGTable() {
       name: 'Document ID',
       selector: row => row.id || 'N/A',
       sortable: true,
-      // center: true,
       cell: (row) => (
         <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
           {getDisplayPolicyId(row.id) || 'N/A'}
@@ -342,14 +256,9 @@ export default function PSGTable() {
       name: 'Document Title',
       selector: row => row.title || 'N/A',
       sortable: true,
-      // center: true,
       width: isXs ? '50%' : '40%',
       cell: (row) => (
-        <Typography
-          variant="body2"
-          sx={{ textAlign: 'left', cursor: 'pointer', color: '#ee8812', textDecoration: 'none', paddingLeft: '8px', fontWeight: 'bold', fontSize: '16px' }}
-          onClick={() => handleRowClick(row)}
-        >
+        <Typography variant="body2" sx={{ textAlign: 'left', cursor: 'pointer', color: '#ee8812', textDecoration: 'none', paddingLeft: '8px', fontWeight: 'bold', fontSize: '16px' }} onClick={() => handleRowClick(row)}>
           {row.title}
         </Typography>
       ),
@@ -357,8 +266,6 @@ export default function PSGTable() {
     {
       name: 'Type',
       selector: row => row.type || 'N/A',
-      // sortable: true,
-      // center: true,
       width: '20%',
       cell: (row) => {
         const typeMapping = {
@@ -375,13 +282,12 @@ export default function PSGTable() {
       }
     },
     {
-      name: activeTab == 3 ? 'Pending At' : 'Updated On', // Conditionally render the name
-      selector: row => activeTab == 3 ? row.pending_at_details?.emp_name || 'N/A' : new Date(row.updatedAt).toLocaleDateString() || 'N/A',
+      name: activeTab == 3 ? 'Pending At' : activeTab == 1 ? 'Approved On' : 'Updated On',
       sortable: true,
       cell: (row) => {
         return (
           <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
-            {activeTab == 3 ? (row.pending_at_details?.emp_name || 'N/A') : new Date(row.updatedAt).toLocaleDateString() || 'N/A'}
+            {activeTab == 3 ? (row.pending_at_details?.emp_name || 'N/A') : activeTab == 1 ? new Date(row.policyStatus[0].updatedAt).toLocaleDateString() || 'N/A' : new Date(row.updatedAt).toLocaleDateString() || 'N/A'}
           </div>
         );
       },
@@ -393,24 +299,6 @@ export default function PSGTable() {
     let temp = Number(role_id);
     const bin = temp.toString(2);
     return bin[bin.length - 1] == "1";
-  };
-
-  const isReviewer = (role_id) => {
-    let temp = Number(role_id);
-    const bin = temp.toString(2);
-    return bin[bin.length - 2] == "1";
-  };
-
-  const isApprover = (role_id) => {
-    let temp = Number(role_id);
-    const bin = temp.toString(2);
-    return bin[bin.length - 3] == "1";
-  };
-
-  const isAdmin = (role_id) => {
-    let temp = Number(role_id);
-    const bin = temp.toString(2);
-    return bin[bin.length - 4] == "1";
   };
 
   const columns = columns1;
@@ -425,26 +313,16 @@ export default function PSGTable() {
     }
   };
 
-  // const handlePageChange = (page) => {
-  //   setCurrentPage(page);
-  //   fetchData(activeTab, page, rowsPerPage);
-  // };
-
   const handleRowsPerPageChange = (newRowsPerPage) => {
     if (isSearching) {
       setRowsPerPage(newRowsPerPage);
-      handleSearchData(activeTab, currentPage, newRowsPerPage, searchValue);  // Search API with updated rows per page
+      handleSearchData(activeTab, currentPage, newRowsPerPage, searchValue);
     } else {
       setRowsPerPage(newRowsPerPage);
-      fetchData(activeTab, currentPage, newRowsPerPage);  // Default rows per page change
+      fetchData(activeTab, currentPage, newRowsPerPage);
     }
   };
 
-  // const handleRowsPerPageChange = (newRowsPerPage, page) => {
-  //   setRowsPerPage(newRowsPerPage);
-  //   setCurrentPage(1);
-  //   fetchData(activeTab, 1, newRowsPerPage);
-  // };
   useEffect(() => {
     if (userToken) {
       const decodedToken = jwtDecode(userToken);
@@ -468,12 +346,8 @@ export default function PSGTable() {
   const handleRowClick = (row) => {
     setSelectedDocument(row.title);
     setSelectedRow(row);
-    // setDecision('');
-    // setRemarks('');
-    // setUploadedFile(null);
     navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status, activeTab }});
   };
-
 
   return (
     <ContentBox className="analytics">
@@ -486,22 +360,7 @@ export default function PSGTable() {
       </Grid>
       {(isInitiator(roleId)) && (
         <Grid item lg={3} md={3} sm={6} xs={6} sx={{ml: {sm: 1, xs: 1}}}>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            sx={{
-              fontFamily: 'sans-serif',
-              fontSize: '0.875rem',
-              textTransform: 'none',
-              marginTop: { sm: 2, xs: 2 },
-              height: '25px',
-              backgroundColor: '#ee8812',
-              '&:hover': {
-                backgroundColor: 'rgb(249, 83, 22)', // Optional: Set a different color on hover
-              },
-            }}
-            onClick={() => navigate('/initiate/psg')}
-          >
+          <Button variant="contained" startIcon={<AddIcon />} sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', textTransform: 'none', marginTop: { sm: 2, xs: 2 }, height: '25px', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }} onClick={() => navigate('/initiate/psg')}>
             New
           </Button>
         </Grid>
@@ -522,13 +381,10 @@ export default function PSGTable() {
                 {...field}
                 value={field.value ?? selectedType}
                 displayEmpty
-                sx={{
-                  width: '160px',
-                }}
+                sx={{ width: '160px', }}
                 onChange={(e) => {
                   field.onChange(e);
-                  setSelectedType(e.target.value); // Set the selected type here
-                  // handleSearchType(activeTab, currentPage, rowsPerPage, searchValue, selectedType);
+                  setSelectedType(e.target.value);
                 }}
               >
                 <MenuItem value="">All</MenuItem>
@@ -542,15 +398,7 @@ export default function PSGTable() {
       </Grid>
       <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2, display: 'flex', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }, alignItems: 'center' }}>
       <Box sx={{ overflowX: 'auto', width: '100%' }}>
-        <Tabs
-          value={activeTab}
-          onChange={handleTabChange}
-          textColor="inherit"
-          indicatorColor="secondary"
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{ whiteSpace: 'nowrap' }}
-        >
+        <Tabs value={activeTab} onChange={handleTabChange} textColor="inherit" indicatorColor="secondary" variant="scrollable" scrollButtons="auto" sx={{ whiteSpace: 'nowrap' }}>
           <Tab label="Waiting for Action" value={4} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
           <Tab label="Approved" value={1} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
           <Tab label="Rejected" value={2} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
@@ -559,75 +407,65 @@ export default function PSGTable() {
       </Box>
       </Grid>
       <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
-        <StyledTextField
-          value={searchValue}
-          onChange={handleInputChange}
-          placeholder="Search Policy ID or Title"
-          sx={{ width: '300px', marginRight: 2 }}
-        />
+        <StyledTextField value={searchValue} onChange={handleInputChange} placeholder="Search Policy ID or Title" sx={{ width: '300px', marginRight: 2 }}/>
         {searchValue && (
           <IconButton
             onClick={() => {
-              setSearchValue(''); // Clear the search field
-              setIsSearching(false); // Reset isSearching state
-              fetchData(activeTab, currentPage, rowsPerPage); // Fetch data without search
+              setSearchValue('');
+              setIsSearching(false);
+              fetchData(activeTab, currentPage, rowsPerPage);
             }}
-            sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }} // Adjust for proper spacing
+            sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }}
           >
             <CloseIcon />
           </IconButton>
         )}
-        {/* <Button
-          variant="contained"
-          color="primary"
-          disabled={isBtnDisabled}
-          sx={{ marginTop: -2, textTransform: 'none', height: '30px', backgroundColor: '#ee8812', '&:hover': { backgroundColor: 'rgb(249, 83, 22)', }, }}
-          onClick={() => handleSearchData(activeTab, currentPage, rowsPerPage, searchValue)}
-        >
-          Search
-        </Button> */}
       </Grid>
       <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2 }}>
         <Box width="100%" height="100%" overflow="auto">
-          <DataTable
-            columns={columns}
-            data={filteredData}
-            progressPending={loading}
-            pagination
-            paginationServer
-            paginationTotalRows={count} // Adjust to the total records returned by your API
-            paginationRowsPerPageOptions={[5, 10, 25]}
-            paginationPerPage={rowsPerPage}
-            onChangePage={handlePageChange}
-            onChangeRowsPerPage={handleRowsPerPageChange}
-            customStyles={{
-              table: {
-                style: {
-                  width: '100%',
-                  autowidth: false,
-                  scrollX: true,
-                  responsive: true,
-                  tableLayout: 'fixed',
-                },
-              },
-              headCells: {
-                style: {
-                  fontSize: '0.875rem',
-                  fontFamily: 'sans-serif',
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                },
-              },
-              cells: {
-                style: {
-                  fontFamily: 'sans-serif',
-                  fontSize: '0.875rem',
-                  textAlign: 'center',
-                  padding: '8px',
-                },
-              },
-            }}
-          />
+          <div style={{ overflowX: 'auto', position: 'relative', }}>
+            <div style={{ content: '""', position: 'absolute', bottom: 0, left: 0, width: '100%', height: '1px', backgroundColor: '#ddd', zIndex: 1, transform: 'scaleX(1)', }}/>
+              <DataTable
+                columns={columns}
+                data={filteredData}
+                progressPending={loading}
+                pagination
+                paginationServer
+                paginationTotalRows={count}
+                paginationRowsPerPageOptions={[5, 10, 25]}
+                paginationPerPage={rowsPerPage}
+                onChangePage={handlePageChange}
+                onChangeRowsPerPage={handleRowsPerPageChange}
+                customStyles={{
+                  table: {
+                    style: {
+                      minWidth: isXs ? '130%' : '100%',
+                      width: '100%',
+                      tableLayout: 'fixed',
+                      borderBottom: '1px solid #ddd',
+                    },
+                  },
+                  headCells: {
+                    style: {
+                      fontSize: '0.875rem',
+                      fontFamily: 'sans-serif',
+                      fontWeight: 'bold',
+                      textAlign: 'center',
+                      borderBottom: '1px solid #ddd',
+                    },
+                  },
+                  cells: {
+                    style: {
+                      fontFamily: 'sans-serif',
+                      fontSize: '0.875rem',
+                      textAlign: 'center',
+                      padding: '8px',
+                      borderBottom: '1px solid #ddd',
+                    },
+                  },
+                }}
+              />
+          </div>
         </Box>
       </Grid>
     </Grid>

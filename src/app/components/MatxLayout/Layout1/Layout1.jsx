@@ -2,19 +2,15 @@ import { useEffect, useRef, memo } from "react";
 import { ThemeProvider, useMediaQuery, Box, styled, useTheme } from "@mui/material";
 import Scrollbar from "react-perfect-scrollbar";
 import { Outlet } from "react-router-dom";
-
 import useSettings from "app/hooks/useSettings";
-
 import Layout1Topbar from "./Layout1Topbar";
 import Layout1Sidenav from "./Layout1Sidenav";
-
 import Footer from "app/components/Footer";
 import { MatxSuspense } from "app/components";
 import SidenavTheme from "app/components/MatxTheme/SidenavTheme/SidenavTheme";
 
 import { sidenavCompactWidth, sideNavWidth } from "app/utils/constant";
 
-// STYLED COMPONENTS
 const Layout1Root = styled(Box)(({ theme }) => ({
   display: "flex",
   background: theme.palette.background.default
@@ -62,24 +58,6 @@ const Layout1 = () => {
     return sidenavMode === "close" ? "0px" : (sidenavMode === "full" ? sideNavWidth : sidenavCompactWidth);
   };
 
-  // const getSidenavWidth = () => {
-  //   // Ensure that the width is set to 0 if the sidebar is not shown
-  //   if (!layout1Settings.leftSidebar.show) {
-  //     return "0px"; 
-  //   }
-
-  //   switch (sidenavMode) {
-  //     case "full":
-  //       return sideNavWidth;
-
-  //     case "compact":
-  //       return sidenavCompactWidth;
-
-  //     default:
-  //       return "0px";
-  //   }
-  // };
-
   const sidenavWidth = getSidenavWidth();
   const theme = useTheme();
   const isMdScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -87,24 +65,12 @@ const Layout1 = () => {
   const ref = useRef({ isMdScreen, settings });
   const layoutClasses = `theme-${theme.palette.type}`;
 
-  // useEffect(() => {
-  //   let { settings } = ref.current;
-  //   let sidebarMode = settings.layout1Settings.leftSidebar.mode;
-  //   if (settings.layout1Settings.leftSidebar.show) {
-  //     let mode = "close";
-  //     updateSettings({ layout1Settings: { leftSidebar: { mode } } });
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
-
   useEffect(() => {
     let { settings } = ref.current;
     let sidebarMode = settings.layout1Settings.leftSidebar.mode;
-    // Immediately close the sidebar without showing it
     if (sidebarMode !== "close") {
       updateSettings({ layout1Settings: { leftSidebar: { mode: "close" } } });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -160,7 +126,6 @@ const Layout1 = () => {
         {settings.footer.show && settings.footer.fixed && <Footer />}
       </LayoutContainer>
 
-      {/* {settings.secondarySidebar.show && <SecondarySidebar />} */}
     </Layout1Root>
   );
 };
