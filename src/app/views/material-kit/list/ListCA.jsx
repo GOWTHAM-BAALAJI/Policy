@@ -9,6 +9,7 @@ import { jwtDecode } from "jwt-decode";
 import CloseIcon from "@mui/icons-material/Close";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
 import { useMediaQuery } from '@mui/material';
+import useDebouce from "app/hooks/useDebouce";
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
@@ -90,6 +91,7 @@ export default function CATable() {
   };
 
   const [searchValue, setSearchValue] = useState("");
+  let deboucedSearchValue = useDebouce(searchValue, 200);
   const [isSearching, setIsSearching] = useState(false);
   const handleInputChange = (event) => {
     setSearchValue(event.target.value);
@@ -130,7 +132,6 @@ export default function CATable() {
     {
       name: "Circular ID",
       selector: (row) => row.id || "N/A",
-      sortable: true,
       cell: (row) => (
         <div style={{ textAlign: "left", width: "100%", paddingLeft: "8px" }}>
           {getDisplayCircularId(row.id) || "N/A"}
@@ -141,7 +142,6 @@ export default function CATable() {
     {
       name: "Circular Title",
       selector: (row) => row.title || "N/A",
-      sortable: true,
       width: "25%",
       cell: (row) => (
         <Typography variant="body2" sx={{ textAlign: "left", cursor: "pointer", color: "#ee8812", textDecoration: "none", paddingLeft: "8px", fontWeight: "bold", fontSize: "16px" }} onClick={() => handleRowClick(row)}>
@@ -153,7 +153,6 @@ export default function CATable() {
       name: "Published On",
       selector: row => new Date(row.createdAt).toLocaleDateString() || 'N/A',
       width: isXs ? "25%" : isMd ? "25%" : "17%",
-      sortable: true,
       cell: (row) => {
         return (
           <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
@@ -215,12 +214,18 @@ export default function CATable() {
   }, [userToken, roleId, userId]);
 
   useEffect(() => {
-    fetchData(currentPage, rowsPerPage);
+    if(!isSearching){
+      fetchData(currentPage, rowsPerPage);
+    }
   }, [currentPage, rowsPerPage]);
 
+  // useEffect(() => {
+  //   handleSearchData(currentPage, rowsPerPage, searchValue);
+  // }, [currentPage, rowsPerPage, searchValue]);
+
   useEffect(() => {
-    handleSearchData(currentPage, rowsPerPage, searchValue);
-  }, [currentPage, rowsPerPage, searchValue]);
+    handleSearchData(currentPage, rowsPerPage, deboucedSearchValue);
+  }, [currentPage, rowsPerPage, deboucedSearchValue]);
 
   const handleRowClick = async (row) => {
     setSelectedDocument(row.title);

@@ -9,6 +9,7 @@ import { jwtDecode } from "jwt-decode";
 import CloseIcon from '@mui/icons-material/Close';
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
 import { useMediaQuery } from '@mui/material';
+import useDebouce from "app/hooks/useDebouce";
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
@@ -179,7 +180,9 @@ export default function PSGTable() {
   };
 
   const [searchValue, setSearchValue] = useState('');
+  let deboucedSearchValue = useDebouce(searchValue, 200);
   const [isSearching, setIsSearching] = useState(false);
+  const [isSelectingType, setIsSelectingType] = useState(false);
   const handleInputChange = (event) => {
     setSearchValue(event.target.value);
   };
@@ -187,6 +190,7 @@ export default function PSGTable() {
   const handleSearchType = async (tab, page, rows, searchValue, selectedType) => {
     setLoading(true);
     setIsSearching(true);
+    setIsSelectingType(true);
     setSelectedType(selectedType);
     try {
       const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",1,{});
@@ -244,7 +248,6 @@ export default function PSGTable() {
     {
       name: 'Document ID',
       selector: row => row.id || 'N/A',
-      sortable: true,
       cell: (row) => (
         <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
           {getDisplayPolicyId(row.id) || 'N/A'}
@@ -255,7 +258,6 @@ export default function PSGTable() {
     {
       name: 'Document Title',
       selector: row => row.title || 'N/A',
-      sortable: true,
       width: isXs ? '50%' : '40%',
       cell: (row) => (
         <Typography variant="body2" sx={{ textAlign: 'left', cursor: 'pointer', color: '#ee8812', textDecoration: 'none', paddingLeft: '8px', fontWeight: 'bold', fontSize: '16px' }} onClick={() => handleRowClick(row)}>
@@ -283,11 +285,10 @@ export default function PSGTable() {
     },
     {
       name: activeTab == 3 ? 'Pending At' : activeTab == 1 ? 'Approved On' : 'Updated On',
-      sortable: true,
       cell: (row) => {
         return (
           <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
-            {activeTab == 3 ? (row.pending_at_details?.emp_name || 'N/A') : activeTab == 1 ? new Date(row.policyStatus[0].updatedAt).toLocaleDateString() || 'N/A' : new Date(row.updatedAt).toLocaleDateString() || 'N/A'}
+            {activeTab == 3 ? (row.pending_at_details?.emp_name || 'N/A') : activeTab == 1 ? new Date(row.approvedAt).toLocaleDateString() || 'N/A' : new Date(row.updatedAt).toLocaleDateString() || 'N/A'}
           </div>
         );
       },
@@ -304,9 +305,9 @@ export default function PSGTable() {
   const columns = columns1;
 
   const handlePageChange = (newPage) => {
-    if (isSearching) {
+    if (isSearching || isSelectingType) {
       setCurrentPage(newPage);
-      handleSearchData(activeTab, newPage, rowsPerPage, searchValue);
+      handleSearchType(activeTab, newPage, rowsPerPage, searchValue, selectedType);
     } else {
       setCurrentPage(newPage);
       fetchData(activeTab, newPage, rowsPerPage);
@@ -314,9 +315,9 @@ export default function PSGTable() {
   };
 
   const handleRowsPerPageChange = (newRowsPerPage) => {
-    if (isSearching) {
+    if (isSearching || isSelectingType) {
       setRowsPerPage(newRowsPerPage);
-      handleSearchData(activeTab, currentPage, newRowsPerPage, searchValue);
+      handleSearchType(activeTab, currentPage, newRowsPerPage, searchValue, selectedType);
     } else {
       setRowsPerPage(newRowsPerPage);
       fetchData(activeTab, currentPage, newRowsPerPage);
@@ -336,12 +337,18 @@ export default function PSGTable() {
   }, [userToken, roleId, userId]);
 
   useEffect(() => {
-    fetchData(activeTab, currentPage, rowsPerPage);
+    if(!isSearching){
+      fetchData(activeTab, currentPage, rowsPerPage);
+    }
   }, [activeTab, currentPage, rowsPerPage]);
 
+  // useEffect(() => {
+  //   handleSearchType(activeTab, currentPage, rowsPerPage, searchValue, selectedType);
+  // }, [selectedType, activeTab, currentPage, rowsPerPage, searchValue]);
+
   useEffect(() => {
-    handleSearchType(activeTab, currentPage, rowsPerPage, searchValue, selectedType);
-  }, [selectedType, activeTab, currentPage, rowsPerPage, searchValue]);
+    handleSearchType(activeTab, currentPage, rowsPerPage, deboucedSearchValue, selectedType);
+  }, [selectedType, activeTab, currentPage, rowsPerPage, deboucedSearchValue]);
 
   const handleRowClick = (row) => {
     setSelectedDocument(row.title);
@@ -407,7 +414,7 @@ export default function PSGTable() {
       </Box>
       </Grid>
       <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
-        <StyledTextField value={searchValue} onChange={handleInputChange} placeholder="Search Policy ID or Title" sx={{ width: '300px', marginRight: 2 }}/>
+        <StyledTextField value={searchValue} onChange={handleInputChange} placeholder="Search Document ID or Title" sx={{ width: '300px', marginRight: 2 }}/>
         {searchValue && (
           <IconButton
             onClick={() => {
@@ -427,7 +434,7 @@ export default function PSGTable() {
             <div style={{ content: '""', position: 'absolute', bottom: 0, left: 0, width: '100%', height: '1px', backgroundColor: '#ddd', zIndex: 1, transform: 'scaleX(1)', }}/>
               <DataTable
                 columns={columns}
-                data={filteredData}
+                data={psgList}
                 progressPending={loading}
                 pagination
                 paginationServer

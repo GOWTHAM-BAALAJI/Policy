@@ -12,6 +12,8 @@ const Admin = Loadable(lazy(() => import("./admin/AdminPage")));
 const AdminPolicyDetails = Loadable(lazy(() => import("./admin/PolicyDetails")));
 const AdminUserDetails = Loadable(lazy(() => import("./admin/UserDetails")));
 const AdminAddUser = Loadable(lazy(() => import("./admin/AddNewUser")));
+const AdminAddExistingPolicy = Loadable(lazy(() => import("./admin/AddExistingPolicy")));
+const AdminAddExistingCircular = Loadable(lazy(() => import("./admin/AddExistingCircular")));
 
 const materialRoutes = [
   { path: "/initiate/psg", element: <PrivateRoute element={<InitiatePSG />} /> },
@@ -24,6 +26,8 @@ const materialRoutes = [
   { path: "/admin/user/:user_id", element: <PrivateRoute element={<AdminUserDetails />} /> },
   { path: "/admin/policy/:id", element: <PrivateRoute element={<AdminPolicyDetails />} /> },
   { path: "/admin/user/add", element: <PrivateRoute element={<AdminAddUser />} /> },
+  { path: "/admin/policy/add", element: <PrivateRoute element={<AdminAddExistingPolicy />} /> },
+  { path: "/admin/circular/add", element: <PrivateRoute element={<AdminAddExistingCircular />} /> },
 ];
 
 export default materialRoutes;

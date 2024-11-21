@@ -7,6 +7,7 @@ import DataTable from "react-data-table-component";
 import { jwtDecode } from "jwt-decode";
 import CloseIcon from "@mui/icons-material/Close";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
+import useDebouce from "app/hooks/useDebouce";
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
@@ -99,22 +100,22 @@ const ApplicableTable = () => {
     return state.token;
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true", "GET", 1, {});
-        const data = await response.json();
-        if (data && data.status) {
-          setCount(data.count);
-        }
-      } catch (error) {
-        console.error("Error fetching data", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true", "GET", 1, {});
+  //       const data = await response.json();
+  //       if (data && data.status) {
+  //         setCount(data.count);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching data", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
 
   const fetchData = async (page, rows) => {
     setLoading(true);
@@ -123,6 +124,12 @@ const ApplicableTable = () => {
       const response = await customFetchWithAuth(url, "GET", 1, {});
       const data = await response.json();
       setPsgList2(data);
+
+      const count_response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true", "GET", 1, {});
+      const count_data = await count_response.json();
+      if (count_data && count_data.status) {
+        setCount(count_data.count);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -131,7 +138,9 @@ const ApplicableTable = () => {
   };
 
   useEffect(() => {
-    fetchData(currentPage, rowsPerPage);
+    if(!isSearching){
+      fetchData(currentPage, rowsPerPage);
+    }
   }, [currentPage, rowsPerPage]);
 
   useEffect(() => {
@@ -147,6 +156,8 @@ const ApplicableTable = () => {
   }, [userToken, roleId, userId]);
 
   const [searchValue, setSearchValue] = useState("");
+  let deboucedSearchValue = useDebouce(searchValue, 200);
+
   const [isSearching, setIsSearching] = useState(false);
   const handleInputChange = (event) => {
     setSearchValue(event.target.value);
@@ -163,7 +174,7 @@ const ApplicableTable = () => {
       setPsgList2(data);
 
       const countResponse = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, "GET", 1, {});
+        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true&search=${searchValue}&type=${selectedType}`, "GET", 1, {});
       if (!countResponse.ok) {
         throw new Error("Failed to fetch count data");
       }
@@ -209,7 +220,6 @@ const ApplicableTable = () => {
     {
       name: "Document ID",
       selector: (row) => row.id || "N/A",
-      sortable: true,
       cell: (row) => (
         <div style={{ textAlign: "left", width: "100%", paddingLeft: "8px" }}>
           {getDisplayPolicyId(row.id) || "N/A"}
@@ -220,7 +230,6 @@ const ApplicableTable = () => {
     {
       name: "Document Title",
       selector: (row) => row.title || "N/A",
-      sortable: true,
       width: "25%",
       cell: (row) => (
         <Typography
@@ -259,11 +268,10 @@ const ApplicableTable = () => {
     {
       name: "Approved On",
       width: "20%",
-      sortable: true,
       cell: (row) => {
         return (
           <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
-            {new Date(row.Policy_status.sort((a,b)=>b.updatedAt-a.updatedAt)[0].updatedAt).toLocaleDateString() || 'N/A'}
+            {new Date(row.approvedAt).toLocaleDateString() || 'N/A'}
           </div>
         );
       },
@@ -280,14 +288,46 @@ const ApplicableTable = () => {
     }
   ];
 
+  // useEffect(() => {
+  //   handleSearchType(currentPage, rowsPerPage, searchValue, selectedType);
+  // }, [selectedType, currentPage, rowsPerPage, searchValue]);
+
+  // const handlePageChange = (newPage) => {
+  //   if (isSearching) {
+  //     setCurrentPage(newPage);
+  //     handleSearchData(newPage, rowsPerPage, searchValue);
+  //   } else {
+  //     setCurrentPage(newPage);
+  //     fetchData(newPage, rowsPerPage);
+  //   }
+  // };
+
+  // const handleRowsPerPageChange = (newRowsPerPage) => {
+  //   if (isSearching) {
+  //     setRowsPerPage(newRowsPerPage);
+  //     handleSearchData(currentPage, newRowsPerPage, searchValue);
+  //   } else {
+  //     setRowsPerPage(newRowsPerPage);
+  //     fetchData(currentPage, newRowsPerPage);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if(isSearching){
+  //     handleSearchType(currentPage, rowsPerPage, deboucedSearchValue, selectedType);
+  //   } else{
+  //     fetchData(currentPage, rowsPerPage);
+  //   }
+  // }, [selectedType, currentPage, rowsPerPage, deboucedSearchValue]);
+
   useEffect(() => {
-    handleSearchType(currentPage, rowsPerPage, searchValue, selectedType);
-  }, [selectedType, currentPage, rowsPerPage, searchValue]);
+    handleSearchType(currentPage, rowsPerPage, deboucedSearchValue, selectedType);
+  }, [selectedType, currentPage, rowsPerPage, deboucedSearchValue]);
 
   const handlePageChange = (newPage) => {
     if (isSearching) {
       setCurrentPage(newPage);
-      handleSearchData(newPage, rowsPerPage, searchValue);
+      handleSearchType(newPage, rowsPerPage, deboucedSearchValue, selectedType);
     } else {
       setCurrentPage(newPage);
       fetchData(newPage, rowsPerPage);
@@ -297,7 +337,7 @@ const ApplicableTable = () => {
   const handleRowsPerPageChange = (newRowsPerPage) => {
     if (isSearching) {
       setRowsPerPage(newRowsPerPage);
-      handleSearchData(currentPage, newRowsPerPage, searchValue);
+      handleSearchType(currentPage, newRowsPerPage, deboucedSearchValue, selectedType);
     } else {
       setRowsPerPage(newRowsPerPage);
       fetchData(currentPage, newRowsPerPage);
@@ -351,7 +391,7 @@ const ApplicableTable = () => {
             </Grid>
           </Grid>
           <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: "flex", alignItems: "center" }}>
-            <StyledTextField value={searchValue} onChange={handleInputChange} placeholder="Search Policy ID or Title" sx={{ width: "300px", marginRight: 2 }}/>
+            <StyledTextField value={searchValue} onChange={handleInputChange} placeholder="Search Document ID or Title" sx={{ width: "300px", marginRight: 2 }} />
             {searchValue && (
               <IconButton
                 onClick={() => {
@@ -368,7 +408,7 @@ const ApplicableTable = () => {
           <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2 }}>
             <Box width="100%" overflow="auto">
               <div style={{ overflowX: 'auto', position: 'relative', }}>
-                <div style={{ content: '""', position: 'absolute', bottom: 0, left: 0, width: '100%', height: '1px', backgroundColor: '#ddd', zIndex: 1, transform: 'scaleX(1)', }}/>
+                <div style={{ content: '""', position: 'absolute', bottom: 0, left: 0, width: '100%', height: '1px', backgroundColor: '#ddd', zIndex: 1, transform: 'scaleX(1)', }} />
                 <DataTable
                   columns={columns2}
                   data={psgList2}

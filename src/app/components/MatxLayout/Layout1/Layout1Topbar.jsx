@@ -168,17 +168,17 @@ const Layout1Topbar = () => {
             <Box
               sx={{
                 minWidth: "100%",
-                width: "auto",
+                width: "100%",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "flex-end",
-                alignItems: "flex-end"
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
               <StyledItem>
                 <Link to="/profile">
                   <Person />
-                  <Span sx={{ ml: "2px" }}>Profile</Span>
+                  <Span sx={{ ml: "5px" }}>Profile</Span>
                 </Link>
               </StyledItem>
 

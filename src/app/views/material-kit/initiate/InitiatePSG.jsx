@@ -437,7 +437,7 @@ const InitiatePSG = () => {
                     Allowed extension .doc/.docx
                   </Typography>
                   <Typography variant="body2" sx={{ fontFamily: "sans-serif", fontSize: "0.7rem", color: "#666", marginTop: 0.5 }}>
-                    Max file size 5Mb
+                    Max file size 5MB
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, Card, Grid, IconButton, MenuItem, Select, styled, Tabs, Tab, TextField, Typography} from "@mui/material";
+import { Box, Button, Card, Grid, IconButton, MenuItem, Select, styled, Tabs, Tab, TextField, Typography } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -12,6 +12,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import CheckIcon from '@mui/icons-material/Check';
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
 import { useMediaQuery } from '@mui/material';
+import useDebouce from "app/hooks/useDebouce";
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
@@ -178,9 +179,12 @@ export default function AdminTable() {
   };
 
   const [searchValue, setSearchValue] = useState("");
+  let deboucedSearchValue = useDebouce(searchValue, 200);
   const [searchValue2, setSearchValue2] = useState("");
+  let deboucedSearchValue2 = useDebouce(searchValue2, 200);
   const [searchValue3, setSearchValue3] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+  let deboucedSearchValue3 = useDebouce(searchValue3, 200);
 
   const handleInputChange = (event) => {
     if (activeTab == 1) setSearchValue(event.target.value);
@@ -292,7 +296,6 @@ export default function AdminTable() {
     {
       name: "Employee ID",
       selector: (row) => row.emp_id || "N/A",
-      sortable: true,
       width: isXs ? "30%" : isMd ? "30%" : "20%",
       cell: (row) => (
         <Typography variant="body2" sx={{ textAlign: "left", textDecoration: "none", paddingLeft: "8px", fontSize: "14px" }}>
@@ -303,7 +306,6 @@ export default function AdminTable() {
     {
       name: "Employee Name",
       selector: (row) => row.emp_name || "N/A",
-      sortable: true,
       width: isXs ? "35%" : "30%",
       cell: (row) => (
         <Typography variant="body2" sx={{ textAlign: "left", textDecoration: "none", paddingLeft: "8px", fontSize: "14px" }} >
@@ -314,7 +316,6 @@ export default function AdminTable() {
     {
       name: "Employee Email",
       selector: (row) => row.emp_email || "N/A",
-      sortable: true,
       width: "35%",
       cell: (row) => (
         <Typography variant="body2" sx={{ textAlign: "left", textDecoration: "none", paddingLeft: "8px", fontSize: "14px" }}>
@@ -329,7 +330,7 @@ export default function AdminTable() {
       center: "true",
       cell: (row) => (
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-          <EditIcon sx={{ cursor: "pointer", color: "#ee8812", justifyContent: "center", alignItems: "center" }} onClick={() => handleRowClick(row)}/>
+          <EditIcon sx={{ cursor: "pointer", color: "#ee8812", justifyContent: "center", alignItems: "center" }} onClick={() => handleRowClick(row)} />
         </Box>
       ),
       style: { textAlign: 'center', width: '100%' }
@@ -340,7 +341,6 @@ export default function AdminTable() {
     {
       name: "Document ID",
       selector: (row) => row.id || "N/A",
-      sortable: true,
       cell: (row) => (
         <div style={{ textAlign: "left", width: "100%", paddingLeft: "8px" }}>
           {getDisplayPolicyId(row.id) || "N/A"}
@@ -351,7 +351,6 @@ export default function AdminTable() {
     {
       name: "Document Title",
       selector: (row) => row.title || "N/A",
-      sortable: true,
       width: isXs ? "20%" : isMd ? "20%" : "23%",
       cell: (row) => (
         <Typography variant="body2" sx={{ textAlign: "left", textDecoration: "none", paddingLeft: "8px", fontSize: "14px" }}>
@@ -409,7 +408,7 @@ export default function AdminTable() {
       center: "true",
       cell: (row) => (
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-          <EditIcon sx={{ cursor: "pointer", color: "#ee8812", justifyContent: "center", alignItems: "center" }} onClick={() => handleRowClick(row)}/>
+          <EditIcon sx={{ cursor: "pointer", color: "#ee8812", justifyContent: "center", alignItems: "center" }} onClick={() => handleRowClick(row)} />
         </Box>
       )
     }
@@ -419,7 +418,6 @@ export default function AdminTable() {
     {
       name: 'Circular ID',
       selector: row => row.id || 'N/A',
-      sortable: true,
       cell: (row) => (
         <div style={{ textAlign: 'left', width: '100%', paddingLeft: '8px' }}>
           {getDisplayCircularId(row.id) || 'N/A'}
@@ -430,7 +428,6 @@ export default function AdminTable() {
     {
       name: 'Circular Title',
       selector: row => row.title || 'N/A',
-      sortable: true,
       width: '23%',
       cell: (row) => (
         <Typography variant="body2" sx={{ textAlign: 'left', textDecoration: 'none', paddingLeft: '8px', fontSize: '14px' }}>
@@ -441,7 +438,6 @@ export default function AdminTable() {
     {
       name: 'Circular Description',
       selector: row => row.description || 'N/A',
-      sortable: true,
       width: '33%',
       cell: (row) => (
         <Typography variant="body2" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '600px', textAlign: 'center', paddingLeft: '8px' }} title={row.description}>
@@ -525,12 +521,18 @@ export default function AdminTable() {
   }, [userToken, roleId, userId]);
 
   useEffect(() => {
-    fetchData(activeTab, currentPage, rowsPerPage);
+    if(!isSearching){
+      fetchData(activeTab, currentPage, rowsPerPage);
+    }
   }, [activeTab, currentPage, rowsPerPage]);
 
+  // useEffect(() => {
+  //   handleSearchData(activeTab, currentPage, rowsPerPage, searchValue, searchValue2, searchValue3, selectedType, selectedStatus, selectedCAStatus);
+  // }, [activeTab, currentPage, rowsPerPage, searchValue, searchValue2, searchValue3, selectedType, selectedStatus, selectedCAStatus]);
+
   useEffect(() => {
-    handleSearchData(activeTab, currentPage, rowsPerPage, searchValue, searchValue2, searchValue3, selectedType, selectedStatus, selectedCAStatus);
-  }, [activeTab, currentPage, rowsPerPage, searchValue, searchValue2, searchValue3, selectedType, selectedStatus, selectedCAStatus]);
+    handleSearchData(activeTab, currentPage, rowsPerPage, deboucedSearchValue, deboucedSearchValue2, deboucedSearchValue3, selectedType, selectedStatus, selectedCAStatus);
+  }, [activeTab, currentPage, rowsPerPage, deboucedSearchValue, deboucedSearchValue2, deboucedSearchValue3, selectedType, selectedStatus, selectedCAStatus]);
 
   const handleRowClick = (row) => {
     if (activeTab == 1) {
@@ -586,14 +588,14 @@ export default function AdminTable() {
         setLoading(false);
         throw error;
       });
-    if(selectedAction === "activate"){
-        toast.promise(submitForm, {
+    if (selectedAction === "activate") {
+      toast.promise(submitForm, {
         loading: "Activating...",
         success: (data) => `Circular activated successfully`,
         error: (err) => `Error while activating the circular`
       });
-    } else if(selectedAction === "deprecate"){
-        toast.promise(submitForm, {
+    } else if (selectedAction === "deprecate") {
+      toast.promise(submitForm, {
         loading: "Deprecating...",
         success: (data) => `Circular deprecated successfully`,
         error: (err) => `Error while deprecating the circular`
@@ -725,58 +727,72 @@ export default function AdminTable() {
               </Button>
             )}
           </Grid>
-          <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: 'flex', alignItems: 'center' }}>
-            {activeTab == 1 && (
-              <>
-                <StyledTextField value={searchValue} onChange={handleInputChange} placeholder="Search..." sx={{ width: '300px', marginRight: 2 }}/>
-                {searchValue && (
-                  <IconButton
-                    onClick={() => {
-                      setSearchValue('');
-                      setIsSearching(false);
-                      fetchData(activeTab, currentPage, rowsPerPage);
-                    }}
-                    sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                )}
-              </>
-            )}
-            {activeTab == 2 && (
-              <>
-                <StyledTextField value={searchValue2} onChange={handleInputChange} placeholder="Search..." sx={{ width: '300px', marginRight: 2 }}/>
-                {searchValue2 && (
-                  <IconButton
-                    onClick={() => {
-                      setSearchValue2('');
-                      setIsSearching(false);
-                      fetchData(activeTab, currentPage, rowsPerPage);
-                    }}
-                    sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                )}
-              </>
-            )}
-            {activeTab == 3 && (
-              <>
-                <StyledTextField value={searchValue3} onChange={handleInputChange} placeholder="Search..." sx={{ width: '300px', marginRight: 2 }}/>
-                {searchValue3 && (
-                  <IconButton
-                    onClick={() => {
-                      setSearchValue3('');
-                      setIsSearching(false);
-                      fetchData(activeTab, currentPage, rowsPerPage);
-                    }}
-                    sx={{ marginRight: 1, marginLeft: -2, marginTop: -2 }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                )}
-              </>
-            )}
+          <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexDirection: { xs: 'column', sm: 'row', md: 'row', lg: 'row' } }}>
+            <Grid item sx={{ display: 'flex', alignItems: 'flex-start' }}>
+              {activeTab == 1 && (
+                <>
+                  <StyledTextField value={searchValue} onChange={handleInputChange} placeholder="Search..." sx={{ width: '300px', marginRight: 2 }} />
+                  {searchValue && (
+                    <IconButton
+                      onClick={() => {
+                        setSearchValue('');
+                        setIsSearching(false);
+                        fetchData(activeTab, currentPage, rowsPerPage);
+                      }}
+                      sx={{ marginRight: 1, marginLeft: -2, marginTop: -0.5 }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  )}
+                </>
+              )}
+              {activeTab == 2 && (
+                <>
+                  <StyledTextField value={searchValue2} onChange={handleInputChange} placeholder="Search..." sx={{ width: '300px', marginRight: 2 }} />
+                  {searchValue2 && (
+                    <IconButton
+                      onClick={() => {
+                        setSearchValue2('');
+                        setIsSearching(false);
+                        fetchData(activeTab, currentPage, rowsPerPage);
+                      }}
+                      sx={{ marginRight: 1, marginLeft: -2, marginTop: -0.5 }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  )}
+                </>
+              )}
+              {activeTab == 3 && (
+                <>
+                  <StyledTextField value={searchValue3} onChange={handleInputChange} placeholder="Search..." sx={{ width: '300px', marginRight: 2 }} />
+                  {searchValue3 && (
+                    <IconButton
+                      onClick={() => {
+                        setSearchValue3('');
+                        setIsSearching(false);
+                        fetchData(activeTab, currentPage, rowsPerPage);
+                      }}
+                      sx={{ marginRight: 1, marginLeft: -2, marginTop: -0.5 }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  )}
+                </>
+              )}
+            </Grid>
+            <Grid item sx={{ justifySelf: 'flex-end' }}>
+              {activeTab == 2 && (
+                <Button variant="contained" startIcon={<AddIcon />} sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", textTransform: "none", marginTop: { sm: -3, xs: 0 }, marginBottom: { sm: -1, xs: 2 }, height: { lg: "30px", md: "30px", sm: "30px", xs: "40px", }, width: { lg: "100%", md: "100%", sm: "100%", xs: "100%" }, backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }} onClick={() => navigate("/admin/policy/add")}>
+                  Add Existing Policies
+                </Button>
+              )}
+              {activeTab == 3 && (
+                <Button variant="contained" startIcon={<AddIcon />} sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", textTransform: "none", marginTop: { sm: -3, xs: 0 }, marginBottom: { sm: -1, xs: 2 }, height: { lg: "30px", md: "30px", sm: "30px", xs: "40px", }, width: { lg: "100%", md: "100%", sm: "100%", xs: "100%" }, backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }} onClick={() => navigate("/admin/circular/add")}>
+                  Add Existing Circulars
+                </Button>
+              )}
+            </Grid>
           </Grid>
           <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2 }}>
             <Box width="100%" height="100%" overflow="auto">

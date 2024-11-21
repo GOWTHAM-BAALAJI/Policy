@@ -15,7 +15,7 @@ export default function MatxMenu(props) {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const children = Children.toArray(props.children);
-  let { shouldCloseOnItemClick = true, horizontalPosition = "left" } = props;
+  let { shouldCloseOnItemClick = true, horizontalPosition = "right" } = props;
 
   const handleClose = () => setAnchorEl(null);
   const handleClick = (event) => setAnchorEl(event.currentTarget);

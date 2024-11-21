@@ -288,7 +288,7 @@ export default function PolicyDetails() {
                               {selectedDocument.reviwer_details?.emp_name}
                             </TableCell>
                           </TableRow>
-                          {selectedDocument.Policy_status.slice(1).map((approver, index) => (
+                          {selectedDocument.Policy_status.slice(2).map((approver, index) => (
                             <TableRow key={approver.approver_id}>
                               <TableCell sx={{ pl: 2, width: { lg: "30%", md: "28%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                                 <b>Approver-{index + 1} Name:</b>

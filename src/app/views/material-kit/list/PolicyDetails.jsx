@@ -708,7 +708,7 @@ export default function PolicyDetails() {
                               {selectedDocument.reviwer_details?.emp_name}
                             </TableCell>
                           </TableRow>
-                          {selectedDocument.Policy_status.slice(1).map((approver, index) => (
+                          {selectedDocument.Policy_status.slice(2).map((approver, index) => (
                             <TableRow key={approver.approver_id}>
                               <TableCell sx={{ pl: 2, width: { lg: "30%", md: "30%", sm: "20%", xs: "40%" }, verticalAlign: "top" }}>
                                 <b>Approver-{index + 1} :</b>
@@ -1753,7 +1753,7 @@ export default function PolicyDetails() {
                         Allowed extension .doc/.docx
                       </Typography>
                       <Typography variant="body2" sx={{ fontFamily: "sans-serif", fontSize: "0.7rem", color: "#666", marginTop: 0.5 }}>
-                        Max file size 5Mb
+                        Max file size 5MB
                       </Typography>
                       <Grid item>
                         <Grid container alignItems="center">
