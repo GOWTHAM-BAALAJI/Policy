@@ -128,7 +128,7 @@ export default function PolicyDetails() {
     setLoading(true);
     setError(null);
     try {
-      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/${documentId}`,"GET",1,{});
+      const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}policy/${documentId}`,"GET",1,{});
       const data = await response.json();
       setSelectedDocument(data.data);
     } catch (err) {
@@ -148,7 +148,7 @@ export default function PolicyDetails() {
     event.preventDefault();
     setLoading(true);
     setIsBtnDisabled(true);
-    const url = documentDecision == "activate" ? "https://policyuat.spandanasphoorty.com/policy_apis/admin/depricate-policy" : "https://policyuat.spandanasphoorty.com/policy_apis/admin/reactivate-policy";
+    const url = documentDecision == "activate" ? `${process.env.REACT_APP_POLICY_BACKEND}admin/depricate-policy` : `${process.env.REACT_APP_POLICY_BACKEND}admin/reactivate-policy`;
     const formData = {
         id: documentID
     }
@@ -333,7 +333,7 @@ export default function PolicyDetails() {
                             <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
                               {selectedDocument.version === "1.0" && selectedDocument.pending_at_id === selectedDocument.initiator_id && (
                                 <>
-                                  <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                  <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Files sent for review :</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
@@ -351,7 +351,7 @@ export default function PolicyDetails() {
                                           <tr key={index}>
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
                                                   <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
@@ -370,7 +370,7 @@ export default function PolicyDetails() {
                               )}
                               {selectedDocument.version === "1.0" && (
                                 <>
-                                  <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                  <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Files uploaded by initiator :</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
@@ -388,7 +388,7 @@ export default function PolicyDetails() {
                                           <tr key={index}>
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
                                                   <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
@@ -407,7 +407,7 @@ export default function PolicyDetails() {
                               )}
                               {selectedDocument.version !== "1.0" && selectedDocument.pending_at_id === selectedDocument.initiator_id && (
                                 <>
-                                  <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                  <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Latest files sent for review :</b>
                                   </Typography>
                                   <Typography sx={{ marginBottom: 2 }}>
@@ -429,7 +429,7 @@ export default function PolicyDetails() {
                                           <tr key={index}>
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
                                                   <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
@@ -448,7 +448,7 @@ export default function PolicyDetails() {
                               )}
                               {selectedDocument.version !== "1.0" && (
                                 <>
-                                  <Typography sx={{ marginBottom: 2, marginTop: 2, textDecoration: "underline" }}>
+                                  <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Latest files uploaded by the initiator :</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
@@ -466,7 +466,7 @@ export default function PolicyDetails() {
                                           <tr key={index}>
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
                                                   <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
@@ -485,7 +485,7 @@ export default function PolicyDetails() {
                               )}
                               {selectedDocument.version !== "1.0" && (
                                 <>
-                                  <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                  <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Previous files sent for review :</b>
                                   </Typography>
                                   {Object.keys(groupedFiles).map((version, tableIndex) => (
@@ -508,7 +508,7 @@ export default function PolicyDetails() {
                                           <tr key={index}>
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
                                                   <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
@@ -525,7 +525,7 @@ export default function PolicyDetails() {
                                     </div>
                                     </>
                                   ))}
-                                  <Typography sx={{ marginBottom: 2, marginTop: 2, textDecoration: "underline" }}>
+                                  <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Previous files uploaded by the initiator :</b>
                                   </Typography>
                                   {Object.keys(groupedFiles1).map((version, tableIndex) => (
@@ -548,7 +548,7 @@ export default function PolicyDetails() {
                                           <tr key={index}>
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }} > {index + 1} </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
                                                   <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
@@ -579,7 +579,7 @@ export default function PolicyDetails() {
                             <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
                               {selectedDocument.version === "1.0" && selectedDocument.pending_at_id === selectedDocument.initiator_id && (
                                 <>
-                                  <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                  <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Files sent for review :</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
@@ -597,7 +597,7 @@ export default function PolicyDetails() {
                                           <tr key={index}>
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
                                                   <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
@@ -616,7 +616,7 @@ export default function PolicyDetails() {
                               )}
                               {selectedDocument.version === "1.0" && (
                                 <>
-                                  <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                  <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Files uploaded by initiator :</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
@@ -634,7 +634,7 @@ export default function PolicyDetails() {
                                           <tr key={index}>
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
                                                   <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
@@ -653,7 +653,7 @@ export default function PolicyDetails() {
                               )}
                               {selectedDocument.version !== "1.0" && selectedDocument.pending_at_id === selectedDocument.initiator_id && (
                                 <>
-                                  <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                  <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Latest files sent for review :</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
@@ -671,7 +671,7 @@ export default function PolicyDetails() {
                                         <tr key={index}>
                                           <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
                                           <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                            <a href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                            <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                               <div className="img-wrapper">
                                                 <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                   <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
@@ -690,7 +690,7 @@ export default function PolicyDetails() {
                               )}
                               {selectedDocument.version !== "1.0" && (
                                 <>
-                                  <Typography sx={{ marginBottom: 2, marginTop: 2, textDecoration: "underline" }}>
+                                  <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Latest files uploaded by the initiator:</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
@@ -708,7 +708,7 @@ export default function PolicyDetails() {
                                         <tr key={index}>
                                           <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
                                           <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                            <a href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                            <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                               <div className="img-wrapper">
                                                 <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                   <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
@@ -727,7 +727,7 @@ export default function PolicyDetails() {
                               )}
                               {selectedDocument.version !== "1.0" && (
                                 <>
-                                  <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>
+                                  <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Previous files sent for review :</b>
                                   </Typography>
                                   {Object.keys(groupedFiles).map((version, tableIndex) => (
@@ -750,7 +750,7 @@ export default function PolicyDetails() {
                                           <tr key={index}>
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
                                                   <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
@@ -767,7 +767,7 @@ export default function PolicyDetails() {
                                     </div>
                                     </>
                                   ))}
-                                  <Typography sx={{ marginBottom: 2, marginTop: 2, textDecoration: "underline" }}>
+                                  <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Previous files uploaded by the initiator :</b>
                                   </Typography>
                                   {Object.keys(groupedFiles1).map((version, tableIndex) => (
@@ -790,7 +790,7 @@ export default function PolicyDetails() {
                                           <tr key={index}>
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
                                                   <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
@@ -834,7 +834,7 @@ export default function PolicyDetails() {
                                     <tr key={index}>
                                       <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
                                       <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                        <a href={`https://policyuat.spandanasphoorty.com/policy_apis/policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                        <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                           <div className="img-wrapper">
                                             <Box sx={{ width: {lg:"45%", md:"65%", sm:"45%", xs:"65%"}, ml:{sm:-1, xs:-1} }}>
                                               <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />

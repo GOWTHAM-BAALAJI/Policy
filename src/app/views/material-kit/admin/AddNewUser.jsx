@@ -89,7 +89,7 @@ const AddNewUser = () => {
   useEffect(() => {
     const fetchUserGroups = async () => {
       try {
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups", "GET", 1, {});
+        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}auth/get-user-groups`, "GET", 1, {});
         const data = await response.json();
         if (data.status) {
           const fetchedUserGroups = data.data.map((usergroup) => ({
@@ -172,7 +172,7 @@ const AddNewUser = () => {
       }, 4000);
       return;
     }
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/admin/add-user";
+    const url = `${process.env.REACT_APP_POLICY_BACKEND}admin/add-user`;
     const formData = {
       emp_id: empID,
       emp_name: empName,

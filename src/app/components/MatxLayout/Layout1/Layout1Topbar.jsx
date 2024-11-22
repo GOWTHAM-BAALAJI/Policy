@@ -82,10 +82,10 @@ const Layout1Topbar = () => {
   useEffect(() => {
     if (userToken) {
       const decodedToken = jwtDecode(userToken);
-      setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
+      setProfileImage(`${process.env.REACT_APP_POLICY_BACKEND}profile_image/${decodedToken.profile_pic}`);
     }
     if (profile_pic) {
-      setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
+      setProfileImage(`${process.env.REACT_APP_POLICY_BACKEND}profile_image/${profile_pic}`);
     }
   }, [profile_pic, userToken]);
 
@@ -184,7 +184,7 @@ const Layout1Topbar = () => {
 
               <StyledItem onClick={handleSignOut}>
                 <PowerSettingsNew />
-                <Span sx={{ ml: "2px" }}>Logout</Span>
+                <Span sx={{ ml: "2px" }}>&nbsp;Logout</Span>
               </StyledItem>
             </Box>
           </MatxMenu>

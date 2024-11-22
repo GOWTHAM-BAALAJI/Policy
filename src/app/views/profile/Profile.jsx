@@ -51,9 +51,9 @@ const Profile = () => {
 
   useEffect(() => {
     const decodedToken = jwtDecode(userToken);
-    setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${decodedToken.profile_pic}`);
+    setProfileImage(`${process.env.REACT_APP_POLICY_BACKEND}profile_image/${decodedToken.profile_pic}`);
     if (profile_pic) {
-      setProfileImage(`https://policyuat.spandanasphoorty.com/policy_apis/profile_image/${profile_pic}`);
+      setProfileImage(`${process.env.REACT_APP_POLICY_BACKEND}profile_image/${profile_pic}`);
     }
   }, [profile_pic, userToken]);
 
@@ -118,7 +118,7 @@ const Profile = () => {
     }
     const formData = new FormData();
     formData.append("files[]", selectedFile);
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/updateProfile";
+    const url = `${process.env.REACT_APP_POLICY_BACKEND}auth/updateProfile`;
     const submitPromise1 = customFetchWithAuth(url,"POST",3,formData)
       .then((response) => {
         return response.json();
@@ -171,7 +171,7 @@ const Profile = () => {
       }, 4000);
       return;
     }
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/updatePassword";
+    const url = `${process.env.REACT_APP_POLICY_BACKEND}auth/updatePassword`;
     const requestData = {
       newPassword: newpassword
     };

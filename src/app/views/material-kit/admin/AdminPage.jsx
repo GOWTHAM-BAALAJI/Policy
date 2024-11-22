@@ -120,21 +120,21 @@ export default function AdminTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response1 = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count", "GET", 1, {});
+        const response1 = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}admin/get-user-count`, "GET", 1, {});
         const data1 = await response1.json();
         if (data1 && data1.status) {
           const userCount = data1.count;
           setUserCount(userCount || 0);
         }
 
-        const response2 = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count", "GET", 1, {});
+        const response2 = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}admin/get-policy-count`, "GET", 1, {});
         const data2 = await response2.json();
         if (data2 && data2.status) {
           const policyCount = data2.count;
           setPolicyCount(policyCount || 0);
         }
 
-        const response3 = await customFetchWithAuth('https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count', "GET", 1, {});
+        const response3 = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}admin/get-circular-count`, "GET", 1, {});
         const data3 = await response3.json();
         if (data3 && data3.status) {
           const circularCount = data3.count;
@@ -153,19 +153,19 @@ export default function AdminTable() {
     setLoading(true);
     try {
       if (tab == 1) {
-        let url = `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-user?page=${page}&rows=${rows}`;
+        let url = `${process.env.REACT_APP_POLICY_BACKEND}admin/get-all-user?page=${page}&rows=${rows}`;
         const response = await customFetchWithAuth(url, "GET", 1, {});
         const data = await response.json();
         setPsgList(data.data);
         setCount(userCount || 0);
       } else if (tab == 2) {
-        let url = `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-policy?page=${page}&rows=${rows}`;
+        let url = `${process.env.REACT_APP_POLICY_BACKEND}admin/get-all-policy?page=${page}&rows=${rows}`;
         const response = await customFetchWithAuth(url, "GET", 1, {});
         const data = await response.json();
         setPsgList(data.data);
         setCount(policyCount || 0);
       } else if (tab == 3) {
-        let url = `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-circulars?page=${page}&rows=${rows}`;
+        let url = `${process.env.REACT_APP_POLICY_BACKEND}admin/get-all-circulars?page=${page}&rows=${rows}`;
         const response = await customFetchWithAuth(url, "GET", 1, {});
         const data = await response.json();
         setPsgList(data.data);
@@ -201,12 +201,12 @@ export default function AdminTable() {
     try {
       if (tab == 1) {
         const response1 = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-user?page=${page}&rows=${rows}&search=${searchValue}`, "GET", 1, {});
+          `${process.env.REACT_APP_POLICY_BACKEND}admin/get-all-user?page=${page}&rows=${rows}&search=${searchValue}`, "GET", 1, {});
         const data1 = await response1.json();
         setPsgList(data1.data);
 
         const countResponse1 = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user-count?search=${searchValue}`, "GET", 1, {},);
+          `${process.env.REACT_APP_POLICY_BACKEND}admin/get-user-count?search=${searchValue}`, "GET", 1, {},);
         if (!countResponse1.ok) {
           throw new Error("Failed to fetch count data");
         }
@@ -214,23 +214,23 @@ export default function AdminTable() {
         setCount(countData1.count);
       } else if (tab == 2) {
         const response2 = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-policy?page=${page}&rows=${rows}&search=${searchValue2}&type=${type}&status=${status}`, "GET", 1, {});
+          `${process.env.REACT_APP_POLICY_BACKEND}admin/get-all-policy?page=${page}&rows=${rows}&search=${searchValue2}&type=${type}&status=${status}`, "GET", 1, {});
         const data2 = await response2.json();
         setPsgList(data2.data);
 
         const countResponse2 = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/admin/get-policy-count?search=${searchValue2}&type=${type}&status=${status}`, "GET", 1, {});
+          `${process.env.REACT_APP_POLICY_BACKEND}admin/get-policy-count?search=${searchValue2}&type=${type}&status=${status}`, "GET", 1, {});
         if (!countResponse2.ok) {
           throw new Error("Failed to fetch count data");
         }
         const countData2 = await countResponse2.json();
         setCount(countData2.count);
       } else if (tab == 3) {
-        const response3 = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-all-circulars?page=${page}&rows=${rows}&search=${searchValue3}&status=${CAstatus}`, "GET", 1, {});
+        const response3 = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}admin/get-all-circulars?page=${page}&rows=${rows}&search=${searchValue3}&status=${CAstatus}`, "GET", 1, {});
         const data3 = await response3.json();
         setPsgList(data3.data);
 
-        const countResponse3 = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-circular-count?search=${searchValue3}&status=${CAstatus}`, "GET", 1, {});
+        const countResponse3 = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}admin/get-circular-count?search=${searchValue3}&status=${CAstatus}`, "GET", 1, {});
         if (!countResponse3.ok) {
           throw new Error('Failed to fetch count data');
         }
@@ -550,7 +550,7 @@ export default function AdminTable() {
 
   const handleCASubmit = (event) => {
     setLoading(true);
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/admin/CA-change-status";
+    const url = `${process.env.REACT_APP_POLICY_BACKEND}admin/CA-change-status`;
     const selectedAction = action[event.id];
     let status = null;
     if (selectedAction === "activate") {

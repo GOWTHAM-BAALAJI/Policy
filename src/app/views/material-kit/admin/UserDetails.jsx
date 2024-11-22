@@ -136,7 +136,7 @@ export default function UserDetails() {
   useEffect(() => {
     const fetchUserGroups = async() => {
       try{
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",1,{});
+        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}auth/get-user-groups`,"GET",1,{});
         const data = await response.json();
         if (data.status) {
           const fetchedUserGroups = data.data.map((usergroup) => ({
@@ -179,7 +179,7 @@ export default function UserDetails() {
     setError(null);
 
     try {
-      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/admin/get-user/${documentId}`,"GET",1,{});
+      const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}admin/get-user/${documentId}`,"GET",1,{});
       const data = await response.json();
       setSelectedUser(data.data);
     } catch (err) {
@@ -272,7 +272,7 @@ export default function UserDetails() {
       return;
     }
 
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/admin/update-user";
+    const url = `${process.env.REACT_APP_POLICY_BACKEND}admin/update-user`;
 
     const formData = {
       user_id: userID,

@@ -14,7 +14,7 @@ const useCustomFetch = () => {
     const expirationTime = decodedToken.exp;
     const currentTime = Math.floor(Date.now() / 1000);
     if (currentTime +1 > expirationTime) {
-      const newAccessTokenData = await fetch("https://policyuat.spandanasphoorty.com/policy_apis/auth/refresh-token", {
+      const newAccessTokenData = await fetch(`${process.env.REACT_APP_POLICY_BACKEND}auth/refresh-token`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

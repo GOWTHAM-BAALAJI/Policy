@@ -122,7 +122,7 @@ const InitiatePSG = () => {
   useEffect(() => {
     const fetchReviewers = async() => {
       try{
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/getReviewer","GET",1,{});
+        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}auth/getReviewer`,"GET",1,{});
         const data = await response.json();
         if (data.status) {
           const fetchedReviewers = data.data.map((reviewer) => ({
@@ -143,7 +143,7 @@ const InitiatePSG = () => {
   useEffect(() => {
     const fetchApprovers = async() => {
       try{
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/getApprover","GET",1,{});
+        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}auth/getApprover`,"GET",1,{});
         const data = await response.json();
         if (data.status) {
           const fetchedApprovalMembers = data.data.map((approvalmember) => ({
@@ -164,7 +164,7 @@ const InitiatePSG = () => {
   useEffect(() => {
     const fetchUserGroups = async() => {
       try{
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",1,{});
+        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}auth/get-user-groups`,"GET",1,{});
         const data = await response.json();
         if (data.status) {
           const categorizedGroups = data.data.reduce((acc, usergroup) => {
@@ -264,7 +264,7 @@ const InitiatePSG = () => {
       }, 4000);
       return;
     }
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/policy/";
+    const url = `${process.env.REACT_APP_POLICY_BACKEND}policy/`;
     const formData = new FormData();
     uploadedFiles.forEach((file) => {
       formData.append("files[]", file);

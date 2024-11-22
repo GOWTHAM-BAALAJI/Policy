@@ -61,7 +61,7 @@ export default function ForgotPassword() {
       }, 4000);
       return;
     }
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/forgetPassword";
+    const url = `${process.env.REACT_APP_POLICY_BACKEND}auth/forgetPassword`;
     const requestData = {
       empRef: values.emailId.trim()
     };

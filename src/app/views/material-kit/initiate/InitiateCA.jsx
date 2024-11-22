@@ -95,7 +95,7 @@ const InitiateCA = () => {
   useEffect(() => {
     const fetchUserGroups = async() => {
       try{
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/auth/get-user-groups","GET",1,{});
+        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}auth/get-user-groups`,"GET",1,{});
         const data = await response.json();
         if (data.status) {
           const categorizedGroups = data.data.reduce((acc, usergroup) => {
@@ -171,7 +171,7 @@ const InitiateCA = () => {
       }, 4000);
       return;
     }
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/";
+    const url = `${process.env.REACT_APP_POLICY_BACKEND}circular-advisories/`;
     const formData = new FormData();
     uploadedFile.forEach((file) => {
       formData.append("files[]", file);

@@ -100,32 +100,15 @@ const ApplicableTable = () => {
     return state.token;
   });
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true", "GET", 1, {});
-  //       const data = await response.json();
-  //       if (data && data.status) {
-  //         setCount(data.count);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching data", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
-
   const fetchData = async (page, rows) => {
     setLoading(true);
     try {
-      let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}`;
+      let url = `${process.env.REACT_APP_POLICY_BACKEND}policy/user?display=true&page=${page}&rows=${rows}`;
       const response = await customFetchWithAuth(url, "GET", 1, {});
       const data = await response.json();
       setPsgList2(data);
 
-      const count_response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true", "GET", 1, {});
+      const count_response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}policy/user/count?display=true`, "GET", 1, {});
       const count_data = await count_response.json();
       if (count_data && count_data.status) {
         setCount(count_data.count);
@@ -169,12 +152,12 @@ const ApplicableTable = () => {
     setSelectedType(selectedType);
     try {
       const response = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, "GET", 1, {});
+        `${process.env.REACT_APP_POLICY_BACKEND}policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, "GET", 1, {});
       const data = await response.json();
       setPsgList2(data);
 
       const countResponse = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true&search=${searchValue}&type=${selectedType}`, "GET", 1, {});
+        `${process.env.REACT_APP_POLICY_BACKEND}policy/user/count?display=true&search=${searchValue}&type=${selectedType}`, "GET", 1, {});
       if (!countResponse.ok) {
         throw new Error("Failed to fetch count data");
       }
@@ -194,12 +177,12 @@ const ApplicableTable = () => {
 
     try {
       const response = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}`, "GET", 1, {});
+        `${process.env.REACT_APP_POLICY_BACKEND}policy/user?display=true&page=${page}&rows=${rows}&search=${searchValue}`, "GET", 1, {});
       const data = await response.json();
       setPsgList2(data);
 
       const countResponse = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?display=true&search=${searchValue}`, "GET", 1, {});
+        `${process.env.REACT_APP_POLICY_BACKEND}policy/user/count?display=true&search=${searchValue}`, "GET", 1, {});
       if (!countResponse.ok) {
         throw new Error("Failed to fetch count data");
       }

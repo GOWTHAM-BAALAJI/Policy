@@ -99,7 +99,7 @@ export default function Login() {
       return;
     }
 
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/";
+    const url = `${process.env.REACT_APP_POLICY_BACKEND}auth/`;
     const requestData = {
       empRef: values.emailId.trim(),
       password: values.password
@@ -113,21 +113,21 @@ export default function Login() {
       });
 
       const result = await response.json();
-      if(result?.status == false){
-        if(result.message === "invalid credentials"){
+      if (result?.status == false) {
+        if (result.message === "invalid credentials") {
           toast.error("Invalid employee ID or password");
           setIsBtnDisabled(true);
           setTimeout(() => {
             setIsBtnDisabled(false);
           }, 4000);
-        } else if(result.message === "account deactivated! , please contact admin"){
+        } else if (result.message === "account deactivated! , please contact admin") {
           toast.error("Account deactivated!, Please contact admin");
           setIsBtnDisabled(true);
           setTimeout(() => {
             setIsBtnDisabled(false);
           }, 4000);
         }
-      } else{
+      } else {
         setUsername(values.emailId.trim());
         setUserId(result.user_id);
         setPasswordError("");
@@ -145,7 +145,7 @@ export default function Login() {
     if (resendCooldown > 0) return;
 
     setLoading(true);
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/resendOtp";
+    const url = `${process.env.REACT_APP_POLICY_BACKEND}auth/resendOtp`;
     const data = {
       user_id: userId
     };
@@ -186,7 +186,7 @@ export default function Login() {
 
   const chkOTP = async (values) => {
     setLoading(true);
-    const url = "https://policyuat.spandanasphoorty.com/policy_apis/auth/verifyOTP";
+    const url = `${process.env.REACT_APP_POLICY_BACKEND}auth/verifyOTP`;
     const data = {
       user_id: userId,
       otp: values.otp

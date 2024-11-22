@@ -132,7 +132,7 @@ export default function PSGTable() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await customFetchWithAuth('https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count', "GET",1,{});
+        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}policy/user/count`, "GET",1,{});
         const data =await response.json();
         if (data && data.status) {
           const approvedCount = data.approved;
@@ -156,7 +156,7 @@ export default function PSGTable() {
   const fetchData = async (tab, page, rows) => {
     setLoading(true);
     try {
-      let url = `https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}`;
+      let url = `${process.env.REACT_APP_POLICY_BACKEND}policy/user?tab=${tab}&page=${page}&rows=${rows}`;
       const response = await customFetchWithAuth(url,"GET",1,{});
       const data = await response.json();
       setPsgList(data);
@@ -193,11 +193,11 @@ export default function PSGTable() {
     setIsSelectingType(true);
     setSelectedType(selectedType);
     try {
-      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",1,{});
+      const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`,"GET",1,{});
       const data =await response.json();
       setPsgList(data);
   
-      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`, "GET",1,{});
+      const countResponse = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}policy/user/count?search=${searchValue}&type=${selectedType}`, "GET",1,{});
       if (!countResponse.status) {
         throw new Error('Failed to fetch count data');
       }
@@ -218,11 +218,11 @@ export default function PSGTable() {
     setIsSearching(true);
     setSearchValue(searchValue.trimStart());
     try {
-      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, "GET",1,{});
+      const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}policy/user?tab=${tab}&page=${page}&rows=${rows}&search=${searchValue}&type=${selectedType}`, "GET",1,{});
       const data = await  response.json();
       setPsgList(data);
   
-      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",1,{});
+      const countResponse = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}policy/user/count?search=${searchValue}&type=${selectedType}`,"GET",1,{});
       if (!countResponse.status) {
         throw new Error('Failed to fetch count data');
       }

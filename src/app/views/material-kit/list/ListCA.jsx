@@ -73,11 +73,11 @@ export default function CATable() {
     setLoading(true);
     try {
       const response = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}`,"GET",1,{});
+        `${process.env.REACT_APP_POLICY_BACKEND}circular-advisories?page=${page}&rows=${rows}`,"GET",1,{});
       const data = await response.json();
       setPsgList(data.data);
 
-      const countResponse = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/count`,"GET",1,{});
+      const countResponse = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}circular-advisories/count`,"GET",1,{});
       if (!countResponse.ok) {
         throw new Error("Failed to fetch count data");
       }
@@ -103,12 +103,12 @@ export default function CATable() {
     setSearchValue(searchValue.trimStart());
     try {
       const response = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories?page=${page}&rows=${rows}&search=${searchValue}`,"GET",1,{});
+        `${process.env.REACT_APP_POLICY_BACKEND}circular-advisories?page=${page}&rows=${rows}&search=${searchValue}`,"GET",1,{});
       const data = await response.json();
       setPsgList(data.data);
 
       const countResponse = await customFetchWithAuth(
-        `https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/count?search=${searchValue}`,"GET",1,{});
+        `${process.env.REACT_APP_POLICY_BACKEND}circular-advisories/count?search=${searchValue}`,"GET",1,{});
       if (!countResponse.ok) {
         throw new Error("Failed to fetch count data");
       }
@@ -231,11 +231,11 @@ export default function CATable() {
     setSelectedDocument(row.title);
     setSelectedRow(row);
     try {
-      const response = await customFetchWithAuth(`https://policyuat.spandanasphoorty.com/policy_apis/circular-advisories/${row.id}`,"GET",1,{});
+      const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}circular-advisories/${row.id}`,"GET",1,{});
       const data = await response.json();
       if (data.status && data.data.file_name) {
         const fileResponse = await customFetchWithAuth(
-          `https://policyuat.spandanasphoorty.com/policy_apis/CA_document/${data.data.file_name}`,"GET",1,{});
+          `${process.env.REACT_APP_POLICY_BACKEND}CA_document/${data.data.file_name}`,"GET",1,{});
         const blob = await fileResponse.blob();
         const url = window.URL.createObjectURL(new Blob([blob]));
         const link = document.createElement("a");

@@ -16,7 +16,7 @@ export default function DoughnutChart({ height = "100%", width = "100%", selecte
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await customFetchWithAuth("https://policyuat.spandanasphoorty.com/policy_apis/policy/user/count","GET",1,{});
+        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}policy/user/count`,"GET",1,{});
         const data = await response.json();
         if (data && data.status) {
           const approvedCount = data.approved;
