@@ -175,14 +175,14 @@ const Layout1Topbar = () => {
                 alignItems: "center",
               }}
             >
-              <StyledItem>
+              <StyledItem sx={{ mt: {xs: -2, sm: 0, md: 0, lg: 0} }}>
                 <Link to="/profile">
                   <Person />
                   <Span sx={{ ml: "5px" }}>Profile</Span>
                 </Link>
               </StyledItem>
 
-              <StyledItem onClick={handleSignOut}>
+              <StyledItem onClick={handleSignOut} sx={{ mt: {xs: -2, sm: 0, md: 0, lg: 0} }}>
                 <PowerSettingsNew />
                 <Span sx={{ ml: "2px" }}>&nbsp;Logout</Span>
               </StyledItem>

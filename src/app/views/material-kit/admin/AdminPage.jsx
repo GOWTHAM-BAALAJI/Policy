@@ -289,6 +289,20 @@ export default function AdminTable() {
     }));
   };
 
+  const handleOptionChange = (rowId, selectedValue) => {
+    const row = psgList.find((r) => r.id === rowId);
+    setRowActions((prev) => ({
+      ...prev,
+      [rowId]: selectedValue,
+    }));
+    const updatedCheckEnabled = {
+      ...isCheckEnabled,
+      [rowId]: (selectedValue === "deprecate" && row.status === 1) || 
+               (selectedValue === "activate" && row.status === 2),
+    };
+    setIsCheckEnabled(updatedCheckEnabled);
+  };  
+
   const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
   const isMd = useMediaQuery((theme) => theme.breakpoints.down('md'));
 
@@ -471,9 +485,9 @@ export default function AdminTable() {
       cell: (row) => (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '40%' }}>
           <form>
-            <StyledSelect value={rowActions[row.id] || ""} onChange={(event) => handleActionChange(event, row)} displayEmpty sx={{ width: '120px' }}>
-              <MenuItem value="activate" disabled={row.status === 1}>Activate</MenuItem>
-              <MenuItem value="deprecate" disabled={row.status === 2}>Deprecate</MenuItem>
+            <StyledSelect value={rowActions[row.id] || ""} onChange={(event) => handleOptionChange(row.id, event.target.value)} displayEmpty sx={{ width: '120px' }}>
+              <MenuItem value="activate">Activate</MenuItem>
+              <MenuItem value="deprecate">Deprecate</MenuItem>
             </StyledSelect>
           </form>
           {isCheckEnabled[row.id] && (
@@ -551,7 +565,7 @@ export default function AdminTable() {
   const handleCASubmit = (event) => {
     setLoading(true);
     const url = `${process.env.REACT_APP_POLICY_BACKEND}admin/CA-change-status`;
-    const selectedAction = action[event.id];
+    const selectedAction = rowActions[event.id];
     let status = null;
     if (selectedAction === "activate") {
       status = 1;
@@ -727,6 +741,7 @@ export default function AdminTable() {
               </Button>
             )}
           </Grid>
+          {/* SEARCH BOX */}
           <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexDirection: { xs: 'column', sm: 'row', md: 'row', lg: 'row' } }}>
             <Grid item sx={{ display: 'flex', alignItems: 'flex-start' }}>
               {activeTab == 1 && (

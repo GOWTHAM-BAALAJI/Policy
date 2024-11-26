@@ -51,12 +51,6 @@ const AddExistingCircular = () => {
     const [userGroupStoreSum, setUserGroupStoreSum] = useState(0);
     const [loading, setLoading] = useState(false);
 
-    const doctypes = [
-        { value: "1", label: "  Policy" },
-        { value: "2", label: "  SOP" },
-        { value: "3", label: "  Guidance Note" }
-      ];
-
     const handleDateChange = (event) => {
         setApprovedOnDate(event.target.value);
     };
@@ -191,18 +185,26 @@ const AddExistingCircular = () => {
             })
             .then((data) => {
                 if (data.status) {
+                    setIsBtnDisabled(true);
                     setTimeout(() => {
                         navigate("/admin");
                     }, 1000);
                 } else {
+                    setIsBtnDisabled(true);
+                    setTimeout(() => {
+                        setIsBtnDisabled(false);
+                    }, 4000);
                     throw new Error("Submission failed");
                 }
                 setLoading(false);
             })
             .catch((error) => {
                 console.error("Submission error:", error);
+                setIsBtnDisabled(true);
+                setTimeout(() => {
+                    setIsBtnDisabled(false);
+                }, 4000);
                 setLoading(false);
-                setIsBtnDisabled(false);
                 throw error;
             });
         toast.promise(submitPromise, {
@@ -292,6 +294,7 @@ const AddExistingCircular = () => {
                                 </Grid>
                             </Grid>
                         </Grid>
+                        {/* FILE UPLOAD */}
                         <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
                             <Grid container alignItems="flex-start" spacing={2}>
                                 <Grid item xs={3} sm={3} md={3} lg={3}>

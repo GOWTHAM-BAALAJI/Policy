@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import useCustomFetch from "../../hooks/useFetchWithAuth";
-import {Box, Button, Table, TableRow, TableCell, TableBody, Grid, InputAdornment, Typography, TextField, IconButton} from "@mui/material";
+import { Box, Button, Table, TableRow, TableCell, TableBody, Grid, InputAdornment, Typography, TextField, IconButton } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import { CameraAlt as CameraIcon } from "@mui/icons-material";
 import { setUserData } from "../../../redux/actions/userActions";
@@ -17,7 +17,7 @@ const Profile = () => {
   };
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const customFetchWithAuth=useCustomFetch();
+  const customFetchWithAuth = useCustomFetch();
 
   const [storeImage, setStoreImage] = useState("");
   const userProfile = useSelector((state) => state.userData);
@@ -119,7 +119,7 @@ const Profile = () => {
     const formData = new FormData();
     formData.append("files[]", selectedFile);
     const url = `${process.env.REACT_APP_POLICY_BACKEND}auth/updateProfile`;
-    const submitPromise1 = customFetchWithAuth(url,"POST",3,formData)
+    const submitPromise1 = customFetchWithAuth(url, "POST", 3, formData)
       .then((response) => {
         return response.json();
       })
@@ -175,7 +175,7 @@ const Profile = () => {
     const requestData = {
       newPassword: newpassword
     };
-    const submitPromise2 = customFetchWithAuth(url,"POST",2,JSON.stringify(requestData))
+    const submitPromise2 = customFetchWithAuth(url, "POST", 2, JSON.stringify(requestData))
       .then((response) => {
         return response.json();
       })
@@ -203,13 +203,13 @@ const Profile = () => {
 
   return (
     <>
-      <Grid container sx={{ ml: 0, p: { lg: 4, md: 4, sm: 0, xs: 0}, mr: 1 }}>
+      <Grid container sx={{ ml: 0, p: { lg: 4, md: 4, sm: 4, xs: 4 }, mr: 1 }}>
         <Grid container sx={{ display: "flex", justifyContent: "center", alignItems: "center", maxWidth: '100%' }}>
           <Grid item xs={12}>
-            <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "column", md: "row", lg: "row" }, justifyContent: { md: "space-between", lg: "space-between" }, border: "1px solid #e0e0e0", boxShadow: "0px 0px 8px 2px rgba(0, 0, 0, 0.1)", p: 4, textAlign: "center", width: "fit-content", margin: "0 auto", gap: 4 }}>
+            <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "column", md: "row", lg: "row" }, alignItems: "space-between", justifyContent: { md: "space-between", lg: "space-between" }, border: "1px solid #e0e0e0", boxShadow: "0px 0px 8px 2px rgba(0, 0, 0, 0.1)", p: 4, textAlign: "center", width: "fit-content", margin: "0 auto", gap: 4 }}>
               <form onSubmit={handleFileUpload} encType="multipart/form-data">
                 <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                  <Avatar src={profileImage} alt="Profile Picture" sx={{ width: 160, height: 162, borderRadius: "50%", border: "1px solid #000" }}/>
+                  <Avatar src={profileImage} alt="Profile Picture" sx={{ width: 160, height: 162, borderRadius: "50%", border: "1px solid #000" }} />
                   <input
                     accept=".jpeg,.jpg,.png"
                     id="upload-button-file"
@@ -238,7 +238,7 @@ const Profile = () => {
                 </Box>
               </form>
 
-              <Box sx={{ p: 2, display: "flex", justifyContent: "center", alignItems: "center", mt:{sm:-4, xs:-2} }}>
+              <Box sx={{ p: 2, display: "flex", justifyContent: "center", alignItems: "center", mt: { sm: -4, xs: -2 } }}>
                 <Table sx={{ width: "auto" }}>
                   <TableBody>
                     <TableRow sx={{ display: { xs: "flex", sm: "table-row" }, flexDirection: { xs: "column", sm: "row" } }}>
@@ -268,7 +268,7 @@ const Profile = () => {
                     <TableRow sx={{ display: { xs: "flex", sm: "table-row" }, flexDirection: { xs: "column", sm: "row" }, }}>
                       <TableCell>
                         <Typography variant="h6" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", marginRight: { sm: "40px", xs: 0 }, }}>
-                          <b>Email:</b>
+                          <b>Email ID:</b>
                         </Typography>
                       </TableCell>
                       <TableCell>
@@ -280,7 +280,7 @@ const Profile = () => {
                     <TableRow sx={{ display: { xs: "flex", sm: "table-row" }, flexDirection: { xs: "column", sm: "row" }, }}>
                       <TableCell>
                         <Typography variant="h6" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", marginRight: { sm: "40px", xs: 0 }, }}>
-                          <b>Mobile:</b>
+                          <b>Mobile No.:</b>
                         </Typography>
                       </TableCell>
                       <TableCell>
@@ -294,57 +294,57 @@ const Profile = () => {
               </Box>
 
               <form onSubmit={handlePasswordUpdate} encType="multipart/form-data">
-                <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", marginTop: "50px", marginRight: "20px", mt:{md: 8, sm:-3, xs:-2} }}>
-                  <Button variant="contained" sx={{ marginBottom: 2, padding: "4px 8px", fontSize: "0.75rem", backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }} onClick={handleUpdatePasswordClick}>
-                    Update Password
-                  </Button>
-                  {showFields && (
-                    <>
-                      <TextField
-                        id="newpassword"
-                        type={showPassword ? "text" : "password"}
-                        rows={1}
-                        maxRows={1}
-                        variant="outlined"
-                        fullWidth
-                        value={newpassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="Enter the new password"
-                        InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: "30px", marginBottom: "10px" },
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton onClick={handleTogglePasswordVisibility} edge="end" aria-label="toggle password visibility">
-                                {showPassword ? <VisibilityOff /> : <Visibility />}
-                              </IconButton>
-                            </InputAdornment>
-                          )
-                        }}
-                      />
-                      <TextField
-                        id="newpassword"
-                        type={showConfirmPassword ? "text" : "password"}
-                        rows={1}
-                        maxRows={1}
-                        variant="outlined"
-                        fullWidth
-                        value={confirmnewpassword}
-                        onChange={(e) => setConfirmNewPassword(e.target.value)}
-                        placeholder="Confirm the new password"
-                        InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: "30px", marginBottom: "10px" },
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton onClick={handleToggleConfirmPasswordVisibility} edge="end" aria-label="toggle password visibility">
-                                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                              </IconButton>
-                            </InputAdornment>
-                          )
-                        }}
-                      />
-                      <Button variant="contained" disabled={isBtnDisabled2} type="submit" sx={{ padding: "4px 8px", fontSize: "0.75rem", backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }}>
-                        Submit
-                      </Button>
-                    </>
-                  )}
+                <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", marginTop: "50px", marginRight: "20px", mt: { lg: 4, md: 4, sm: -3, xs: -2 } }}>
+                  <Typography sx={{ mb: 2, fontFamily: "sans-serif", fontSize: "16px", fontWeight: "bold" }}>
+                    Update your password
+                  </Typography>
+                  <>
+                    <TextField
+                      id="newpassword"
+                      type={showPassword ? "text" : "password"}
+                      rows={1}
+                      maxRows={1}
+                      variant="outlined"
+                      fullWidth
+                      value={newpassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Enter the new password"
+                      InputProps={{
+                        style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: "30px", marginBottom: "10px" },
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton onClick={handleTogglePasswordVisibility} edge="end" aria-label="toggle password visibility">
+                              {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                    <TextField
+                      id="newpassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      rows={1}
+                      maxRows={1}
+                      variant="outlined"
+                      fullWidth
+                      value={confirmnewpassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      placeholder="Confirm the new password"
+                      InputProps={{
+                        style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: "30px", marginBottom: "10px" },
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton onClick={handleToggleConfirmPasswordVisibility} edge="end" aria-label="toggle password visibility">
+                              {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                    <Button variant="contained" disabled={isBtnDisabled2} type="submit" sx={{ padding: "4px 8px", fontSize: "0.75rem", backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }}>
+                      Submit
+                    </Button>
+                  </>
                 </Box>
               </form>
             </Box>

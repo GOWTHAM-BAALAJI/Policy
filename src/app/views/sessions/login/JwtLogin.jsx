@@ -253,7 +253,7 @@ export default function Login() {
               <div className="img-wrapper">
                 <img src={img1} width="20%" alt="" />
               </div>
-              <Typography sx={{ display: "flex", justifyContent: "center", alignItems: "center", fontSize: "24px", fontWeight: "bold" }}>
+              <Typography sx={{ mb: -2, display: "flex", justifyContent: "center", alignItems: "center", fontSize: "20px", fontWeight: "500" }}>
                 Policies & Circulars
               </Typography>
               <ContentBox>

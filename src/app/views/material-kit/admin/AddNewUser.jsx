@@ -198,8 +198,12 @@ const AddNewUser = () => {
         if (data.status === false) {
           setIsBtnDisabled(false);
           toast.error(data.message);
+          setIsBtnDisabled(true);
+          setTimeout(() => {
+            setIsBtnDisabled(false);
+          }, 4000);
         } else {
-          setIsBtnDisabled(false);
+          setIsBtnDisabled(true);
           setTimeout(() => {
             navigate("/admin");
           }, 1000);
@@ -208,7 +212,10 @@ const AddNewUser = () => {
       })
       .catch((error) => {
         console.error("Submission error:", error);
-        setIsBtnDisabled(false);
+        setIsBtnDisabled(true);
+          setTimeout(() => {
+            setIsBtnDisabled(false);
+          }, 4000);
         setLoading(false);
         throw error;
       });

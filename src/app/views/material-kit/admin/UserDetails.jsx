@@ -49,20 +49,30 @@ export default function UserDetails() {
   const [error, setError] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [userID, setUserID] = useState(selectedUser?.user_id || "");
+  const [initialuserID, setInitialUserID] = useState(selectedUser?.user_id || "");
   const [documentStatus, setDocumentStatus] = useState(null);
   const [empID, setEmpID] = useState(selectedUser?.emp_id || "");
+  const [initialempID, setInitialEmpID] = useState(selectedUser?.emp_id || "");
   const [empName, setEmpName] = useState(selectedUser?.emp_name || "");
+  const [initialempName, setInitialEmpName] = useState(selectedUser?.emp_name || "");
   const [empEmail, setEmpEmail] = useState(selectedUser?.emp_email || "");
+  const [initialempEmail, setInitialEmpEmail] = useState(selectedUser?.emp_email || "");
   const [empMobile, setEmpMobile] = useState(selectedUser?.emp_mobile || "");
+  const [initialempMobile, setInitialEmpMobile] = useState(selectedUser?.emp_mobile || "");
   const [roleID, setRoleID] = useState(selectedUser?.role_id || 0);
+  const [initialroleID, setInitialRoleID] = useState(selectedUser?.role_id || 0);
   const [roleIDLabel, setRoleIDLabel] = useState([]);
   const [designation, setDesignation] = useState(selectedUser?.designation || "");
+  const [initialdesignation, setInitialDesignation] = useState(selectedUser?.designation || "");
   const [state, setState] = useState(selectedUser?.state || "");
+  const [initialstate, setInitialState] = useState(selectedUser?.state || "");
   const [clusterID, setClusterID] = useState(selectedUser?.cluster_id || "");
   const [userGroup, setUserGroup] = useState(selectedUser?.user_group || 0);
+  const [initialuserGroup, setInitialUserGroup] = useState(selectedUser?.user_group || 0);
   const [userGroupLabel, setUserGroupLabel] = useState("");
   const [empStatusLabel, setEmpStatusLabel] = useState("");
   const [empStatus, setEmpStatus] = useState(selectedUser?.status || 0);
+  const [initialempStatus, setInitialEmpStatus] = useState(selectedUser?.status || 0);
   const [othersSelected, setOthersSelected] = useState(false);
 
   const userToken = useSelector((state) => {
@@ -72,11 +82,17 @@ export default function UserDetails() {
   useEffect(() => {
     if (selectedUser) {
       setUserID(selectedUser.user_id || "");
+      setInitialUserID(selectedUser.user_id || "");
       setEmpID(selectedUser.emp_id || "");
+      setInitialEmpID(selectedUser.emp_id || "");
       setEmpName(selectedUser.emp_name || "");
+      setInitialEmpName(selectedUser.emp_name || "");
       setEmpEmail(selectedUser.emp_email || "");
+      setInitialEmpEmail(selectedUser.emp_email || "");
       setEmpMobile(selectedUser.emp_mobile || "");
+      setInitialEmpMobile(selectedUser.emp_mobile || "");
       setRoleID(selectedUser.role_id || 0);
+      setInitialRoleID(selectedUser.role_id || 0);
       const roleLabel = selectedRoleIDOptions.find((option) => option.value === selectedUser.role_id)?.label;
       if (roleLabel) {
         const selectedLabels = roleLabel.split(", ").map((label) => label.trim());
@@ -84,10 +100,14 @@ export default function UserDetails() {
         setOthersSelected(selectedLabels.includes("View Access Only"));
       }
       setDesignation(selectedUser.designation || "");
+      setInitialDesignation(selectedUser.designation || "");
       setState(selectedUser.state || "");
+      setInitialState(selectedUser.state || "");
       setClusterID(selectedUser.cluster_id || "");
       setUserGroup(selectedUser.user_group || 0);
+      setInitialUserGroup(selectedUser.user_group || 0);
       setEmpStatus(selectedUser.status || 0);
+      setInitialEmpStatus(selectedUser.status || 0);
       setEmpStatusLabel(selectedUser.status == 1 ? "Active" : selectedUser.status == 2 ? "Inactive" : "Unknown");
     }
   }, [selectedUser]);
@@ -193,26 +213,265 @@ export default function UserDetails() {
     navigate(-1);
   };
 
-  const [isBtnDisabled, setIsBtnDisabled] = useState(false);
+  const [isBtnDisabled, setIsBtnDisabled] = useState(true);
+  const [initialFormData, setInitialFormData] = useState({});
 
-  const initialFormData = {
-    user_id: userID,
-    emp_id: empID,
-    emp_name: empName,
-    emp_email: empEmail,
-    emp_mobile: empMobile,
-    role_id: roleID,
-    designation: designation,
-    state: state,
-    cluster_id: clusterID,
-    user_group: userGroup,
-    status: empStatus
-  };
-  const [userData, setUserData] = useState(initialFormData);
+  useEffect(()=>{
+    if (initialuserID) {
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        user_id: initialuserID,
+      }));
+    } else{
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        user_id: "",
+      }));
+    }
+    if (initialempID) {
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        emp_id: initialempID,
+      }));
+    } else{
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        emp_id: "",
+      }));
+    }
+    if (initialempName) {
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        emp_name: initialempName,
+      }));
+    } else{
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        emp_name: "",
+      }));
+    }
+    if (initialempEmail) {
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        emp_email: initialempEmail,
+      }));
+    } else{
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        emp_email: "",
+      }));
+    }
+    if (initialempMobile) {
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        emp_mobile: initialempMobile,
+      }));
+    } else{
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        emp_mobile: "",
+      }));
+    }
+    if (initialroleID) {
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        role_id: initialroleID,
+      }));
+    } else{
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        role_id: 0,
+      }));
+    }
+    if (initialdesignation) {
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        designation: initialdesignation,
+      }));
+    } else{
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        designation: "",
+      }));
+    }
+    if (initialstate) {
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        state: initialstate,
+      }));
+    } else{
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        state: "",
+      }));
+    }
+    if (clusterID) {
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        cluster_id: clusterID,
+      }));
+    } else{
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        cluster_id: "",
+      }));
+    }
+    if (initialuserGroup) {
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        user_group: initialuserGroup,
+      }));
+    } else{
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        user_group: 0,
+      }));
+    }
+    if (initialempStatus) {
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        status: initialempStatus,
+      }));
+    } else{
+      setInitialFormData((prevData) => ({
+        ...prevData,
+        status: 0,
+      }));
+    }
+  },[initialuserID, initialempID, initialempName, initialempEmail, initialempMobile, initialroleID, initialdesignation, initialstate, clusterID, initialuserGroup, initialempStatus]);
+
+  const [userData, setUserData] = useState({});
+  useEffect(()=>{
+    if (userID) {
+      setUserData((prevData) => ({
+        ...prevData,
+        user_id: userID,
+      }));
+    } else{
+      setUserData((prevData) => ({
+        ...prevData,
+        user_id: "",
+      }));
+    }
+    if (empID) {
+      setUserData((prevData) => ({
+        ...prevData,
+        emp_id: empID,
+      }));
+    } else{
+      setUserData((prevData) => ({
+        ...prevData,
+        emp_id: "",
+      }));
+    }
+    if (empName.trimStart()) {
+      setUserData((prevData) => ({
+        ...prevData,
+        emp_name: empName.trimStart(),
+      }));
+    } else{
+      setUserData((prevData) => ({
+        ...prevData,
+        emp_name: "",
+      }));
+    }
+    if (empEmail) {
+      setUserData((prevData) => ({
+        ...prevData,
+        emp_email: empEmail,
+      }));
+    } else{
+      setUserData((prevData) => ({
+        ...prevData,
+        emp_email: "",
+      }));
+    }
+    if (empMobile) {
+      setUserData((prevData) => ({
+        ...prevData,
+        emp_mobile: empMobile,
+      }));
+    } else{
+      setUserData((prevData) => ({
+        ...prevData,
+        emp_mobile: "",
+      }));
+    }
+    if (roleID) {
+      setUserData((prevData) => ({
+        ...prevData,
+        role_id: roleID,
+      }));
+    } else{
+      setUserData((prevData) => ({
+        ...prevData,
+        role_id: 0,
+      }));
+    }
+    if (designation.trimStart()) {
+      setUserData((prevData) => ({
+        ...prevData,
+        designation: designation.trimStart(),
+      }));
+    } else{
+      setUserData((prevData) => ({
+        ...prevData,
+        designation: "",
+      }));
+    }
+    if (state.trimStart()) {
+      setUserData((prevData) => ({
+        ...prevData,
+        state: state.trimStart(),
+      }));
+    } else{
+      setUserData((prevData) => ({
+        ...prevData,
+        state: "",
+      }));
+    }
+    if (clusterID) {
+      setUserData((prevData) => ({
+        ...prevData,
+        cluster_id: clusterID,
+      }));
+    } else{
+      setUserData((prevData) => ({
+        ...prevData,
+        cluster_id: "",
+      }));
+    }
+    if (userGroup) {
+      setUserData((prevData) => ({
+        ...prevData,
+        user_group: userGroup,
+      }));
+    } else{
+      setUserData((prevData) => ({
+        ...prevData,
+        user_group: 0,
+      }));
+    }
+    if (empStatus) {
+      setUserData((prevData) => ({
+        ...prevData,
+        status: empStatus,
+      }));
+    } else{
+      setUserData((prevData) => ({
+        ...prevData,
+        status: 0,
+      }));
+    }
+  },[userID, empID, empName, empEmail, empMobile, roleID, designation, state, clusterID, userGroup, empStatus]);
+
   useEffect(() => {
-    const isModified = Object.keys(userData).some(
-      (key) => userData[key] !== initialFormData[key]
-    );
+    let isModified = false;
+    if(JSON.stringify(userData) !== JSON.stringify(initialFormData)){
+      isModified = true;
+    } else{
+      isModified = false;
+    }
     setIsBtnDisabled(!isModified);
   }, [userData]);
 
@@ -301,8 +560,12 @@ export default function UserDetails() {
         if (data.status === false) {
           setIsBtnDisabled(false);
           toast.error(data.message);
+          setIsBtnDisabled(true);
+          setTimeout(() => {
+            setIsBtnDisabled(false);
+          }, 4000);
         } else {
-          setIsBtnDisabled(false);
+          setIsBtnDisabled(true);
           setTimeout(() => {
             navigate("/admin");
           }, 1000);
@@ -311,7 +574,10 @@ export default function UserDetails() {
       })
       .catch((error) => {
         console.error("Submission error:", error);
-        setIsBtnDisabled(false);
+        setIsBtnDisabled(true);
+          setTimeout(() => {
+            setIsBtnDisabled(false);
+          }, 4000);
         setLoading(false);
         throw error;
       });
@@ -370,7 +636,7 @@ export default function UserDetails() {
                           setUserData({ ...userData, emp_id: event.target.value.toUpperCase() });
                           setEmpID(event.target.value.toUpperCase());
                         }}
-                        InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: '30px', } }}
+                        InputProps={{ readOnly: true, style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: '30px', } }}
                         error={shouldShowEmpIDError}
                         helperText={shouldShowEmpIDError? !isExactLength ? "Input must be exactly 9 characters" : "Must start with SF followed by 7 digits" : ""}
                         inputProps={{ maxLength: 9 }}
@@ -424,7 +690,7 @@ export default function UserDetails() {
                           setUserData({ ...userData, emp_email: event.target.value });
                           setEmpEmail(event.target.value);
                         }}
-                        InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: '30px', } }}
+                        InputProps={{ readOnly: true, style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: '30px', } }}
                         error={shouldShowEmpEmailError}
                         helperText={shouldShowEmpEmailError ? "Email must be in the format *******@spandanasphoorty.com" : ""}
                       />
@@ -450,7 +716,7 @@ export default function UserDetails() {
                           setUserData({ ...userData, emp_mobile: event.target.value });
                           setEmpMobile(event.target.value);
                         }}
-                        InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: '30px', } }}
+                        InputProps={{ readOnly: true, style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: '30px', } }}
                         error={shouldShowEmpMobileNoError}
                         helperText={shouldShowEmpMobileNoError ? (!isExactMobileNoLength ? "Mobile number must be of 10 digits long" : "Mobile number must have numbers only") : ""}
                         inputProps={{ maxLength: 10 }}
@@ -660,7 +926,7 @@ export default function UserDetails() {
                                 const selectedValue = event.target.value;
                                 field.onChange(selectedValue);
                                 setUserData({ ...userData, status: selectedValue })
-                                setEmpStatus(selectedValue);
+                                // setEmpStatus(selectedValue);
                             }}
                             renderValue={(selected) => {
                                 return selected ? selected : empStatusLabel
