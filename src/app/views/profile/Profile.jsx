@@ -22,6 +22,7 @@ const Profile = () => {
   const [storeImage, setStoreImage] = useState("");
   const userProfile = useSelector((state) => state.userData);
   const { profile_pic } = userProfile;
+  console.log("Profile pic ----------- ", profile_pic);
   const [profileImage, setProfileImage] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -88,18 +89,30 @@ const Profile = () => {
       setTimeout(() => {
         setIsBtnDisabled1(false);
       }, 4000);
-      setSelectedFile(null);
-      setProfileImage(storeImage);
+      const decodedToken = jwtDecode(userToken);
+      if(profile_pic){
+        setProfileImage(`${process.env.REACT_APP_POLICY_BACKEND}profile_image/${profile_pic}`);
+        setSelectedFile(null);
+      } else{
+         if(decodedToken.profile_pic){
+          setProfileImage(`${process.env.REACT_APP_POLICY_BACKEND}profile_image/${decodedToken.profile_pic}`);
+          setSelectedFile(null);
+        } else{
+          setProfileImage(storeImage);
+          setSelectedFile(null);
+        }
+      }
       return;
+    } else{
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const imageDataUrl = reader.result;
+        setProfileImage(imageDataUrl);
+        setStoreImage(imageDataUrl);
+      };
+      reader.readAsDataURL(file);
     }
-    setSelectedFile(file);
-    const reader = new FileReader();
-    reader.onload = () => {
-      const imageDataUrl = reader.result;
-      setProfileImage(imageDataUrl);
-      setStoreImage(imageDataUrl);
-    };
-    reader.readAsDataURL(file);
   };
 
   const [isBtnDisabled1, setIsBtnDisabled1] = useState(false);
@@ -125,6 +138,11 @@ const Profile = () => {
       })
       .then((data) => {
         if (data.status) {
+          setIsBtnDisabled1(true);
+          setTimeout(() => {
+            setIsBtnDisabled1(false);
+          }, 4000);
+          setSelectedFile(null);
           const img = data.image;
           if (img) {
             dispatch(setUserData({ profile_pic: img }));
@@ -134,7 +152,10 @@ const Profile = () => {
       })
       .catch((error) => {
         console.error("Submission error:", error);
-        setIsBtnDisabled1(false);
+        setIsBtnDisabled2(true);
+        setTimeout(() => {
+          setIsBtnDisabled2(false);
+        }, 4000);
         setLoading(false);
       });
     toast.promise(submitPromise1, {
@@ -181,6 +202,10 @@ const Profile = () => {
       })
       .then((data) => {
         if (data.status) {
+          setIsBtnDisabled2(true);
+          setTimeout(() => {
+            setIsBtnDisabled2(false);
+          }, 4000);
           setNewPassword("");
           setConfirmNewPassword("");
           setShowFields(false);
@@ -209,7 +234,7 @@ const Profile = () => {
             <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "column", md: "row", lg: "row" }, alignItems: "space-between", justifyContent: { md: "space-between", lg: "space-between" }, border: "1px solid #e0e0e0", boxShadow: "0px 0px 8px 2px rgba(0, 0, 0, 0.1)", p: 4, textAlign: "center", width: "fit-content", margin: "0 auto", gap: 4 }}>
               <form onSubmit={handleFileUpload} encType="multipart/form-data">
                 <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
-                  <Avatar src={profileImage} alt="Profile Picture" sx={{ width: 160, height: 162, borderRadius: "50%", border: "1px solid #000" }} />
+                  <Avatar src={profileImage} sx={{ width: 160, height: 162, borderRadius: "50%", border: "1px solid #000" }} />
                   <input
                     accept=".jpeg,.jpg,.png"
                     id="upload-button-file"

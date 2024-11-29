@@ -61,3 +61,21 @@ export const navigations3 = [
     path: "/admin"
   }
 ];
+
+export const navigations4 = [
+  {
+    name: "Policy, SOP & Guidance Note",
+    icon: "description",
+    path: "/display/list"
+  },
+  {
+    name: "Circulars & Advisories",
+    icon: "timer",
+    path: "/list/ca"
+  },
+  {
+    name: "Admin Portal",
+    icon: "group",
+    path: "/admin"
+  }
+];

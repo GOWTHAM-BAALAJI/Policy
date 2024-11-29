@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
+import { useMediaQuery } from '@mui/material';
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
@@ -43,6 +44,9 @@ export default function UserDetails() {
   const location = useLocation();
   const customFetchWithAuth=useCustomFetch();
   const { title, status, activeTab } = location.state || {};
+
+  const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+
   const [userGroupOptions, setUserGroupOptions] = useState([]);
   const [categorizedUserGroupOptions, setCategorizedUserGroupOptions] = useState({});
   const [loading, setLoading] = useState(true);
@@ -599,11 +603,13 @@ export default function UserDetails() {
                 User Details:
               </Typography>
             </Grid>
+            {!isXs && (
             <Grid item>
               <Button variant="contained" onClick={handleBackClick} sx={{ marginRight: 2, marginTop: 2, height: "28px", backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }}>
                   Back
               </Button>
             </Grid>
+            )}
         </Grid>
         <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 } }}>

@@ -1,6 +1,7 @@
 export const SET_USER_DATA = 'SET_USER_DATA';
+export const CLEAR_USER_DATA = 'CLEAR_USER_DATA';
 
-const initialUserState = JSON.parse(sessionStorage.getItem('userData')) || {
+const initialUserState = JSON.parse(localStorage.getItem('userData')) || {
     user_id: '',
     emp_id: '',
     emp_name: '',
@@ -23,6 +24,8 @@ export const userDataReducer = (state = initialUserState, action) => {
                 ...state,
                 ...action.payload
             };
+        case CLEAR_USER_DATA:
+            return '';
         default:
             return state;
     }

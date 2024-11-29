@@ -1,6 +1,7 @@
 import { memo, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { clearJwtToken } from "../../../../redux/actions/authActions";
+import { clearUserData } from "../../../../redux/actions/userActions";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
@@ -125,6 +126,7 @@ const Layout1Topbar = () => {
 
   const handleSignOut = () => {
     dispatch(clearJwtToken());
+    dispatch(clearUserData());
     navigate("/");
     toast.success("Logged out successfully");
   };

@@ -340,7 +340,7 @@ export default function AdminTable() {
     {
       name: "Action",
       selector: () => null,
-      width: isXs ? "15%" : isMd ? "15%" : "10%",
+      width: isXs ? "20%" : isMd ? "15%" : "10%",
       center: "true",
       cell: (row) => (
         <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>

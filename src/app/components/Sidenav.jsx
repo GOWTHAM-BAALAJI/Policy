@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { jwtDecode } from "jwt-decode";
 import { MatxVerticalNav } from "app/components";
 import useSettings from "app/hooks/useSettings";
-import { navigations1, navigations2, navigations3 } from "app/navigations";
+import { navigations1, navigations2, navigations3, navigations4 } from "app/navigations";
 
 const StyledScrollBar = styled(Scrollbar)(() => ({
   paddingLeft: "1rem",
@@ -74,7 +74,7 @@ export default function Sidenav({ children }) {
       <StyledScrollBar options={{ suppressScrollX: true }}>
         {children}
         <MatxVerticalNav
-          items={roleId === 16 ? navigations2 : isAdmin(roleId) ? navigations3 : navigations1}
+          items={roleId === 16 ? navigations2 : isAdmin(roleId) ? ( roleId === 8 ? navigations4 : navigations3 ) : navigations1}
           onItemClick={() => updateSidebarMode({ mode: "close" })}
         />
       </StyledScrollBar>

@@ -6,6 +6,7 @@ import { Button, Card, Checkbox, ListItemText, MenuItem, FormControl, Grid, Icon
 import CloseIcon from "@mui/icons-material/Close";
 import toast from "react-hot-toast";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
+import { useMediaQuery } from '@mui/material';
 
 const ContentBox = styled("div")(({ theme }) => ({
     margin: "15px",
@@ -40,6 +41,9 @@ const AddExistingCircular = () => {
     const { control } = useForm();
     const navigate = useNavigate();
     const customFetchWithAuth = useCustomFetch();
+
+    const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+
     const [circulartitle, setCircularTitle] = useState("");
     const [circulardescription, setCircularDescription] = useState("");
     const [uploadedFilename, setUploadedFilename] = useState("");
@@ -59,6 +63,10 @@ const AddExistingCircular = () => {
     const userToken = useSelector((state) => {
         return state.token;
     });
+
+    const handleBackClick = () => {
+        navigate(-1);
+    };
 
     const handleCheckboxChange = (optionValue) => {
         setSelectedUserGroup((prevSelected) => {
@@ -218,17 +226,28 @@ const AddExistingCircular = () => {
         <ContentBox className="analytics">
             <Card sx={{ px: 3, py: 3, height: "100%", width: "100%" }}>
                 <form onSubmit={handleSubmit}>
-                    <Grid container spacing={2}>
-                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                    <Grid container justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                        <Grid item>
                             <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "1.4rem", marginLeft: { sm: 2, xs: 2 }, marginTop: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
                                 Add an Existing Circular and Advisory
                             </Typography>
                         </Grid>
+                        {!isXs && (
+                        <Grid item>
+                            <Button variant="contained" onClick={handleBackClick} sx={{ marginRight: 2, marginTop: 2, height: "28px", backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }}>
+                                Back
+                            </Button>
+                        </Grid>
+                        )}
+                    </Grid>
+                    <Grid container spacing={2} sx={{ mb: 2 }}>
                         <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 } }}>
                             <span style={{ fontSize: "0.7rem" }}>
                                 Fields marked with (<span style={{ color: "red" }}>*</span>) are mandatory
                             </span>
                         </Grid>
+                    </Grid>
+                    <Grid container spacing={2} alignItems="flex-start">
                         <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
                             <Grid container alignItems="flex-start" spacing={2}>
                                 <Grid item xs={3} sm={3} md={3} lg={3}>

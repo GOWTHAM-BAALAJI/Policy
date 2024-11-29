@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { jwtDecode } from "jwt-decode";
 
-const PrivateRoute = ({ element }) => {
+const PrivateRoute2 = ({ element }) => {
   const userToken = useSelector((state) => state.token);
   const [roleId, setRoleId] = useState(null);
   useEffect(() => {
@@ -20,7 +20,7 @@ const PrivateRoute = ({ element }) => {
     }
   }, [userToken]);
 
-  return userToken ? ( roleId !== 16 ? <Navigate to="/dashboard" /> : <Navigate to="/display/list" />) : element;
+  return userToken ? ( (roleId !== 16 && roleId !== 8) ? <Navigate to="/dashboard" /> : <Navigate to="/display/list" />) : element;
 };
 
-export default PrivateRoute;
+export default PrivateRoute2;

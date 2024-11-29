@@ -209,6 +209,8 @@ export default function Login() {
         const token = result.jwt;
         // const loggedUser      = result.user_data;
         if (token) {
+          sessionStorage.clear();
+          localStorage.clear();
           await dispatch(setJwtToken(token));
           // await dispatch(setUserData(loggedUser));
           navigate("/dashboard");
@@ -353,7 +355,7 @@ export default function Login() {
             <div className="img-wrapper">
               <img src={img1} width="20%" alt="" />
             </div>
-            <Typography sx={{ display: "flex", justifyContent: "center", alignItems: "center", fontSize: "24px", fontWeight: "bold" }}>
+            <Typography sx={{ display: "flex", justifyContent: "center", alignItems: "center", fontSize: "20px", fontWeight: "500" }}>
               Policies & Circulars
             </Typography>
             <ContentBox>
@@ -377,6 +379,7 @@ export default function Login() {
                         handleChange(e);
                         setEmailIdError("");
                       }}
+                      InputProps={{ readOnly: true }}
                       helperText={emailIdError || (touched.emailId && errors.emailId)}
                       error={Boolean(emailIdError || (errors.emailId && touched.emailId))}
                       sx={{ mb: 2 }}
@@ -414,7 +417,7 @@ export default function Login() {
                     />
 
                     <Box display="flex" alignItems="flex-end" justifyContent="flex-end" sx={{ width: "100%" }}>
-                      <Typography component="a" href="#" onClick={handleResendOTP} sx={{ ml: 2, color: "#ee8812", fontWeight: "500", cursor: resendCooldown > 0 ? "not-allowed" : "pointer", textDecoration: "none", "&:hover": { color: resendCooldown > 0 ? theme.palette.primary.main : "rgb(249, 83, 22)" } }}>
+                      <Typography component="a" href="#" onClick={handleResendOTP} sx={{ ml: 2, color: "#ee8812", fontWeight: "500", cursor: resendCooldown > 0 ? "not-allowed" : "pointer", textDecoration: "none", "&:hover": { color: resendCooldown > 0 ? "#f0a44d" : "rgb(249, 83, 22)" } }}>
                         {resendCooldown > 0 ? `Resend OTP (${resendCooldown}s)` : "Resend OTP"}
                       </Typography>
                     </Box>

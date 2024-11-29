@@ -23,7 +23,7 @@ const PrivateRoute1 = ({ element }) => {
         }
     }, [userToken]);
     
-    return roleId !== 16 ? element : <Navigate to="/display/list" />;
+    return (roleId !== 16 && roleId !== 8) ? element : <Navigate to="/display/list" />;
 };
 
 export default PrivateRoute1;
