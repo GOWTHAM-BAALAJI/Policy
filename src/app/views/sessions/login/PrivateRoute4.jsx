@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { jwtDecode } from "jwt-decode";
 
-const PrivateRoute2 = ({ element }) => {
+const PrivateRoute4 = ({ element }) => {
   const userToken = useSelector((state) => state.token);
   const [roleId, setRoleId] = useState(null);
 
@@ -21,15 +21,19 @@ const PrivateRoute2 = ({ element }) => {
     }
   }, [userToken]);
 
+  const isInitiator = (role_id) => {
+    let temp = Number(role_id);
+    const bin = temp.toString(2);
+    return bin[bin.length - 1] == "1";
+  };
+
   if (roleId === null && userToken) {
     return <div>Loading...</div>;
   }
 
   return userToken
-    ? (roleId !== 16 && roleId !== 8
-      ? <Navigate to="/dashboard" />
-      : <Navigate to="/display/list" />)
-    : element;
+    ? (isInitiator(roleId) ? element : <Navigate to="/" />)
+    : <Navigate to="/" />;
 };
 
-export default PrivateRoute2;
+export default PrivateRoute4;

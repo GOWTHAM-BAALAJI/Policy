@@ -22,7 +22,6 @@ const Profile = () => {
   const [storeImage, setStoreImage] = useState("");
   const userProfile = useSelector((state) => state.userData);
   const { profile_pic } = userProfile;
-  console.log("Profile pic ----------- ", profile_pic);
   const [profileImage, setProfileImage] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
