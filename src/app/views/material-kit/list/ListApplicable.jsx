@@ -339,7 +339,7 @@ const ApplicableTable = () => {
         <Grid container spacing={2}>
           <Grid item lg={6} md={6} sm={6} xs={12}>
             <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontWeight: "bold", fontSize: "1rem", marginLeft: { sm: 2, xs: 2 }, marginTop: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
-              Policies, SOPs and Guidance notes
+              Policies, SOPs & Guidance notes
             </Typography>
           </Grid>
           <Grid item lg={6} md={6} sm={6} xs={12}>

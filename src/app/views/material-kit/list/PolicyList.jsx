@@ -364,7 +364,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
     <Grid container spacing={2}>
       <Grid item lg={6} md={6} sm={12} xs={12} sx={{ mb: {sm:-2, xs:-2} }}>
         <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontWeight: "bold", fontSize: "1rem", marginLeft: { sm: 2, xs: 2 }, marginTop: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
-          Policies, SOPs and Guidance notes
+          Policies, SOPs & Guidance notes
         </Typography>
       </Grid>
       {(isInitiator(roleId)) && (

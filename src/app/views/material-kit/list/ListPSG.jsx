@@ -362,7 +362,7 @@ export default function PSGTable() {
     <Grid container spacing={2} sx={{ width: '100%', height: '100%' }}>
       <Grid item lg={6} md={6} sm={12} xs={12} sx={{ mb: {sm:-2, xs:-2} }}>
         <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontWeight: 'bold', fontSize: '1rem', marginLeft: 2, marginTop: 2, marginRight: 2 }}>
-          Policies, SOPs and Guidance notes
+          Policies, SOPs & Guidance notes
         </Typography>
       </Grid>
       {(isInitiator(roleId)) && (

@@ -2,6 +2,7 @@ import { createContext, useState } from "react";
 import merge from "lodash/merge";
 // CUSTOM COMPONENT
 import { MatxLayoutSettings } from "app/components/MatxLayout/settings";
+import { setMergedSettings } from "app/hooks/useSettings";
 
 export const SettingsContext = createContext({
   settings: MatxLayoutSettings,
@@ -10,10 +11,10 @@ export const SettingsContext = createContext({
 
 export default function SettingsProvider({ settings, children }) {
   const [currentSettings, setCurrentSettings] = useState(settings || MatxLayoutSettings);
-
   const handleUpdateSettings = (update = {}) => {
-    const marged = merge({}, currentSettings, update);
-    setCurrentSettings(marged);
+    const merged = merge({}, currentSettings, update);
+    setCurrentSettings(merged);
+    setMergedSettings(merged);
   };
 
   return (

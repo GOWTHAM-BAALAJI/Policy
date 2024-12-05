@@ -32,18 +32,19 @@ export default function Sidenav({ children }) {
   const updateSidebarMode = (sidebarSettings) => {
     let activeLayoutSettingsName = settings.activeLayout + "Settings";
     let activeLayoutSettings = settings[activeLayoutSettingsName];
-
-    updateSettings({
+  
+    const newSettings = {
       ...settings,
       [activeLayoutSettingsName]: {
         ...activeLayoutSettings,
         leftSidebar: {
           ...activeLayoutSettings.leftSidebar,
-          ...sidebarSettings
-        }
-      }
-    });
-  };
+          ...sidebarSettings,
+        },
+      },
+    };  
+    updateSettings(newSettings);
+  };  
 
   const userToken = useSelector((state)=>{
     return state.token;

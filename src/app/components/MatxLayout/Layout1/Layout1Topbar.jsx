@@ -13,6 +13,8 @@ import { MatxMenu, MatxSearchBox } from "app/components";
 import { themeShadows } from "app/components/MatxTheme/themeColors";
 import { topBarHeight } from "app/utils/constant";
 import { Home, Menu, Person, PowerSettingsNew, Settings } from "@mui/icons-material";
+import SpandanaLogo from "../../../assets/logo.png";
+import { mergedSettings } from "app/hooks/useSettings";
 
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
   width: "55px",
@@ -74,6 +76,8 @@ const Layout1Topbar = () => {
   const { settings, updateSettings } = useSettings();
   const [roleId, setRoleId] = useState(null);
   const [userName, setUsername] = useState(null);
+  const [brandName, setBrandName] = useState(null);
+  let appMode = mergedSettings.layout1Settings?.leftSidebar?.mode;
   const userToken = useSelector((state) => {
     return state.token;
   });
@@ -108,6 +112,26 @@ const Layout1Topbar = () => {
   }, [userToken]);
   
   const isMdScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const isSmScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isXsScreen = useMediaQuery(theme.breakpoints.down("xs"));
+  const isCustomScreenXxs = useMediaQuery("(min-width:0px) and (max-width:300px)");
+  const isCustomScreenXs = useMediaQuery("(min-width:301px) and (max-width:500px)");
+  const isCustomScreenSm = useMediaQuery("(min-width:501px) and (max-width:600px)");
+  useEffect(()=>{
+    if(isCustomScreenSm){
+      setBrandName(3);
+    } else if(isCustomScreenXs){
+      setBrandName(4);
+    } else if(isCustomScreenXxs){
+      setBrandName(5);
+    } else{
+      if(appMode == "close"){
+        setBrandName(1);
+      } else if(appMode == "full"){
+        setBrandName(2);
+      }
+    }
+  },[appMode]);
 
   const updateSidebarMode = (sidebarSettings) => {
     updateSettings({ layout1Settings: { leftSidebar: { ...sidebarSettings } } });
@@ -124,6 +148,52 @@ const Layout1Topbar = () => {
     updateSidebarMode({ mode });
   };
 
+  const spandanaContent = (
+    brandName == 1 ? (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <img
+          src={SpandanaLogo}
+          alt="Spandana Logo"
+          style={{ width: '50px', marginRight: '10px' }}
+        />
+        <Hidden smDown>
+          <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold' }}>SPANDANA POLICIES & CIRCULARS PLATFORM</span>
+        </Hidden>
+      </div>
+    ) : brandName == 3 ? (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <img
+          src={SpandanaLogo}
+          alt="Spandana Logo"
+          style={{ width: '50px', marginRight: '10px' }}
+        />
+          <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold' }}>POLICIES & CIRCULARS PLATFORM</span>
+      </div>
+    ) : brandName == 4 ? (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <img
+          src={SpandanaLogo}
+          alt="Spandana Logo"
+          style={{ width: '50px', marginRight: '10px' }}
+        />
+          <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold' }}>POLICIES & CIRCULARS</span>
+      </div>
+    ) : brandName == 5 ? (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <img
+          src={SpandanaLogo}
+          alt="Spandana Logo"
+          style={{ width: '50px', marginRight: '10px' }}
+        />
+          <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold' }}>P&C PLATFORM</span>
+      </div>
+    ) : (
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold', marginTop: "4px" }}>POLICIES & CIRCULARS PLATFORM</span>
+      </div>
+    )
+  );
+
   const handleSignOut = () => {
     dispatch(clearJwtToken());
     dispatch(clearUserData());
@@ -137,7 +207,7 @@ const Layout1Topbar = () => {
     <TopbarRoot>
       <TopbarContainer>
         <Box display="flex">
-          <StyledIconButton onClick={handleSidebarToggle}>
+          <StyledIconButton onClick={handleSidebarToggle} style={{ marginTop: "4px" }}>
             <Menu />
           </StyledIconButton>
           <Link to={path} style={{ textDecoration: "none", color: "inherit" }}>
@@ -149,7 +219,7 @@ const Layout1Topbar = () => {
                 fontWeight: "bold"
               }}
             >
-              POLICIES & CIRCULARS
+              {spandanaContent}
             </p>
           </Link>
         </Box>

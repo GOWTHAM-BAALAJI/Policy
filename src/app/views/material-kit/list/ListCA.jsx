@@ -259,7 +259,7 @@ export default function CATable() {
         <Grid container spacing={2}>
           <Grid item lg={isInitiator(roleId) ? 6 : 12} md={isInitiator(roleId) ? 6 : 12} sm={isInitiator(roleId) ? 6 : 12} xs={12}>
             <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontWeight: "bold", fontSize: "1rem", marginLeft: { sm: 2, xs: 2 }, marginTop: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
-              Circulars and Advisories
+              Circulars & Advisories
             </Typography>
           </Grid>
           {(isInitiator(roleId)) && (
