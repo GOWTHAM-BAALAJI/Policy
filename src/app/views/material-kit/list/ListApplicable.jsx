@@ -345,7 +345,7 @@ const ApplicableTable = () => {
           <Grid item lg={6} md={6} sm={6} xs={12}>
             <Grid item xs={12} sx={{ display: "flex", justifyContent: { lg: "flex-end", md: "flex-end", sm: "flex-end", xs: "center" }, alignItems: "center", mt: { lg: 2, md: 2, sm: 2, xs: 0 }, mr: { lg: 2, md: 2, sm: 2, xs: 0 } }}>
               <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", mr: 2, mt: 0.5 }}>
-                Type
+                <b>Type</b>
               </Typography>
               <Controller
                 name="documentType"

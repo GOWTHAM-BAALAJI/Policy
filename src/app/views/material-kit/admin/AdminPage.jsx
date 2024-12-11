@@ -628,7 +628,7 @@ export default function AdminTable() {
             {activeTab == 2 && (
               <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center', mt: { lg: 0, md: 0, sm: 0, xs: 2 } }}>
                 <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2 }}>
-                  Type
+                  <b>Type</b>
                 </Typography>
                 <Controller
                   name="documentType"
@@ -657,18 +657,18 @@ export default function AdminTable() {
               </Grid>
             )}
           </Grid>
-          <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2, display: 'flex', flexDirection: { xs: 'column', sm: 'row', md: 'row', lg: 'row' }, justifyContent: 'space-between', alignItems: 'center' }}>
+          <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: 2, marginTop: -2, display: 'flex', flexDirection: { xs: 'column', sm: 'row', md: 'row', lg: 'row' }, justifyContent: 'space-between', alignItems: 'center' }}>
             <Box sx={{ overflowX: 'auto', width: '100%' }}>
               <Tabs value={activeTab} onChange={handleTabChange} textColor="inherit" indicatorColor="secondary" variant="scrollable" scrollButtons="auto" sx={{ whiteSpace: 'nowrap' }}>
-                <Tab label="User Management" value={1} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
-                <Tab label="Policy Management" value={2} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
-                <Tab label="Circular Management" value={3} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+                <Tab label="User Management" value={1} sx={{ minWidth: 0, padding: '6px 0px', margin: 0, fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none", mr: 1 }} />
+                <Tab label="Policy Management" value={2} sx={{ minWidth: 0, padding: '6px 0px', margin: 0, fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none", mr: 1, ml: 1 }} />
+                <Tab label="Circular Management" value={3} sx={{ minWidth: 0, padding: '6px 0px', margin: 0, fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none", ml: 1 }} />
               </Tabs>
             </Box>
             {activeTab == 2 && (
               <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center', mt: { lg: -1, md: -1, sm: 0, xs: 2 } }}>
                 <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2 }}>
-                  Status
+                  <b>Status</b>
                 </Typography>
                 <Controller
                   name="documentStatus"
@@ -704,7 +704,7 @@ export default function AdminTable() {
             {activeTab == 3 && (
               <Grid item xs="auto" sx={{ display: 'flex', alignItems: 'center', mt: { lg: -1, md: -1, sm: 0, xs: 2 } }}>
                 <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2 }}>
-                  Status
+                  <b>Status</b>
                 </Typography>
                 <Controller
                   name="documentCAStatus"
@@ -797,6 +797,11 @@ export default function AdminTable() {
               )}
             </Grid>
             <Grid item sx={{ justifySelf: 'flex-end' }}>
+              {/* {activeTab == 1 && (
+                <Button variant="contained" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", textTransform: "none", marginTop: { sm: -3, xs: 0 }, marginBottom: { sm: -1, xs: 2 }, height: { lg: "30px", md: "30px", sm: "30px", xs: "40px", }, width: { lg: "100%", md: "100%", sm: "100%", xs: "100%" }, backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }} onClick={() => navigate("/admin/create-user")}>
+                  Take Action on New Users
+                </Button>
+              )} */}
               {activeTab == 2 && (
                 <Button variant="contained" startIcon={<AddIcon />} sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", textTransform: "none", marginTop: { sm: -3, xs: 0 }, marginBottom: { sm: -1, xs: 2 }, height: { lg: "30px", md: "30px", sm: "30px", xs: "40px", }, width: { lg: "100%", md: "100%", sm: "100%", xs: "100%" }, backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }} onClick={() => navigate("/admin/policy/add")}>
                   Add Existing Policies

@@ -43,6 +43,7 @@ const InitiatePSG = () => {
   const customFetchWithAuth=useCustomFetch();
 
   const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const isCustomScreenXxs = useMediaQuery("(min-width:0px) and (max-width:390px)");
 
   const [documentType, setDocumentType] = useState("");
   const [title, setTitle] = useState("");
@@ -343,7 +344,7 @@ const InitiatePSG = () => {
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Type of Document <span style={{ color: "red" }}>*</span>
+                    {isXs ? "Doc Type" : "Type of Document"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -363,7 +364,7 @@ const InitiatePSG = () => {
                         <MenuItem value="" disabled>
                           <ListItemText
                             style={{ color: "#bdbdbd" }}
-                            primary="Select a document type"
+                            primary={isXs ? "Select Document Type" : "Select a document type"}
                           />
                         </MenuItem>
                         {types.map((option) => (
@@ -378,7 +379,7 @@ const InitiatePSG = () => {
               </Grid>
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
-              <Grid container alignItems="center" spacing={2}>
+              <Grid container alignItems="flex-start" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
                     Title <span style={{ color: "red" }}>*</span>
@@ -410,10 +411,10 @@ const InitiatePSG = () => {
               </Grid>
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginLeft: { sm: 2, xs: 2 }, marginRight: { sm: 2, xs: 2 } }}>
-              <Grid container alignItems="center" spacing={2}>
+              <Grid container alignItems="flex-start" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Description <span style={{ color: "red" }}>*</span>
+                    {isCustomScreenXxs ? "Descr iption" : "Description"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -511,7 +512,7 @@ const InitiatePSG = () => {
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Select the Reviewer <span style={{ color: "red" }}>*</span>
+                    {isXs ? "Reviewer" : "Select the Reviewer"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -546,7 +547,7 @@ const InitiatePSG = () => {
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Select Approval committee members <span style={{ color: "red" }}>*</span>
+                    {isXs ? "Approval members" : "Select Approval committee members"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -606,7 +607,7 @@ const InitiatePSG = () => {
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Select User Groups for publishing <span style={{ color: "red" }}>*</span>
+                    {isXs ? "User groups" : "Select User Groups for publishing"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>

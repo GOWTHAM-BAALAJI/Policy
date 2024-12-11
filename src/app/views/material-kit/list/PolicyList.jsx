@@ -70,27 +70,44 @@ const StyledSelect = styled(Select)(() => ({
   }
 }));
 
-const PSGTable = ({ initialTab, onTabChange }) => {
+const PSGTable = ({ initialTab, onTabChange, onChangeCount, selectedTab, hasTabChanged }) => {
   const { control } = useForm();
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const queryTab = Number(queryParams.get("tab")) || 4;
   const [activeTab, setActiveTab] = useState(initialTab || queryTab);
+  const [onClickCount, setOnClickCount] = useState(false);
+  const [selectedSection, setSelectedSection] = useState(selectedTab || null);
   const customFetchWithAuth=useCustomFetch();
+  const [tabChangeTrack, setTabChangeTrack] = useState(hasTabChanged || false);
 
   useEffect(() => {
     if (queryTab && queryTab == initialTab) {
       setActiveTab(Number(queryTab));
     }
   }, [queryTab, initialTab]);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-    setCurrentPage(1);
-    handleSearchType(newValue, currentPage, rowsPerPage, searchValue, selectedType);
-  };
+  useEffect(()=>{
+    if(hasTabChanged){
+      setTabChangeTrack(hasTabChanged);
+      setActiveTab(initialTab);
+    }
+  },[hasTabChanged, initialTab]);
+
+  // useEffect(() => {
+  //   if (selectedTab) {
+  //     setSelectedSection(selectedTab);
+  //   }
+  // }, [selectedTab]);
+
+  useEffect(() => {
+    if (selectedTab) {
+      setSelectedSection(selectedTab);
+    }
+  }, [selectedTab]);
+
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [psgList, setPsgList] = useState([]);
   const [userId, setUserId] = useState(null);
@@ -106,20 +123,62 @@ const PSGTable = ({ initialTab, onTabChange }) => {
   const [count, setCount] = useState(waitingForActionCount);
 
   useEffect(() => {
-    if (waitingForActionCount > 0) {
-      setCount(waitingForActionCount);
-      setActiveTab("4");
-    } else if (approvedCount > 0) {
-      setCount(approvedCount);
-      setActiveTab("1");
-    } else if (rejectedCount > 0) {
-      setCount(rejectedCount);
-      setActiveTab("2");
-    } else if (pendingCount > 0) {
-      setCount(pendingCount);
-      setActiveTab("3");
+    if(onChangeCount > 0 && selectedTab){
+      // setCount(onChangeCount);
+      if(selectedTab === "Approved"){
+        setActiveTab(1);
+        setCount(approvedCount);
+      } else if(selectedTab === "Rejected"){
+        setActiveTab(2);
+        setCount(rejectedCount);
+      } else if(selectedTab === "Pending"){
+        setActiveTab(3);
+        setCount(pendingCount);
+      } else if(selectedTab === "Waiting for Action"){
+        setActiveTab(4);
+        setCount(waitingForActionCount);
+      }
+    } else{
+      if (waitingForActionCount > 0) {
+        // setCount(waitingForActionCount);
+        setActiveTab(4);
+      } else if (approvedCount > 0) {
+        // setCount(approvedCount);
+        setActiveTab(1);
+      } else if (rejectedCount > 0) {
+        // setCount(rejectedCount);
+        setActiveTab(2);
+      } else if (pendingCount > 0) {
+        // setCount(pendingCount);
+        setActiveTab(3);
+      }
     }
-  }, [waitingForActionCount, approvedCount, rejectedCount, pendingCount]);
+  }, [waitingForActionCount, approvedCount, rejectedCount, pendingCount, onChangeCount, selectedTab]);
+
+  const handleTabChange = (event, newValue) => {
+    // setActiveTab(newValue);
+    // onTabChange(null);
+    if(onTabChange){
+      onTabChange(newValue);
+    }
+    setActiveTab(newValue);
+    if(newValue == 4){
+      setSelectedSection("Waiting for Action");
+      setCount(waitingForActionCount);
+    } else if(newValue == 1){
+      setSelectedSection("Approved");
+      setCount(approvedCount);
+    } else if(newValue == 2){
+      setSelectedSection("Rejected");
+      setCount(rejectedCount);
+    } else if(newValue == 3){
+      setSelectedSection("Pending");
+      setCount(pendingCount);
+    }
+    setTabChangeTrack(true);
+    setCurrentPage(1);
+    handleSearchData(newValue, currentPage, rowsPerPage, searchValue, selectedType);
+  };
 
   const [selectedType, setSelectedType] = useState("");
   const filteredData = selectedType ? psgList.filter((record) => record.type === Number(selectedType)) : psgList;
@@ -350,7 +409,7 @@ const PSGTable = ({ initialTab, onTabChange }) => {
 
   useEffect(() => {
     if (userToken) {
-      handleSearchType(activeTab, currentPage, rowsPerPage, deboucedSearchValue, selectedType);
+      handleSearchData(activeTab, currentPage, rowsPerPage, deboucedSearchValue, selectedType);
     }
   }, [selectedType, activeTab, currentPage, rowsPerPage, deboucedSearchValue]);
 
@@ -376,8 +435,8 @@ const PSGTable = ({ initialTab, onTabChange }) => {
       )}
       <Grid item lg={(isInitiator(roleId)) ? 2.7 : 6} md={(isInitiator(roleId)) ? 2.7 : 6} sm={(isInitiator(roleId)) ? 5.7 : 12} xs={(isInitiator(roleId)) ? 5.2 : 12}>
         <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end", alignItems: "center", mt: 2, mr: 2 }}>
-          <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", mr: 2, mt: 0.5 }}>
-            Type
+          <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", mr: 1, mt: 0.5 }}>
+            <b>Type</b>
           </Typography>
           <Controller
             name="documentType"
@@ -405,13 +464,13 @@ const PSGTable = ({ initialTab, onTabChange }) => {
           />
         </Grid>
       </Grid>
-      <Grid item lg={12} md={12} sm={12} xs={12} sx={{marginTop: -1}}>
+      <Grid item lg={12} md={12} sm={12} xs={12} sx={{marginLeft: 2, marginTop: -1}}>
       <Box sx={{ overflowX: 'auto', width: '100%' }}>
         <Tabs value={activeTab} onChange={handleTabChange} textColor="inherit" indicatorColor="secondary" variant="scrollable" scrollButtons="auto" sx={{ whiteSpace: 'nowrap' }}>
-          <Tab label="Waiting for Action" value="4" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", fontWeight: 100, textTransform: "none" }}/>
-          <Tab label="Approved" value="1" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", fontWeight: 100, textTransform: "none" }}/>
-          <Tab label="Rejected" value="2" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", fontWeight: 100, textTransform: "none" }}/>
-          <Tab label="Pending" value="3" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", fontWeight: 100, textTransform: "none" }}/>
+          <Tab label="Waiting for Action" value={4} sx={{ minWidth: 0, padding: '6px 0px', margin: 0, fontFamily: "sans-serif", fontSize: "0.875rem", fontWeight: 100, textTransform: "none", mr: 1 }}/>
+          <Tab label="Approved" value={1} sx={{ minWidth: 0, padding: '6px 0px', margin: 0, fontFamily: "sans-serif", fontSize: "0.875rem", fontWeight: 100, textTransform: "none", mr: 1, ml: 1 }}/>
+          <Tab label="Rejected" value={2} sx={{ minWidth: 0, padding: '6px 0px', margin: 0, fontFamily: "sans-serif", fontSize: "0.875rem", fontWeight: 100, textTransform: "none", mr: 1, ml: 1 }}/>
+          <Tab label="Pending" value={3} sx={{ minWidth: 0, padding: '6px 0px', margin: 0, fontFamily: "sans-serif", fontSize: "0.875rem", fontWeight: 100, textTransform: "none", ml: 1 }}/>
         </Tabs>
       </Box>
       </Grid>

@@ -375,7 +375,7 @@ export default function PSGTable() {
       <Grid item lg={(isInitiator(roleId)) ? 2.9 : 6} md={(isInitiator(roleId)) ? 2.7 : 6} sm={(isInitiator(roleId)) ? 5.7 : 12} xs={(isInitiator(roleId)) ? 5.5 : 12}>
         <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mt: 2, mr: 2 }}>
           <Typography variant="h5" sx={{ fontFamily: 'sans-serif', fontSize: '0.875rem', mr: 2, mt: 0.5 }}>
-            Type
+            <b>Type</b>
           </Typography>
           <Controller
             name="documentType"
@@ -403,13 +403,13 @@ export default function PSGTable() {
           />
         </Grid>
       </Grid>
-      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2, display: 'flex', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }, alignItems: 'center' }}>
+      <Grid item lg={12} md={12} sm={12} xs={12} sx={{ marginTop: -2, marginLeft: 2, display: 'flex', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }, alignItems: 'center' }}>
       <Box sx={{ overflowX: 'auto', width: '100%' }}>
         <Tabs value={activeTab} onChange={handleTabChange} textColor="inherit" indicatorColor="secondary" variant="scrollable" scrollButtons="auto" sx={{ whiteSpace: 'nowrap' }}>
-          <Tab label="Waiting for Action" value={4} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Approved" value={1} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Rejected" value={2} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
-          <Tab label="Pending" value={3} sx={{ fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none" }} />
+          <Tab label="Waiting for Action" value={4} sx={{ minWidth: 0, padding: '6px 0px', margin: 0, fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none", mr: 1, }} />
+          <Tab label="Approved" value={1} sx={{ minWidth: 0, padding: '6px 0px', margin: 0, fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none", mr: 1, ml: 1, }} />
+          <Tab label="Rejected" value={2} sx={{ minWidth: 0, padding: '6px 0px', margin: 0, fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none", mr: 1, ml: 1, }} />
+          <Tab label="Pending" value={3} sx={{ minWidth: 0, padding: '6px 0px', margin: 0, fontFamily: "sans-serif", fontSize: '0.875rem', fontWeight: 100, textTransform: "none", ml: 1, }} />
         </Tabs>
       </Box>
       </Grid>

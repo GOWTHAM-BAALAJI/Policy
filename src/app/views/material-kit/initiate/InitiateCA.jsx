@@ -43,6 +43,7 @@ const InitiateCA = () => {
   const customFetchWithAuth=useCustomFetch();
 
   const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const isCustomScreenXxs = useMediaQuery("(min-width:0px) and (max-width:390px)");
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -260,7 +261,7 @@ const InitiateCA = () => {
                         maxRows={1}
                         variant="outlined"
                         fullWidth
-                        placeholder="Enter title"
+                        placeholder="Enter the title"
                         inputProps={{ maxLength: 100 }}
                         InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: "30px" } }}
                       />
@@ -278,7 +279,7 @@ const InitiateCA = () => {
               <Grid container alignItems="flex-start" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Description <span style={{ color: "red" }}>*</span>
+                  {isCustomScreenXxs ? "Descr iption" : "Description"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -293,7 +294,7 @@ const InitiateCA = () => {
                         maxRows={2}
                         variant="outlined"
                         fullWidth
-                        placeholder="Enter description"
+                        placeholder="Enter the description"
                         inputProps={{ maxLength: 1000 }}
                         InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem" } }}
                       />
@@ -376,7 +377,7 @@ const InitiateCA = () => {
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Select User Groups for publishing <span style={{ color: "red" }}>*</span>
+                  {isXs ? "User groups" : "Select User Groups for publishing"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>

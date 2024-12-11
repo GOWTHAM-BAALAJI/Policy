@@ -1,17 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "@mui/material/styles";
 import ReactEcharts from "echarts-for-react";
+import { useMediaQuery } from '@mui/material';
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
 
-export default function DoughnutChart({ height = "100%", width = "100%", selectedTab, onClickSection }) {
+export default function DoughnutChart({ height = "100%", width = "100%", selectedTab, onClickSection, onChangeCount, onTabChange, hasTabChanged, section }) {
   const theme = useTheme();
   const customFetchWithAuth=useCustomFetch();
   const [loading, setLoading] = useState(true);
   const [selectedSection, setSelectedSection] = useState(selectedTab || null);
+  const [storeSelectedSection, setStoreSelectedSection] = useState(null);
   const [approvedCount, setApprovedCount] = useState(0);
   const [rejectedCount, setRejectedCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
   const [waitingForActionCount, setWaitingForActionCount] = useState(0);
+
+  const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const isCustomScreenXs = useMediaQuery("(min-width:220px) and (max-width:600px)");
+
+  useEffect(() => {
+    setStoreSelectedSection(section);
+  }, [section]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,7 +82,7 @@ export default function DoughnutChart({ height = "100%", width = "100%", selecte
       show: true,
       itemGap: 20,
       icon: "circle",
-      bottom: 20,
+      bottom: isCustomScreenXs ? 20 : 10,
       padding: [20, 0, 0, 0],
       textStyle: {
         color: "black",
@@ -137,10 +146,13 @@ export default function DoughnutChart({ height = "100%", width = "100%", selecte
   const onChartClick = (params) => {
     if (params && params.data && params.data.name) {
       setSelectedSection(params.data.name);
+      onChangeCount(params.data.value);
+      onTabChange(params.data.value);
       const clickedSection = params.data.name;
       onClickSection(clickedSection);
     }
     const selectedData = option.series[0].data.find((item) => item.name === params.data.name);
+    onClickSection(selectedData?.name);
     if (selectedData) {
       option.series[0].label.normal = {
         show: true,

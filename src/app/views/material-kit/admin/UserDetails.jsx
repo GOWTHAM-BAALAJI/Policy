@@ -46,6 +46,7 @@ export default function UserDetails() {
   const { title, status, activeTab } = location.state || {};
 
   const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const isCustomScreenXxs = useMediaQuery("(min-width:0px) and (max-width:390px)");
 
   const [userGroupOptions, setUserGroupOptions] = useState([]);
   const [categorizedUserGroupOptions, setCategorizedUserGroupOptions] = useState({});
@@ -625,7 +626,7 @@ export default function UserDetails() {
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Employee ID <span style={{ color: "red" }}>*</span>
+                    {isXs ? "Emp ID" : "Employee ID"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -652,7 +653,7 @@ export default function UserDetails() {
                 </Grid>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Employee Name <span style={{ color: "red" }}>*</span>
+                    {isXs ? "Name" : "Employee Name"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -679,7 +680,7 @@ export default function UserDetails() {
                 </Grid>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Employee Email ID <span style={{ color: "red" }}>*</span>
+                    {isXs ? "Email ID" : "Employee Email ID"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -705,7 +706,7 @@ export default function UserDetails() {
                 </Grid>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Employee Mobile Number <span style={{ color: "red" }}>*</span>
+                    {isXs ? "Mobile No." : "Employee Mobile Number"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -732,7 +733,7 @@ export default function UserDetails() {
                 </Grid>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Role ID <span style={{ color: "red" }}>*</span>
+                    Roles <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -792,7 +793,7 @@ export default function UserDetails() {
                 </Grid>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Designation <span style={{ color: "red" }}>*</span>
+                  {isCustomScreenXxs ? "Desig nation" : "Designation"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
