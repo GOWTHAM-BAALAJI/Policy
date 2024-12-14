@@ -797,11 +797,11 @@ export default function AdminTable() {
               )}
             </Grid>
             <Grid item sx={{ justifySelf: 'flex-end' }}>
-              {/* {activeTab == 1 && (
+              {activeTab == 1 && (
                 <Button variant="contained" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", textTransform: "none", marginTop: { sm: -3, xs: 0 }, marginBottom: { sm: -1, xs: 2 }, height: { lg: "30px", md: "30px", sm: "30px", xs: "40px", }, width: { lg: "100%", md: "100%", sm: "100%", xs: "100%" }, backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }} onClick={() => navigate("/admin/create-user")}>
                   Take Action on New Users
                 </Button>
-              )} */}
+              )}
               {activeTab == 2 && (
                 <Button variant="contained" startIcon={<AddIcon />} sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", textTransform: "none", marginTop: { sm: -3, xs: 0 }, marginBottom: { sm: -1, xs: 2 }, height: { lg: "30px", md: "30px", sm: "30px", xs: "40px", }, width: { lg: "100%", md: "100%", sm: "100%", xs: "100%" }, backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }} onClick={() => navigate("/admin/policy/add")}>
                   Add Existing Policies

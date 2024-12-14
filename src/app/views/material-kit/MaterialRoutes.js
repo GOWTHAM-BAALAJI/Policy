@@ -17,8 +17,8 @@ const AdminUserDetails = Loadable(lazy(() => import("./admin/UserDetails")));
 const AdminAddUser = Loadable(lazy(() => import("./admin/AddNewUser")));
 const AdminAddExistingPolicy = Loadable(lazy(() => import("./admin/AddExistingPolicy")));
 const AdminAddExistingCircular = Loadable(lazy(() => import("./admin/AddExistingCircular")));
-// const AdminAddUserAction = Loadable(lazy(() => import("./admin/UserAction")));
-// const AdminCreateUserDetails = Loadable(lazy(() => import("./admin/CreateUserDetails")));
+const AdminAddUserAction = Loadable(lazy(() => import("./admin/UserAction")));
+const AdminCreateUserDetails = Loadable(lazy(() => import("./admin/CreateUserDetails")));
 
 const materialRoutes = [
   { path: "/initiate/psg", element: <PrivateRoute4 element={<InitiatePSG />} /> },
@@ -33,8 +33,8 @@ const materialRoutes = [
   { path: "/admin/user/add", element: <PrivateRoute3 element={<AdminAddUser />} /> },
   { path: "/admin/policy/add", element: <PrivateRoute3 element={<AdminAddExistingPolicy />} /> },
   { path: "/admin/circular/add", element: <PrivateRoute3 element={<AdminAddExistingCircular />} /> },
-  // { path: "/admin/create-user", element: <PrivateRoute3 element={<AdminAddUserAction />} /> },
-  // { path: "/admin/create-user/:user_id", element: <PrivateRoute3 element={<AdminCreateUserDetails />} /> },
+  { path: "/admin/create-user", element: <PrivateRoute3 element={<AdminAddUserAction />} /> },
+  { path: "/admin/create-user/:user_id", element: <PrivateRoute3 element={<AdminCreateUserDetails />} /> },
 ];
 
 export default materialRoutes;
