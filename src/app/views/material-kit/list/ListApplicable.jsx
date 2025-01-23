@@ -330,7 +330,7 @@ const ApplicableTable = () => {
   const handleRowClick = (row) => {
     setSelectedDocument(row.title);
     setSelectedRow(row);
-    navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status } });
+    navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status, fromHandleRowClick: true } });
   };
 
   return (
@@ -395,7 +395,7 @@ const ApplicableTable = () => {
                 <DataTable
                   columns={columns2}
                   data={psgList2}
-                  progressPending={loading}
+                  // progressPending={loading}
                   pagination
                   paginationServer
                   paginationTotalRows={count}

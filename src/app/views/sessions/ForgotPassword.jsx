@@ -49,6 +49,7 @@ export default function ForgotPassword() {
     "Content-Type": "application/json"
   };
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
+  const current_year = new Date().getFullYear();
 
   const handleFormSubmit = async (values) => {
     setLoading(true);
@@ -162,7 +163,7 @@ export default function ForgotPassword() {
                     </Button>
 
                     <Typography sx={{ mt: 2, fontSize: "12px", fontWeight: 10, fontFamily: "sans-serif", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                      © 2024. Policies & Circulars by Spandana
+                      © {current_year}. Policies & Circulars by Spandana
                     </Typography>
                   </form>
                 )}

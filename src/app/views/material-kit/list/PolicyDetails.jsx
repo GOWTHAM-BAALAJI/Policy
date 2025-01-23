@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import img1 from "../../../assets/download_file_icon.png";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
 import { useMediaQuery } from '@mui/material';
+import { useUserGroup } from "app/contexts/UserGroupContext";
 
 const ContentBox = styled("div")(({ theme }) => ({
   margin: "15px",
@@ -75,12 +76,47 @@ const StyledSelect = styled(Select)(() => ({
   }
 }));
 
-export default function PolicyDetails() {
+export default function PolicyDetails({ policy_user_group }) {
   const { control } = useForm();
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
+
+  useEffect(() => {
+    if (!location.state?.fromHandleRowClick) {
+        navigate(-1);
+    }
+  }, [location.state, navigate]);
+
+  const userToken = useSelector((state) => {
+    return state.token;
+  });
+  const { setUserGroup } = useUserGroup();
+
+  const [fetchedUserGroup, setFetchedUserGroup] = useState(null);
+  
+  useEffect(() => {
+    if (userToken) {
+      try {
+        const decodedToken = jwtDecode(userToken);
+        if (decodedToken.user_group) {
+          setFetchedUserGroup(decodedToken.user_group);
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        setFetchedUserGroup(null);
+      }
+    }
+  }, [userToken]);
+
+  useEffect(() => {
+    if (fetchedUserGroup !== null) {
+      setUserGroup(fetchedUserGroup);
+    }
+  }, [fetchedUserGroup, setUserGroup]);
+
   const { title, status, activeTab } = location.state || {};
+
   const customFetchWithAuth = useCustomFetch();
   const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
   const isMd = useMediaQuery((theme) => theme.breakpoints.down('md'));
@@ -164,10 +200,6 @@ export default function PolicyDetails() {
   useEffect(() => {
     setUserGroupStoreSum(selectedUserGroupSum);
   }, [selectedUserGroupSum]);
-
-  const userToken = useSelector((state) => {
-    return state.token;
-  });
 
   const filteredApprovalMembers = selectedReviewer ? approvalMembersOptions.filter((member) => member.value !== selectedReviewer) : approvalMembersOptions;
   const approvalMembers = approvalMembersWithPriority.map((member) => member.value.toString());
@@ -456,13 +488,22 @@ export default function PolicyDetails() {
       id: documentID
     };
     try {
-      const response = await customFetchWithAuth(url, "POST", 3, requestData);
+      const response = await customFetchWithAuth(url, "GET", 1);
       if (response.ok) {
         const blob = await response.blob();
         const link = document.createElement("a");
         const fileURL = window.URL.createObjectURL(blob);
         link.href = fileURL;
-        link.download = `document-${documentID}.pdf`;
+        const documentIDDisplay = getDisplayPolicyId(documentID);
+        if (selectedDocument?.status == 1 && selectedDocument?.pending_at_id == null) {
+          link.download = `${documentIDDisplay}.pdf`;
+        } else { 
+          if (type === 1) {
+            link.download = version && `${documentIDDisplay}_v${version}.zip`;
+          } else if (type === 2) {
+            link.download = version && `${documentIDDisplay}_v${version}_Review.zip`;
+          }
+        }
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -855,7 +896,7 @@ export default function PolicyDetails() {
                                 </TableCell>
                                 <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
-                                    <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse" }}>
+                                    <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse" }}>
                                       <thead>
                                         <tr>
                                           {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
@@ -869,9 +910,9 @@ export default function PolicyDetails() {
                                         <tr>
                                           {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>{1}</td> */}
                                           <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                            <a href="#" onClick={(e) => { e.preventDefault(); handleFileDownload(parseInt(selectedDocument.version.split(".")[1], 10), 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                            <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                               <div className="img-wrapper">
-                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                   {/* <img src={img1} style={{ width: "100%, height: "auto" }} alt="" /> */}
                                                   <img src={img1} style={{ width: "100%", height: "auto" }} />
                                                 </Box>
@@ -879,7 +920,9 @@ export default function PolicyDetails() {
                                             </a>
                                           </td>
                                           <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                          <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                          {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).slice(0, 1).map((file) => (
+                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                          ))}
                                         </tr>
                                         {/* ))} */}
                                         {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).length === 0 && (
@@ -898,7 +941,7 @@ export default function PolicyDetails() {
                                 </TableCell>
                                 <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
-                                    <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse" }}>
+                                    <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse" }}>
                                       <thead>
                                         <tr>
                                           {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
@@ -912,9 +955,9 @@ export default function PolicyDetails() {
                                         <tr>
                                           {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>{1}</td> */}
                                           <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                            <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                            <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                               <div className="img-wrapper">
-                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                   {/* <img src={img1} style={{ width: "100%, height: "auto" }} alt="" /> */}
                                                   <img src={img1} style={{ width: "100%", height: "auto" }} />
                                                 </Box>
@@ -922,7 +965,9 @@ export default function PolicyDetails() {
                                             </a>
                                           </td>
                                           <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                          <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                          {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file) => (
+                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                          ))}
                                         </tr>
                                         {/* ))} */}
                                         {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).length === 0 && (
@@ -955,7 +1000,7 @@ export default function PolicyDetails() {
                                               <em>{remarksArray[tableIndex]}</em>
                                             </Typography>
                                             <div style={{ overflowX: 'auto', width: '100%' }}>
-                                              <table key={tableIndex} style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                              <table key={tableIndex} style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                                 <thead>
                                                   <tr>
                                                     {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
@@ -969,16 +1014,18 @@ export default function PolicyDetails() {
                                                   <tr>
                                                     {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                                     <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                                      <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                                      <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                         <div className="img-wrapper">
-                                                          <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                          <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                             <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                           </Box>
                                                         </div>
                                                       </a>
                                                     </td>
-                                                    <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                                    <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                                    <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
+                                                    {groupedFiles[version].slice(0, 1).map((file) => (
+                                                      <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                                    ))}
                                                   </tr>
                                                   {/* ))} */}
                                                 </tbody>
@@ -995,11 +1042,11 @@ export default function PolicyDetails() {
                                               Version {version}:
                                             </Typography>
                                             <div style={{ overflowX: 'auto', width: '100%' }}>
-                                              <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                              <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                                 <thead>
                                                   <tr>
                                                     {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
-                                                    <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                                    <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                                     <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                                     <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }} > Uploaded On </th>
                                                   </tr>
@@ -1009,16 +1056,18 @@ export default function PolicyDetails() {
                                                   <tr>
                                                     {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                                     <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                                      <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                                      <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                         <div className="img-wrapper">
-                                                          <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                          <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                             <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                           </Box>
                                                         </div>
                                                       </a>
                                                     </td>
-                                                    <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                                    <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                                    <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
+                                                    {groupedFiles1[version].slice(0, 1).map((file) => (
+                                                      <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                                    ))}
                                                   </tr>
                                                   {/* ))} */}
                                                 </tbody>
@@ -1036,7 +1085,7 @@ export default function PolicyDetails() {
                             <Typography>No files uploaded</Typography>
                           )}
                         </>
-                      ) : (activeTab == 4 || (selectedDocument.status != 1 && selectedDocument.status != 2)) && (isApprover(roleId) || isReviewer(roleId)) && (selectedDocument.reviewer_id === userId || selectedDocument.Policy_status.some((status) => status.approver_id === userId)) ? (
+                      ) : ((selectedDocument.status != 1 && selectedDocument.status != 2) && activeTab == 4) && (isApprover(roleId) || isReviewer(roleId)) && (selectedDocument.reviewer_id === userId || selectedDocument.Policy_status.some((status) => status.approver_id === userId)) ? (
                         <>
                           {selectedDocument.policy_files && Array.isArray(selectedDocument.policy_files) && selectedDocument.policy_files.length > 0 ? (
                             <>
@@ -1046,11 +1095,11 @@ export default function PolicyDetails() {
                                 </TableCell>
                                 <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
-                                    <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                    <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                       <thead>
                                         <tr>
                                           {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
-                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                           <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                           <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                         </tr>
@@ -1060,16 +1109,18 @@ export default function PolicyDetails() {
                                         <tr>
                                           {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {1} </td> */}
                                           <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                            <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                            <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                               <div className="img-wrapper">
-                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                   <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                 </Box>
                                               </div>
                                             </a>
                                           </td>
                                           <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                          <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                          {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file) => (
+                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                          ))}
                                         </tr>
                                         {/* ))} */}
                                       </tbody>
@@ -1096,11 +1147,11 @@ export default function PolicyDetails() {
                                                 <em>{remarksArray[tableIndex]}</em>
                                               </Typography>
                                               <div style={{ overflowX: 'auto', width: '100%' }}>
-                                                <table key={tableIndex} style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                                <table key={tableIndex} style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                                   <thead>
                                                     <tr>
                                                       {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
-                                                      <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                                      <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                                       <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                                       <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                                     </tr>
@@ -1110,16 +1161,18 @@ export default function PolicyDetails() {
                                                     <tr>
                                                       {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                                       <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                                        <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${selectedDocument.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                                        <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                           <div className="img-wrapper">
-                                                            <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                            <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                               <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                             </Box>
                                                           </div>
                                                         </a>
                                                       </td>
-                                                      <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                                      <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                                      <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
+                                                      {groupedFiles[version].slice(0, 1).map((file) => (
+                                                        <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                                      ))}
                                                     </tr>
                                                     {/* ))} */}
                                                   </tbody>
@@ -1134,11 +1187,11 @@ export default function PolicyDetails() {
                                                 Version {version}:
                                               </Typography>
                                               <div style={{ overflowX: 'auto', width: '100%' }}>
-                                                <table key={tableIndex} style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                                <table key={tableIndex} style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                                   <thead>
                                                     <tr>
                                                       {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
-                                                      <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                                      <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                                       <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                                       <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                                     </tr>
@@ -1148,16 +1201,18 @@ export default function PolicyDetails() {
                                                       <tr>
                                                         {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                                         <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                                          <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${selectedDocument.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                                          <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                             <div className="img-wrapper">
-                                                              <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                              <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                                 <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                               </Box>
                                                             </div>
                                                           </a>
                                                         </td>
-                                                        <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                                        <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                                        <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
+                                                        {groupedFiles1[version].slice(0, 1).map((file) => (
+                                                          <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                                        ))}
                                                       </tr>
                                                     {/* ))} */}
                                                   </tbody>
@@ -1189,11 +1244,11 @@ export default function PolicyDetails() {
                                     <b>Files sent for review :</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
-                                    <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                    <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                       <thead>
                                         <tr>
                                           {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
-                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                           <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                           <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                         </tr>
@@ -1203,16 +1258,18 @@ export default function PolicyDetails() {
                                           <tr>
                                             {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${selectedDocument.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
                                               </a>
                                             </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).slice(0, 1).map((file, index) => (
+                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                            ))}
                                           </tr>
                                         {/* ))} */}
                                       </tbody>
@@ -1226,11 +1283,11 @@ export default function PolicyDetails() {
                                     <b>Files uploaded by initiator :</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
-                                    <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                    <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                       <thead>
                                         <tr>
                                           {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
-                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                           <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                           <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                         </tr>
@@ -1240,16 +1297,18 @@ export default function PolicyDetails() {
                                           <tr>
                                             {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${selectedDocument.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
                                               </a>
                                             </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file, index) => (
+                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                            ))}
                                           </tr>
                                         {/* ))} */}
                                       </tbody>
@@ -1263,11 +1322,11 @@ export default function PolicyDetails() {
                                   <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>Remarks :</Typography>
                                   <Typography sx={{ marginBottom: 2 }}><em>{latest_remarks}</em></Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
-                                    <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                    <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                       <thead>
                                         <tr>
                                           {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
-                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                           <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                           <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                         </tr>
@@ -1277,16 +1336,18 @@ export default function PolicyDetails() {
                                           <tr>
                                             {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${selectedDocument.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
                                               </a>
                                             </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).slice(0, 1).map((file, index) => (
+                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                            ))}
                                           </tr>
                                         {/* ))} */}
                                       </tbody>
@@ -1300,11 +1361,11 @@ export default function PolicyDetails() {
                                     <b>Latest files uploaded by the initiator :</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
-                                    <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                    <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                       <thead>
                                         <tr>
                                           {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
-                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                           <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                           <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                         </tr>
@@ -1314,16 +1375,18 @@ export default function PolicyDetails() {
                                           <tr>
                                             {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${selectedDocument.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
                                               </a>
                                             </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file, index) => (
+                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                            ))}
                                           </tr>
                                         {/* ))} */}
                                       </tbody>
@@ -1345,11 +1408,11 @@ export default function PolicyDetails() {
                                         <em>{remarksArray[tableIndex]}</em>
                                       </Typography>
                                       <div style={{ overflowX: 'auto', width: '100%' }}>
-                                        <table key={tableIndex} style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                        <table key={tableIndex} style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                           <thead>
                                             <tr>
                                               {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
-                                              <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                              <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                               <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                               <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                             </tr>
@@ -1359,16 +1422,18 @@ export default function PolicyDetails() {
                                               <tr>
                                                 {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                                 <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                                  <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${selectedDocument.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                                  <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                     <div className="img-wrapper">
-                                                      <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                      <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                         <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                       </Box>
                                                     </div>
                                                   </a>
                                                 </td>
-                                                <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                                <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                                <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
+                                                {groupedFiles[version].slice(0, 1).map((file, index) => (
+                                                  <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                                ))}
                                               </tr>
                                             {/* ))} */}
                                           </tbody>
@@ -1385,11 +1450,11 @@ export default function PolicyDetails() {
                                         Version {version}:
                                       </Typography>
                                       <div style={{ overflowX: 'auto', width: '100%' }}>
-                                        <table key={tableIndex} style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                        <table key={tableIndex} style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                           <thead>
                                             <tr>
                                               {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
-                                              <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                              <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                               <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                               <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                             </tr>
@@ -1399,16 +1464,18 @@ export default function PolicyDetails() {
                                               <tr>
                                                 {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                                 <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                                  <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${selectedDocument.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                                  <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                     <div className="img-wrapper">
-                                                      <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                      <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                         <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                       </Box>
                                                     </div>
                                                   </a>
                                                 </td>
-                                                <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                                <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                                <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
+                                                {groupedFiles1[version].slice(0, 1).map((file, index) => (
+                                                  <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                                ))}
                                               </tr>
                                             {/* ))} */}
                                           </tbody>
@@ -1434,11 +1501,11 @@ export default function PolicyDetails() {
                                     <b>Files sent for review :</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
-                                    <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                    <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                       <thead>
                                         <tr>
                                           {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
-                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                           <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                           <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                         </tr>
@@ -1448,16 +1515,18 @@ export default function PolicyDetails() {
                                           <tr>
                                             {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${selectedDocument.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
                                               </a>
                                             </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).slice(0, 1).map((file, index) => (
+                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                            ))}
                                           </tr>
                                         {/* ))} */}
                                       </tbody>
@@ -1471,11 +1540,11 @@ export default function PolicyDetails() {
                                     <b>Files uploaded by initiator :</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
-                                    <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                    <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                       <thead>
                                         <tr>
                                           {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
-                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                           <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                           <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                         </tr>
@@ -1485,16 +1554,18 @@ export default function PolicyDetails() {
                                           <tr>
                                             {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${selectedDocument.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "45%", xs: "45%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
                                               </a>
                                             </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file, index) => (
+                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                            ))}
                                           </tr>
                                         {/* ))} */}
                                       </tbody>
@@ -1508,11 +1579,11 @@ export default function PolicyDetails() {
                                     <b>Latest files sent for review :</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
-                                    <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                    <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                       <thead>
                                         <tr>
                                           {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
-                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                           <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                           <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                         </tr>
@@ -1522,16 +1593,18 @@ export default function PolicyDetails() {
                                           <tr>
                                             {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${selectedDocument.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "65%", md: "65%", sm: "45%", xs: "65%" }, ml: { lg: 0, md: 0, sm: -1, xs: -1 } }}>
+                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: -1, xs: -1 } }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
                                               </a>
                                             </td>
                                             <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(selectedDocument.createdAt).toLocaleDateString("en-GB")} </td>
+                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).slice(0, 1).map((file, index) => (
+                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                            ))}
                                           </tr>
                                         {/* ))} */}
                                       </tbody>
@@ -1545,32 +1618,34 @@ export default function PolicyDetails() {
                                     <b>Latest files uploaded by the initiator:</b>
                                   </Typography>
                                   <div style={{ overflowX: 'auto', width: '100%' }}>
-                                    <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                    <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                       <thead>
                                         <tr>
-                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th>
-                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                          {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
+                                          <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                           <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                           <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).map((file, index) => (
-                                          <tr key={index}>
-                                            <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
+                                        {/* {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).map((file, index) => ( */}
+                                          <tr>
+                                            {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                             <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                 <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "65%", md: "65%", sm: "45%", xs: "65%" }, ml: { lg: 0, md: 0, sm: -1, xs: -1 } }}>
+                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                     <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                   </Box>
                                                 </div>
                                               </a>
                                             </td>
-                                            <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {file.version} </td>
-                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                            <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
+                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file, index) => (
+                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                            ))}
                                           </tr>
-                                        ))}
+                                        {/* ))} */}
                                       </tbody>
                                     </table>
                                   </div>
@@ -1590,32 +1665,34 @@ export default function PolicyDetails() {
                                         <em>{remarksArray[tableIndex]}</em>
                                       </Typography>
                                       <div style={{ overflowX: 'auto', width: '100%' }}>
-                                        <table key={tableIndex} style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                        <table key={tableIndex} style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                           <thead>
                                             <tr>
-                                              <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th>
-                                              <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                              {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
+                                              <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                               <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                               <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                             </tr>
                                           </thead>
                                           <tbody>
-                                            {groupedFiles[version].map((file, index) => (
-                                              <tr key={index}>
-                                                <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
+                                            {/* {groupedFiles[version].map((file, index) => ( */}
+                                              <tr>
+                                                {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                                 <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                                  <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                                  <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                     <div className="img-wrapper">
-                                                      <Box sx={{ width: { lg: "65%", md: "65%", sm: "45%", xs: "65%" }, ml: { lg: 0, md: 0, sm: -1, xs: -1 } }}>
+                                                      <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                         <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                       </Box>
                                                     </div>
                                                   </a>
                                                 </td>
-                                                <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {file.version} </td>
-                                                <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                                <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
+                                                {groupedFiles[version].slice(0, 1).map((file, index) => (
+                                                  <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                                ))}
                                               </tr>
-                                            ))}
+                                            {/* ))} */}
                                           </tbody>
                                         </table>
                                       </div>
@@ -1630,32 +1707,34 @@ export default function PolicyDetails() {
                                         Version {version}:
                                       </Typography>
                                       <div style={{ overflowX: 'auto', width: '100%' }}>
-                                        <table key={tableIndex} style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
+                                        <table key={tableIndex} style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "20px" }}>
                                           <thead>
                                             <tr>
-                                              <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th>
-                                              <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                              {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
+                                              <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                               <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                               <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                             </tr>
                                           </thead>
                                           <tbody>
-                                            {groupedFiles1[version].map((file, index) => (
-                                              <tr key={index}>
-                                                <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
+                                            {/* {groupedFiles1[version].map((file, index) => ( */}
+                                              <tr>
+                                                {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                                 <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                                  <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                                  <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                                     <div className="img-wrapper">
-                                                      <Box sx={{ width: { lg: "65%", md: "65%", sm: "45%", xs: "65%" }, ml: { lg: 0, md: 0, sm: -1, xs: -1 } }}>
+                                                      <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                         <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                                       </Box>
                                                     </div>
                                                   </a>
                                                 </td>
-                                                <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {file.version} </td>
-                                                <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                                <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
+                                                {groupedFiles1[version].slice(0, 1).map((file, index) => (
+                                                  <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                                ))}
                                               </tr>
-                                            ))}
+                                            {/* ))} */}
                                           </tbody>
                                         </table>
                                       </div>
@@ -1674,32 +1753,34 @@ export default function PolicyDetails() {
                             </TableCell>
                             <TableCell sx={{ pl: 1, width: '70%', verticalAlign: "top" }}>
                               <div style={{ overflowX: 'auto', width: '100%' }}>
-                                <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "10px" }}>
+                                <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "10px" }}>
                                   <thead>
                                     <tr>
-                                      <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th>
-                                      <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                      {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
+                                      <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                       <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                       <th style={{ width: "25%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {selectedDocument.policy_files.map((file, index) => (
-                                      <tr key={index}>
-                                        <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
+                                    {/* {selectedDocument.policy_files.map((file, index) => ( */}
+                                      <tr>
+                                        {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                         <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                          <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                          <a onClick={(e) => { e.preventDefault(); handleFileDownload("", null); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                             <div className="img-wrapper">
-                                              <Box sx={{ width: { lg: "65%", md: "65%", sm: "45%", xs: "65%" }, ml: { lg: 0, md: 0, sm: -1, xs: -1 } }}>
+                                              <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                 <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                               </Box>
                                             </div>
                                           </a>
                                         </td>
-                                        <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {file.version} </td>
-                                        <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                        <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
+                                        {selectedDocument.policy_files.map((file, index) => (
+                                          <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                        ))}
                                       </tr>
-                                    ))}
+                                    {/* ))} */}
                                   </tbody>
                                 </table>
                               </div>
@@ -1733,32 +1814,34 @@ export default function PolicyDetails() {
                             </TableCell>
                             <TableCell sx={{ pl: 1, width: '70%', verticalAlign: "top" }}>
                               <div style={{ overflowX: 'auto', width: '100%' }}>
-                                <table style={{ minWidth: isXs ? "200%" : isMd ? "150%" : "100%", borderCollapse: "collapse", marginBottom: "10px" }}>
+                                <table style={{ minWidth: isXs ? "200%" : "100%", borderCollapse: "collapse", marginBottom: "10px" }}>
                                   <thead>
                                     <tr>
-                                      <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th>
-                                      <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> File </th>
+                                      {/* <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> S.no </th> */}
+                                      <th style={{ width: "15%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Files </th>
                                       <th style={{ width: "20%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Version </th>
                                       <th style={{ width: "30%", borderBottom: "1px solid #ddd", padding: "8px", textAlign: "left" }}> Uploaded On </th>
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {selectedDocument.policy_files.map((file, index) => (
-                                      <tr key={index}>
-                                        <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td>
+                                    {/* {selectedDocument.policy_files.map((file, index) => ( */}
+                                      <tr>
+                                        {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
                                         <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                          <a href={`${process.env.REACT_APP_POLICY_BACKEND}policy_document/${file.file_name}`} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                          <a onClick={(e) => { e.preventDefault(); handleFileDownload("", null); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
                                             <div className="img-wrapper">
-                                              <Box sx={{ width: { lg: "65%", md: "65%", sm: "45%", xs: "65%" }, ml: { lg: 0, md: 0, sm: -1, xs: -1 } }}>
+                                              <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
                                                 <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
                                               </Box>
                                             </div>
                                           </a>
                                         </td>
-                                        <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {file.version} </td>
-                                        <td style={{ width: "30%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                        <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
+                                        {selectedDocument.policy_files.map((file, index) => (
+                                          <td style={{ width: "30%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                        ))}
                                       </tr>
-                                    ))}
+                                    {/* ))} */}
                                   </tbody>
                                 </table>
                               </div>

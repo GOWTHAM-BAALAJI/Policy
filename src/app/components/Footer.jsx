@@ -36,6 +36,7 @@ const FooterContent = styled("div")(() => ({
 export default function Footer() {
   const theme = useTheme();
   const { settings } = useSettings();
+  const current_year = new Date().getFullYear();
 
   const footerTheme = settings.themes[settings.footer.theme] || theme;
 
@@ -44,7 +45,7 @@ export default function Footer() {
       <AppBar color="primary" position="static" sx={{ zIndex: 96 }}>
         <AppFooter>
           <FooterContent>
-            2024 © Policies & Circulars by Spandana
+            {current_year} © Policies & Circulars by Spandana
           </FooterContent>
         </AppFooter>
       </AppBar>

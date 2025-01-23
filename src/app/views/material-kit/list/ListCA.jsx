@@ -64,6 +64,7 @@ export default function CATable() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selectedRow, setSelectedRow] = useState(null);
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [error, setError] = useState(null);
 
   const userToken = useSelector((state) => {
     return state.token;
@@ -230,26 +231,26 @@ export default function CATable() {
   const handleRowClick = async (row) => {
     setSelectedDocument(row.title);
     setSelectedRow(row);
+
+    const url = `${process.env.REACT_APP_POLICY_BACKEND}circular-advisories/download-circular/${row.id}`;
+
     try {
-      const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}circular-advisories/${row.id}`,"GET",1,{});
-      const data = await response.json();
-      if (data.status && data.data.file_name) {
-        const fileResponse = await customFetchWithAuth(
-          `${process.env.REACT_APP_POLICY_BACKEND}CA_document/${data.data.file_name}`,"GET",1,{});
-        const blob = await fileResponse.blob();
-        const url = window.URL.createObjectURL(new Blob([blob]));
+      const response = await customFetchWithAuth(url, "GET", 1);
+      if (response.ok) {
+        const blob = await response.blob();
         const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", data.data.file_name);
+        const fileURL = window.URL.createObjectURL(blob);
+        link.href = fileURL;
+        const documentIDDisplay = getDisplayCircularId(row.id);
+        link.download = `${documentIDDisplay}.pdf`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
       } else {
-        console.error("File not found or invalid response");
+        setError("Failed to download the file. Please try again.");
       }
-    } catch (error) {
-      console.error("Error fetching document:", error);
+    } catch (err) {
+      setError("Failed to fetch the requested file");
     }
   };
 
@@ -291,7 +292,7 @@ export default function CATable() {
                   <DataTable
                     columns={columns}
                     data={psgList}
-                    progressPending={loading}
+                    // progressPending={loading}
                     pagination
                     paginationServer
                     paginationTotalRows={count}

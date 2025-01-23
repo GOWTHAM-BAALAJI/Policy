@@ -416,7 +416,7 @@ const PSGTable = ({ initialTab, onTabChange, onChangeCount, selectedTab, hasTabC
   const handleRowClick = (row) => {
     setSelectedDocument(row.title);
     setSelectedRow(row);
-    navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status, activeTab } });
+    navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status, activeTab, fromHandleRowClick: true } });
   };
 
   return (
@@ -496,7 +496,7 @@ const PSGTable = ({ initialTab, onTabChange, onChangeCount, selectedTab, hasTabC
             <DataTable
               columns={columns}
               data={filteredData}
-              progressPending={loading}
+              // progressPending={loading}
               pagination
               paginationServer
               paginationTotalRows={count}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, Card, Grid, IconButton, MenuItem, Select, styled, Tabs, Tab, TextField, Typography } from "@mui/material";
+import { Badge, Box, Button, Card, Grid, IconButton, MenuItem, Select, styled, Tabs, Tab, TextField, Typography } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -112,6 +112,25 @@ export default function AdminTable() {
   const [selectedType, setSelectedType] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedCAStatus, setSelectedCAStatus] = useState("");
+  // const [newUsersCount, setNewUsersCount] = useState(0);
+
+  // useEffect(() => {
+  //     const fetchData = async () => {
+  //       try {
+  //         const response1 = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}admin/get-new-users-count`, "GET", 1, {});
+  //         const data1 = await response1.json();
+  //         if (data1 && data1.status) {
+  //           const newUsersCount = data1.count;
+  //           setNewUsersCount(newUsersCount || 0);
+  //         }
+  //       } catch (error) {
+  //         console.error("Error fetching data", error);
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     };
+  //     fetchData();
+  //   }, [newUsersCount]);
 
   const userToken = useSelector((state) => {
     return state.token;
@@ -553,12 +572,12 @@ export default function AdminTable() {
       setSelectedDocument(row.user_id);
       setSelectedRow(row);
       navigate(`/admin/user/${row.user_id}`, {
-        state: { user_id: row.user_id, emp_id: row.emp_id, emp_name: row.emp_name, activeTab }
+        state: { user_id: row.user_id, emp_id: row.emp_id, emp_name: row.emp_name, activeTab, fromHandleRowClick: true }
       });
     } else if (activeTab == 2) {
       setSelectedDocument(row.title);
       setSelectedRow(row);
-      navigate(`/admin/policy/${row.id}`, { state: { id: row.id, title: row.title, activeTab } });
+      navigate(`/admin/policy/${row.id}`, { state: { id: row.id, title: row.title, activeTab, fromHandleRowClick: true } });
     }
   };
 
@@ -736,7 +755,7 @@ export default function AdminTable() {
               </Grid>
             )}
             {activeTab == 1 && (
-              <Button variant="contained" startIcon={<AddIcon />} sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", textTransform: "none", marginTop: { sm: -1, xs: 2 }, height: "25px", width: { lg: "14%", md: "16%", sm: "30%", xs: "50%" }, backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }} onClick={() => navigate("/admin/user/add")}>
+              <Button variant="contained" startIcon={<AddIcon />} sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", textTransform: "none", marginTop: { sm: -1, xs: 2 }, height: "25px", width: { lg: "14%", md: "18%", sm: "30%", xs: "50%" }, backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }} onClick={() => navigate("/admin/user/add")}>
                 New User
               </Button>
             )}
@@ -797,11 +816,16 @@ export default function AdminTable() {
               )}
             </Grid>
             <Grid item sx={{ justifySelf: 'flex-end' }}>
-              {activeTab == 1 && (
-                <Button variant="contained" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", textTransform: "none", marginTop: { sm: -3, xs: 0 }, marginBottom: { sm: -1, xs: 2 }, height: { lg: "30px", md: "30px", sm: "30px", xs: "40px", }, width: { lg: "100%", md: "100%", sm: "100%", xs: "100%" }, backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }} onClick={() => navigate("/admin/create-user")}>
-                  Take Action on New Users
-                </Button>
-              )}
+              {/* {activeTab == 1 && (
+                <Box sx={{ position: 'relative' }}>
+                  <Button variant="contained" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", textTransform: "none", marginTop: { sm: -3, xs: 0 }, marginBottom: { sm: -1, xs: 2 }, height: { lg: "30px", md: "30px", sm: "30px", xs: "40px", }, width: { lg: "100%", md: "100%", sm: "100%", xs: "100%" }, backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }} onClick={() => navigate("/admin/create-user")}>
+                    Take Action on New Users
+                  </Button>
+                  {newUsersCount > 0 && 
+                    <Badge badgeContent={newUsersCount} color="success" sx={{ position: 'absolute', top: { lg: -8, md: -8, sm: -8, xs: 0}, right: 0, fontSize: '14px', width: '20px', height: '20px', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center' }} />
+                  }
+                </Box>
+              )} */}
               {activeTab == 2 && (
                 <Button variant="contained" startIcon={<AddIcon />} sx={{ fontFamily: "sans-serif", fontSize: "0.875rem", textTransform: "none", marginTop: { sm: -3, xs: 0 }, marginBottom: { sm: -1, xs: 2 }, height: { lg: "30px", md: "30px", sm: "30px", xs: "40px", }, width: { lg: "100%", md: "100%", sm: "100%", xs: "100%" }, backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }} onClick={() => navigate("/admin/policy/add")}>
                   Add Existing Policies
@@ -819,7 +843,7 @@ export default function AdminTable() {
               <DataTable
                 columns={columns}
                 data={psgList}
-                progressPending={loading}
+                // progressPending={loading}
                 pagination
                 paginationServer
                 paginationTotalRows={count}

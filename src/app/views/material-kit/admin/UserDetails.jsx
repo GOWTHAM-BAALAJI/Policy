@@ -45,6 +45,12 @@ export default function UserDetails() {
   const customFetchWithAuth=useCustomFetch();
   const { title, status, activeTab } = location.state || {};
 
+  useEffect(() => {
+        if (!location.state?.fromHandleRowClick) {
+            navigate(-1);
+        }
+      }, [location.state, navigate]);
+
   const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
   const isCustomScreenXxs = useMediaQuery("(min-width:0px) and (max-width:390px)");
 

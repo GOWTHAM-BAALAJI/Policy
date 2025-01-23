@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Checkbox, ListItemText, MenuItem, FormControl, Grid, styled, Select, Typography, TextField } from "@mui/material";
+import { Button, Card, Checkbox, ListItemText, ListSubheader, MenuItem, FormControl, Grid, styled, Select, Typography, TextField } from "@mui/material";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import useCustomFetch from "../../../hooks/useFetchWithAuth";
@@ -42,6 +42,8 @@ const AddNewUser = () => {
   const customFetchWithAuth = useCustomFetch();
 
   const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+  const isCustomScreenXxs = useMediaQuery("(min-width:0px) and (max-width:350px)");
+  const isCustomScreenXxs1 = useMediaQuery("(min-width:0px) and (max-width:400px)");
 
   const [empID, setEmpID] = useState("");
   const [empName, setEmpName] = useState("");
@@ -54,9 +56,8 @@ const AddNewUser = () => {
   const [designation, setDesignation] = useState("");
   const [state, setState] = useState("");
   const [clusterID, setClusterID] = useState("");
-  const [selectedUserGroup, setSelectedUserGroup] = useState("");
-  const [selectedUserGroupSum, setSelectedUserGroupSum] = useState(0);
-  const [userGroupStoreSum, setUserGroupStoreSum] = useState(0);
+  const [selectedUserGroup, setSelectedUserGroup] = useState(0);
+  const [userGroupLabel, setUserGroupLabel] = useState("");
   const [userGroupOptions, setUserGroupOptions] = useState([]);
   const [categorizedUserGroupOptions, setCategorizedUserGroupOptions] = useState({});
   const [loading, setLoading] = useState(false);
@@ -80,10 +81,6 @@ const AddNewUser = () => {
   useEffect(() => {
     setRoleStoreSum(roleSum);
   }, [roleSum]);
-
-  useEffect(() => {
-    setUserGroupStoreSum(selectedUserGroupSum);
-  }, [selectedUserGroupSum]);
 
   const userToken = useSelector((state) => {
     return state.token;
@@ -139,7 +136,7 @@ const AddNewUser = () => {
     event.preventDefault();
     setLoading(true);
     setIsBtnDisabled(true);
-    if (!empID || !empName || !empEmail || (!empMobile && empMobile.length === 0) || (role.length === 0 && roleSum === 0) || !designation || !selectedUserGroup) {
+    if (!empID || !empName || !empEmail || (!empMobile && empMobile.length === 0) || (role.length === 0 && roleSum === 0) || !designation || selectedUserGroup === 0) {
       toast.error("Please fill in all the required fields");
       setIsBtnDisabled(true);
       setTimeout(() => {
@@ -263,7 +260,7 @@ const AddNewUser = () => {
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Employee ID <span style={{ color: "red" }}>*</span>
+                    {isCustomScreenXxs ? "Emp ID" : "Employee ID"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -276,7 +273,7 @@ const AddNewUser = () => {
                         rows={1}
                         maxRows={1}
                         variant="outlined"
-                        placeholder="Enter the Employee ID"
+                        placeholder={isCustomScreenXxs ? "Employee ID" : "Enter the Employee ID"}
                         fullWidth
                         InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: '30px', } }}
                         error={shouldShowEmpIDError}
@@ -292,7 +289,7 @@ const AddNewUser = () => {
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Employee Name <span style={{ color: "red" }}>*</span>
+                  {isCustomScreenXxs ? "Emp Name" : "Employee Name"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -305,7 +302,7 @@ const AddNewUser = () => {
                         rows={1}
                         maxRows={1}
                         variant="outlined"
-                        placeholder="Enter the Employee Name"
+                        placeholder={isCustomScreenXxs ? "Employee Name" : "Enter the Employee Name"}
                         fullWidth
                         InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: '30px', } }}
                         error={/[^a-zA-Z\s]/.test(empName)}
@@ -321,7 +318,7 @@ const AddNewUser = () => {
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Employee Email <span style={{ color: "red" }}>*</span>
+                  {isCustomScreenXxs ? "Emp Email" : "Employee Email"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -334,7 +331,7 @@ const AddNewUser = () => {
                         rows={1}
                         maxRows={1}
                         variant="outlined"
-                        placeholder="Enter the Employee Email"
+                        placeholder={isCustomScreenXxs ? "Employee Email" : "Enter the Employee Email"}
                         fullWidth
                         InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: '30px', } }}
                         error={shouldShowEmpEmailError}
@@ -349,7 +346,7 @@ const AddNewUser = () => {
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Mobile Number <span style={{ color: "red" }}>*</span>
+                  {isCustomScreenXxs ? "Mobile No." : "Mobile Number"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -362,7 +359,7 @@ const AddNewUser = () => {
                         rows={1}
                         maxRows={1}
                         variant="outlined"
-                        placeholder="Enter the Employee Mobile Number"
+                        placeholder={isCustomScreenXxs ? "Mobile Number" : "Enter the Mobile Number"}
                         fullWidth
                         InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: '30px', } }}
                         error={shouldShowEmpMobileNoError}
@@ -436,7 +433,7 @@ const AddNewUser = () => {
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={3} sm={3} md={3} lg={3}>
                   <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "0.875rem" }}>
-                    Designation <span style={{ color: "red" }}>*</span>
+                  {isCustomScreenXxs1 ? "Desig nation" : "Designation"} <span style={{ color: "red" }}>*</span>
                   </Typography>
                 </Grid>
                 <Grid item xs={9} sm={9} md={9} lg={9}>
@@ -449,7 +446,7 @@ const AddNewUser = () => {
                         rows={1}
                         maxRows={1}
                         variant="outlined"
-                        placeholder="Enter the Employee Designation"
+                        placeholder={isCustomScreenXxs1 ? "Employee Designation" : "Enter the Employee Designation"}
                         fullWidth
                         InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: '30px', } }}
                       />
@@ -475,7 +472,7 @@ const AddNewUser = () => {
                         rows={1}
                         maxRows={1}
                         variant="outlined"
-                        placeholder="Enter the Employee State"
+                        placeholder={isCustomScreenXxs ? "Employee State" : "Enter the Employee State"}
                         fullWidth
                         InputProps={{ style: { fontFamily: "sans-serif", fontSize: "0.875rem", height: '30px', } }}
                       />
@@ -494,69 +491,54 @@ const AddNewUser = () => {
                 <Grid item xs={9} sm={9} md={9} lg={9}>
                   <Grid container alignItems="center" spacing={2}>
                     <Grid item xs>
-                      <FormControl variant="outlined" fullWidth sx={{ position: "relative" }}>
-                        <Controller
-                          name="userGroups"
-                          control={control}
-                          render={({ field }) => (
+                    <Controller
+                        name="userGroups"
+                        control={control}
+                        render={({ field }) => (
                             <StyledSelect
-                              labelId="user-groups-label"
-                              id="userGroups"
-                              value={selectedUserGroup || ""}
-                              displayEmpty
-                              onChange={(e) => {
-                                setSelectedUserGroup(e.target.value);
-                              }}
+                            labelId="user-groups-label"
+                            id="userGroups"
+                            displayEmpty
+                            value={userGroupLabel}
+                            onChange={(event) => {
+                              const selectedLabel = event.target.value;
+                              const selectedOption = userGroupOptions.find(option => option.label === selectedLabel);
+                              
+                              if (selectedOption) {
+                                setUserGroupLabel(selectedOption.label);
+                                setSelectedUserGroup(selectedOption.value);
+                                field.onChange(selectedOption.value);
+                              }
+                            }}
+                            renderValue={(selected) => {
+                                return selected ? selected : <span style={{ color: "#bdbdbd" }}>{isCustomScreenXxs ? "User Group" : "Select a user group"}</span>
+                            }}
                             >
-                              <MenuItem value="" disabled>
-                                <ListItemText style={{ color: "#bdbdbd" }} primary="Select a user group" />
-                              </MenuItem>
-                              {userGroupOptions.map((option) => (
-                                <MenuItem key={option.value} value={option.value}>
-                                  <ListItemText primary={option.label} />
-                                </MenuItem>
-                              ))}
-                            </StyledSelect>
-                          )}
-                        />
-                        {/* <Controller
-                          name="userGroups"
-                          control={control}
-                          render={({ field }) => (
-                            <StyledSelect
-                              labelId="user-groups-label"
-                              id="userGroups"
-                              value={field.value || ""}
-                              displayEmpty
-                              onChange={(e) => {
-                                field.onChange(e.target.value); // Sync Controller's field value
-                                setSelectedUserGroup(e.target.value); // Update local state
-                              }}
-                            >
-                              <MenuItem value="" disabled>
-                                <ListItemText
-                                  style={{ color: "#bdbdbd" }}
-                                  primary="User Group"
-                                />
-                              </MenuItem>
-                              {Object.entries(categorizedUserGroupOptions).map(([category, options]) => (
-                                <div key={category}>
-                                  <MenuItem>
-                                    <Typography variant="h8" color="#ee8812" fontWeight="bolder">
-                                      {category}
-                                    </Typography>
+                            {Object.entries(categorizedUserGroupOptions).map(([category, options]) => (
+                              <div key={category}>
+                                <ListSubheader disableSticky>
+                                  <Typography variant="h8" color="#ee8812" fontWeight="bolder">
+                                    {category}
+                                  </Typography>
+                                </ListSubheader>
+                                {options.map((option) => (
+                                  <MenuItem
+                                    key={option.value}
+                                    value={option.label}
+                                    onClick={() => {
+                                      setSelectedUserGroup(option.value);
+                                      setUserGroupLabel(option.label);
+                                      field.onChange(option.label);
+                                    }}
+                                  >
+                                    <ListItemText primary={option.label} />
                                   </MenuItem>
-                                  {options.map((option) => (
-                                    <MenuItem key={option.value} value={option.value}>
-                                      <ListItemText primary={option.label} />
-                                    </MenuItem>
-                                  ))}
-                                </div>
-                              ))}
+                                ))}
+                              </div>
+                            ))}
                             </StyledSelect>
-                          )}
-                        /> */}
-                      </FormControl>
+                        )}
+                    />
                     </Grid>
                   </Grid>
                 </Grid>

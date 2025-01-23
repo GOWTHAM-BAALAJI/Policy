@@ -63,6 +63,7 @@ export default function Login() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
+  const current_year = new Date().getFullYear();
 
   const userToken = useSelector((state) => {
     return state.token;
@@ -334,7 +335,7 @@ export default function Login() {
                       </LoadingButton>
 
                       <Typography sx={{ fontSize: "12px", fontWeight: 10, fontFamily: "sans-serif", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                        © 2024. Policies & Circulars by Spandana
+                        © {current_year}. Policies & Circulars by Spandana
                       </Typography>
                     </form>
                   )}
@@ -422,7 +423,7 @@ export default function Login() {
                       </Typography>
                     </Box>
                     <Typography sx={{ fontSize: "12px", fontWeight: 10, fontFamily: "sans-serif", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                      © 2024. Policies & Circulars by Spandana
+                      © {current_year}. Policies & Circulars by Spandana
                     </Typography>
                   </form>
                 )}
