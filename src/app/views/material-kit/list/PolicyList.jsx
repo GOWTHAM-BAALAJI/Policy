@@ -123,37 +123,52 @@ const PSGTable = ({ initialTab, onTabChange, onChangeCount, selectedTab, hasTabC
   const [count, setCount] = useState(waitingForActionCount);
 
   useEffect(() => {
-    if(onChangeCount > 0 && selectedTab){
-      // setCount(onChangeCount);
-      if(selectedTab === "Approved"){
-        setActiveTab(1);
-        setCount(approvedCount);
-      } else if(selectedTab === "Rejected"){
-        setActiveTab(2);
-        setCount(rejectedCount);
-      } else if(selectedTab === "Pending"){
-        setActiveTab(3);
-        setCount(pendingCount);
-      } else if(selectedTab === "Waiting for Action"){
+    // Check if the URL contains the ?tab query parameter
+    if (window.location.search.includes("?tab")) {
+      const params = new URLSearchParams(location.search);
+      const tabParam = params.get('tab');
+
+      if (tabParam) {
+        const tabIndex = parseInt(tabParam, 10);
+        if (tabIndex >= 1 && tabIndex <= 4) {
+          setActiveTab(tabIndex);
+          // Set the count based on the active tab
+          if (tabIndex === 1) {
+            setCount(approvedCount);
+            setSelectedSection("Approved");
+          } else if (tabIndex === 2) {
+            setCount(rejectedCount);
+            setSelectedSection("Rejected");
+          } else if (tabIndex === 3) {
+            setCount(pendingCount);
+            setSelectedSection("Pending");
+          } else if (tabIndex === 4) {
+            setCount(waitingForActionCount);
+            setSelectedSection("Waiting for Action");
+          }
+        }
+      }
+    } else {
+      // If no tab parameter, set the active tab based on counts
+      if (waitingForActionCount > 0) {
         setActiveTab(4);
         setCount(waitingForActionCount);
-      }
-    } else{
-      if (waitingForActionCount > 0) {
-        // setCount(waitingForActionCount);
-        setActiveTab(4);
+        setSelectedSection("Waiting for Action");
       } else if (approvedCount > 0) {
-        // setCount(approvedCount);
         setActiveTab(1);
+        setCount(approvedCount);
+        setSelectedSection("Approved");
       } else if (rejectedCount > 0) {
-        // setCount(rejectedCount);
         setActiveTab(2);
+        setCount(rejectedCount);
+        setSelectedSection("Rejected");
       } else if (pendingCount > 0) {
-        // setCount(pendingCount);
         setActiveTab(3);
+        setCount(pendingCount);
+        setSelectedSection("Pending");
       }
     }
-  }, [waitingForActionCount, approvedCount, rejectedCount, pendingCount, onChangeCount, selectedTab]);
+  }, [waitingForActionCount, approvedCount, rejectedCount, pendingCount, location.search]);
 
   const handleTabChange = (event, newValue) => {
     // setActiveTab(newValue);
@@ -177,6 +192,7 @@ const PSGTable = ({ initialTab, onTabChange, onChangeCount, selectedTab, hasTabC
     }
     setTabChangeTrack(true);
     setCurrentPage(1);
+    navigate(`?tab=${newValue}`, { replace: true });
     handleSearchData(newValue, currentPage, rowsPerPage, searchValue, selectedType);
   };
 
@@ -414,9 +430,23 @@ const PSGTable = ({ initialTab, onTabChange, onChangeCount, selectedTab, hasTabC
   }, [selectedType, activeTab, currentPage, rowsPerPage, deboucedSearchValue]);
 
   const handleRowClick = (row) => {
+    // Extract the tab parameter from the URL
+    const params = new URLSearchParams(location.search);
+    const tabValue = params.get('tab');
+    
+    // Determine the activeTab based on the tab parameter or use the default value
+    const newActiveTab = tabValue ? parseInt(tabValue, 10) : activeTab;
+  
     setSelectedDocument(row.title);
     setSelectedRow(row);
-    navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status, activeTab, fromHandleRowClick: true } });
+    navigate(`/policy/${row.id}`, { 
+      state: { 
+        title: row.title, 
+        status: row.status, 
+        activeTab: newActiveTab, // Use the determined activeTab
+        fromHandleRowClick: true 
+      } 
+    });
   };
 
   return (

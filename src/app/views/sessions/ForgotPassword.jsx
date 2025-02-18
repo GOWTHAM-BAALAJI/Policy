@@ -104,7 +104,7 @@ export default function ForgotPassword() {
               <img width="20%" src={img1} alt="" />
             </div>
             <Typography sx={{ mb: 1, display: "flex", justifyContent: "center", alignItems: "center", fontSize: "20px", fontWeight: "500" }}>
-              Policies & Circulars
+              Kaleidoscope
             </Typography>
             <Typography sx={{ mb: -3, display: "flex", justifyContent: "center", alignItems: "center", fontSize: "14px", fontWeight: "500" }}>
               Forgot Password
@@ -163,7 +163,7 @@ export default function ForgotPassword() {
                     </Button>
 
                     <Typography sx={{ mt: 2, fontSize: "12px", fontWeight: 10, fontFamily: "sans-serif", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                      © {current_year}. Policies & Circulars by Spandana
+                      © {current_year}. Kaleidoscope by Spandana
                     </Typography>
                   </form>
                 )}

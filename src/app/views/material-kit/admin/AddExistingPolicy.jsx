@@ -73,7 +73,7 @@ const AddExistingPolicy = () => {
     });
 
     const handleBackClick = () => {
-        navigate(-1);
+        navigate("/admin?tab=2");
     };
 
     const handleCheckboxChange = (optionValue) => {

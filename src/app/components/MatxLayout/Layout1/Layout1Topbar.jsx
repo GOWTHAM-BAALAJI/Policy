@@ -156,8 +156,8 @@ const Layout1Topbar = () => {
           alt="Spandana Logo"
           style={{ width: '50px', marginRight: '10px' }}
         />
-        <Hidden smDown>
-          <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold' }}>SPANDANA POLICIES & CIRCULARS PLATFORM</span>
+        <Hidden xsDown>
+          <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold' }}>SPANDANA KALEIDOSCOPE</span>
         </Hidden>
       </div>
     ) : brandName == 3 ? (
@@ -167,7 +167,7 @@ const Layout1Topbar = () => {
           alt="Spandana Logo"
           style={{ width: '50px', marginRight: '10px' }}
         />
-          <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold' }}>POLICIES & CIRCULARS PLATFORM</span>
+          <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold' }}>KALEIDOSCOPE</span>
       </div>
     ) : brandName == 4 ? (
       <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -176,7 +176,7 @@ const Layout1Topbar = () => {
           alt="Spandana Logo"
           style={{ width: '50px', marginRight: '10px' }}
         />
-          <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold' }}>POLICIES & CIRCULARS</span>
+          <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold' }}>KALEIDOSCOPE</span>
       </div>
     ) : brandName == 5 ? (
       <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -185,11 +185,11 @@ const Layout1Topbar = () => {
           alt="Spandana Logo"
           style={{ width: '50px', marginRight: '10px' }}
         />
-          <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold' }}>P&C PLATFORM</span>
+          <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold' }}>KALEIDOSCOPE</span>
       </div>
     ) : (
       <div style={{ display: 'flex', alignItems: 'center' }}>
-        <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold', marginTop: "4px" }}>POLICIES & CIRCULARS PLATFORM</span>
+        <span style={{ fontSize: '16px', fontFamily: "sans-serif", fontWeight: 'bold', marginTop: "4px" }}>KALEIDOSCOPE</span>
       </div>
     )
   );

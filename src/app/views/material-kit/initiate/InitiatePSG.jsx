@@ -40,7 +40,7 @@ const StyledSelect = styled(Select)(() => ({
 const InitiatePSG = () => {
   const { control } = useForm();
   const navigate = useNavigate();
-  const customFetchWithAuth=useCustomFetch();
+  const customFetchWithAuth = useCustomFetch();
 
   const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
   const isCustomScreenXxs = useMediaQuery("(min-width:0px) and (max-width:390px)");
@@ -68,7 +68,7 @@ const InitiatePSG = () => {
   ];
 
   const handleSelectChangeApprovalMembers = (event) => {
-    const { target: { value }} = event;
+    const { target: { value } } = event;
     setSelectedApprovalMembers(value);
     setPriorityOrder(value);
   };
@@ -120,7 +120,7 @@ const InitiatePSG = () => {
   };
 
   const handleBackClick = () => {
-    navigate(-1);
+    navigate("/dashboard");
   };
 
   const userToken = useSelector((state) => {
@@ -128,9 +128,9 @@ const InitiatePSG = () => {
   });
 
   useEffect(() => {
-    const fetchReviewers = async() => {
-      try{
-        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}auth/getReviewer`,"GET",1,{});
+    const fetchReviewers = async () => {
+      try {
+        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}auth/getReviewer`, "GET", 1, {});
         const data = await response.json();
         if (data.status) {
           const fetchedReviewers = data.data.map((reviewer) => ({
@@ -149,9 +149,9 @@ const InitiatePSG = () => {
   }, [userToken]);
 
   useEffect(() => {
-    const fetchApprovers = async() => {
-      try{
-        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}auth/getApprover`,"GET",1,{});
+    const fetchApprovers = async () => {
+      try {
+        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}auth/getApprover`, "GET", 1, {});
         const data = await response.json();
         if (data.status) {
           const fetchedApprovalMembers = data.data.map((approvalmember) => ({
@@ -170,9 +170,9 @@ const InitiatePSG = () => {
   }, [userToken]);
 
   useEffect(() => {
-    const fetchUserGroups = async() => {
-      try{
-        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}auth/get-user-groups`,"GET",1,{});
+    const fetchUserGroups = async () => {
+      try {
+        const response = await customFetchWithAuth(`${process.env.REACT_APP_POLICY_BACKEND}auth/get-user-groups`, "GET", 1, {});
         const data = await response.json();
         if (data.status) {
           const categorizedGroups = data.data.reduce((acc, usergroup) => {
@@ -234,7 +234,7 @@ const InitiatePSG = () => {
     setIsBtnDisabled(true);
     setTitle(title.trimEnd());
     setDescription(description.trimEnd());
-    if ( !documentType || !title || !description || uploadedFiles.length === 0 || !selectedReviewer || selectedApprovalMembers.length === 0 || (selectedUserGroup.length === 0 && selectedUserGroupSum === 0) ) {
+    if (!documentType || !title || !description || uploadedFiles.length === 0 || !selectedReviewer || selectedApprovalMembers.length === 0 || (selectedUserGroup.length === 0 && selectedUserGroupSum === 0)) {
       toast.error("Please fill in all the required fields");
       setIsBtnDisabled(true);
       setTimeout(() => {
@@ -283,7 +283,7 @@ const InitiatePSG = () => {
     formData.append("reviewer_id", selectedReviewer || null);
     formData.append("approver_ids", JSON.stringify(selectedApprovalMembers || []));
     formData.append("user_group", selectedUserGroupSum || 0);
-    const submitPromise = customFetchWithAuth(url, "POST", 3,formData)
+    const submitPromise = customFetchWithAuth(url, "POST", 3, formData)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
@@ -325,11 +325,11 @@ const InitiatePSG = () => {
               </Typography>
             </Grid>
             {!isXs && (
-            <Grid item>
-              <Button variant="contained" onClick={handleBackClick} sx={{ marginRight: 2, marginTop: 2, height: "28px", backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }}>
+              <Grid item>
+                <Button variant="contained" onClick={handleBackClick} sx={{ marginRight: 2, marginTop: 2, height: "28px", backgroundColor: "#ee8812", "&:hover": { backgroundColor: "rgb(249, 83, 22)" } }}>
                   Back
-              </Button>
-            </Grid>
+                </Button>
+              </Grid>
             )}
           </Grid>
           <Grid container spacing={2} sx={{ mb: 2 }}>
@@ -498,7 +498,7 @@ const InitiatePSG = () => {
                               </IconButton>
                             </Grid>
                             <Grid item xs={12}>
-                              <hr style={{ border: "none", borderTop: "1px solid #ccc", margin: "5px 0" }}/>
+                              <hr style={{ border: "none", borderTop: "1px solid #ccc", margin: "5px 0" }} />
                             </Grid>
                           </Grid>
                         ))}
@@ -584,13 +584,12 @@ const InitiatePSG = () => {
                               </MenuItem>
                               {filteredApprovalMembers.map((member) => (
                                 <MenuItem key={member.value} value={member.value}>
-                                  <Checkbox checked={selectedApprovalMembers.indexOf(member.value) > -1}/>
+                                  <Checkbox checked={selectedApprovalMembers.indexOf(member.value) > -1} />
                                   <ListItemText
-                                    primary={`${
-                                      priorityOrder.indexOf(member.value) > -1
+                                    primary={`${priorityOrder.indexOf(member.value) > -1
                                         ? `${priorityOrder.indexOf(member.value) + 1}. `
                                         : ""
-                                    }${member.label}`}
+                                      }${member.label}`}
                                   />
                                 </MenuItem>
                               ))}

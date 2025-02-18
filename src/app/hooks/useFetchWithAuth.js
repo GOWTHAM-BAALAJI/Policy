@@ -40,7 +40,7 @@ const useCustomFetch = () => {
     if(method=="POST"){
       requestParams.body=payload;
     }
-    if(flag==1||flag==3){
+    if(flag==1||flag==3||flag==4){
       requestParams.headers= {
           Authorization: `Bearer ${token}`
         }

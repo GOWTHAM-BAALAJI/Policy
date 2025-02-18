@@ -221,7 +221,7 @@ export default function UserDetails() {
   };
 
   const handleBackClick = () => {
-    navigate(-1);
+    navigate("/admin?tab=1");
   };
 
   const [isBtnDisabled, setIsBtnDisabled] = useState(true);

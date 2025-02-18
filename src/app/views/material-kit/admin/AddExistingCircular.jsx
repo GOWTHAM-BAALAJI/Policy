@@ -65,7 +65,7 @@ const AddExistingCircular = () => {
     });
 
     const handleBackClick = () => {
-        navigate(-1);
+        navigate("/admin?tab=3");
     };
 
     const handleCheckboxChange = (optionValue) => {

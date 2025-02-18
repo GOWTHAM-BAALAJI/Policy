@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { jwtDecode } from "jwt-decode";
 
 const PrivateRoute3 = ({ element }) => {
+  const location = useLocation();
   const userToken = useSelector((state) => state.token);
   const [roleId, setRoleId] = useState(null);
 
@@ -33,8 +34,8 @@ const PrivateRoute3 = ({ element }) => {
   }
 
   return userToken
-    ? (isAdmin(roleId) ? element : <Navigate to="/" />)
-    : <Navigate to="/" />;
+    ? (isAdmin(roleId) ? element : <Navigate to="/" state={{ redirect: location.pathname + location.search }} replace />)
+    : <Navigate to="/" state={{ redirect: location.pathname + location.search , fromHandleRowClick: true}} replace />;
 };
 
 export default PrivateRoute3;

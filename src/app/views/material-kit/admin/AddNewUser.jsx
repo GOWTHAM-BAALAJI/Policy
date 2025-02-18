@@ -87,7 +87,7 @@ const AddNewUser = () => {
   });
 
   const handleBackClick = () => {
-    navigate(-1);
+    navigate("/admin?tab=1");
   };
 
   useEffect(() => {

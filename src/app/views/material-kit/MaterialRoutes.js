@@ -4,7 +4,7 @@ import PrivateRoute from "../sessions/login/PrivateRoute";
 import PrivateRoute3 from "../sessions/login/PrivateRoute3";
 import PrivateRoute4 from "../sessions/login/PrivateRoute4";
 import PrivateRoute5 from "../sessions/login/PrivateRoute5";
-import PrivateRoute6 from "../sessions/login/PrivateRoute6";
+// import PrivateRoute6 from "../sessions/login/PrivateRoute6";
 
 const InitiatePSG = Loadable(lazy(() => import("./initiate/InitiatePSG")));
 const ListPSG = Loadable(lazy(() => import("./list/ListPSG")));

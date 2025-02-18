@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { jwtDecode } from "jwt-decode";
 
 const PrivateRoute2 = ({ element }) => {
   const userToken = useSelector((state) => state.token);
   const [roleId, setRoleId] = useState(null);
+  const location = useLocation();
 
   useEffect(() => {
     if (userToken) {

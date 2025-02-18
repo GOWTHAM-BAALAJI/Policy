@@ -45,7 +45,7 @@ export default function Footer() {
       <AppBar color="primary" position="static" sx={{ zIndex: 96 }}>
         <AppFooter>
           <FooterContent>
-            {current_year} © Policies & Circulars by Spandana
+            {current_year} © Kaleidoscope by Spandana
           </FooterContent>
         </AppFooter>
       </AppBar>

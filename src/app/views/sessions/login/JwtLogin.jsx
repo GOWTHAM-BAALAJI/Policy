@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Box, Card, Grid, styled, useTheme, Typography, TextField } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import { Formik } from "formik";
@@ -55,6 +55,7 @@ export default function Login() {
   const theme = useTheme();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [username, setUsername] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -64,6 +65,7 @@ export default function Login() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const current_year = new Date().getFullYear();
+  const redirectUrl = location.state?.redirect || "/dashboard";
 
   const userToken = useSelector((state) => {
     return state.token;
@@ -129,6 +131,7 @@ export default function Login() {
           }, 4000);
         }
       } else {
+        // localStorage.setItem("redirectUrl", redirectUrl);
         setUsername(values.emailId.trim());
         setUserId(result.user_id);
         setPasswordError("");
@@ -208,13 +211,15 @@ export default function Login() {
       if (result?.status) {
         toast.success("Logged in successfully");
         const token = result.jwt;
+        // const redirectUrl = localStorage.getItem("redirectUrl");
         // const loggedUser      = result.user_data;
         if (token) {
           sessionStorage.clear();
           localStorage.clear();
           await dispatch(setJwtToken(token));
           // await dispatch(setUserData(loggedUser));
-          navigate("/dashboard");
+          // navigate("/dashboard");
+          navigate(redirectUrl, { replace: true });
         } else {
           toast.error("Token not found in response.");
           setIsBtnDisabled(true);
@@ -257,7 +262,7 @@ export default function Login() {
                 <img src={img1} width="20%" alt="" />
               </div>
               <Typography sx={{ mb: -2, display: "flex", justifyContent: "center", alignItems: "center", fontSize: "20px", fontWeight: "500" }}>
-                Policies & Circulars
+                Kaleidoscope
               </Typography>
               <ContentBox>
                 <Formik
@@ -335,7 +340,7 @@ export default function Login() {
                       </LoadingButton>
 
                       <Typography sx={{ fontSize: "12px", fontWeight: 10, fontFamily: "sans-serif", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                        © {current_year}. Policies & Circulars by Spandana
+                        © {current_year}. Kaleidoscope by Spandana
                       </Typography>
                     </form>
                   )}
@@ -357,7 +362,7 @@ export default function Login() {
               <img src={img1} width="20%" alt="" />
             </div>
             <Typography sx={{ display: "flex", justifyContent: "center", alignItems: "center", fontSize: "20px", fontWeight: "500" }}>
-              Policies & Circulars
+              Kaleidoscope
             </Typography>
             <ContentBox>
               <Formik
@@ -423,7 +428,7 @@ export default function Login() {
                       </Typography>
                     </Box>
                     <Typography sx={{ fontSize: "12px", fontWeight: 10, fontFamily: "sans-serif", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                      © {current_year}. Policies & Circulars by Spandana
+                      © {current_year}. Kaleidoscope by Spandana
                     </Typography>
                   </form>
                 )}

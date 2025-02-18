@@ -60,7 +60,7 @@ const InitiateCA = () => {
   });
 
   const handleBackClick = () => {
-    navigate(-1);
+    navigate("/list/ca");
   };
 
   const handleCheckboxChange = (optionValue) => {

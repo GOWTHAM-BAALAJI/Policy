@@ -330,7 +330,7 @@ const ApplicableTable = () => {
   const handleRowClick = (row) => {
     setSelectedDocument(row.title);
     setSelectedRow(row);
-    navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status, fromHandleRowClick: true } });
+    navigate(`/policy/${row.id}`, { state: { title: row.title, status: row.status, fromHandleRowClick: true, fromDisplayList: true } });
   };
 
   return (

@@ -81,41 +81,35 @@ export default function PolicyDetails({ policy_user_group }) {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
+  const [activeTab, setActiveTab] = useState(null);
 
-  useEffect(() => {
-    if (!location.state?.fromHandleRowClick) {
-        navigate(-1);
-    }
-  }, [location.state, navigate]);
+  // useEffect(() => {
+  //   if (!location.state?.fromHandleRowClick) {
+  //       navigate(-1);
+  //   }
+  // }, [location.state, navigate]);
 
   const userToken = useSelector((state) => {
     return state.token;
   });
-  const { setUserGroup } = useUserGroup();
 
-  const [fetchedUserGroup, setFetchedUserGroup] = useState(null);
-  
+  const [fetchedEmpId, setFetchedEmpId] = useState(null);
+
   useEffect(() => {
     if (userToken) {
       try {
         const decodedToken = jwtDecode(userToken);
-        if (decodedToken.user_group) {
-          setFetchedUserGroup(decodedToken.user_group);
+        if (decodedToken.emp_id) {
+          setFetchedEmpId(decodedToken.emp_id);
         }
       } catch (error) {
         console.error("Error decoding token:", error);
-        setFetchedUserGroup(null);
+        setFetchedEmpId(null);
       }
     }
   }, [userToken]);
 
-  useEffect(() => {
-    if (fetchedUserGroup !== null) {
-      setUserGroup(fetchedUserGroup);
-    }
-  }, [fetchedUserGroup, setUserGroup]);
-
-  const { title, status, activeTab } = location.state || {};
+  const { title, status } = location.state || {};
 
   const customFetchWithAuth = useCustomFetch();
   const isXs = useMediaQuery((theme) => theme.breakpoints.down('sm'));
@@ -152,7 +146,7 @@ export default function PolicyDetails({ policy_user_group }) {
   useEffect(() => {
     if (selectedDocument?.status != 1) {
       let doc_version_count = parseInt(selectedDocument?.version.split(".")[1], 10);
-      if (selectedDocument?.version === "1.0") {
+      if (selectedDocument?.version.endsWith(".0")) {
         if (selectedDocument?.pending_at_id === selectedDocument?.initiator_id) {
           setFilesCount(2);
         } else {
@@ -455,7 +449,13 @@ export default function PolicyDetails({ policy_user_group }) {
   };
 
   const handleBackClick = () => {
-    navigate(-1);
+    const fromDisplayList = location.state?.fromDisplayList;
+
+    if (fromDisplayList) {
+      navigate("/display/list");
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   useEffect(() => {
@@ -469,6 +469,72 @@ export default function PolicyDetails({ policy_user_group }) {
       }
     }
   }, [userToken, roleId, userId]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabValue = params.get('tab');
+
+    if (tabValue) {
+      const tabIndex = parseInt(tabValue, 10);
+      if (selectedDocument) {
+        const validTabs = getValidTabs(selectedDocument.status);
+        const isUserPartOfDocument = checkUserMembership(selectedDocument, fetchedEmpId);
+        if (validTabs.includes(tabIndex) && isUserPartOfDocument) {
+          setActiveTab(tabIndex);
+        } else {
+          navigate('/dashboard');
+          toast.error("Invalid URL request");
+        }
+      }
+    } else {
+      const { activeTab: stateActiveTab } = location.state || {};
+      if (selectedDocument) {
+        const isUserPartOfDocument = checkUserMembership(selectedDocument, fetchedEmpId);
+        if (!isUserPartOfDocument) {
+          navigate('/dashboard');
+          toast.error("You do not have access to this document.");
+          return;
+        }
+      }
+      if (stateActiveTab) {
+        setActiveTab(stateActiveTab);
+      }
+    }
+  }, [location.search, location.state, selectedDocument, fetchedEmpId, navigate]);
+
+  const getValidTabs = (status) => {
+    switch (status) {
+      case 0:
+        return [3, 4]; // Valid tabs for status 0
+      case 1:
+        return [1]; // Valid tab for status 1
+      case 2:
+        return [2]; // Valid tab for status 2
+      default:
+        return []; // No valid tabs for other statuses
+    }
+  };
+
+  const checkUserMembership = (document, empId) => {
+    const initiatorId = document.initiator_details.emp_id;
+    const reviewerId = document.reviwer_details.emp_id;
+    const isApprover = document.Policy_status.some(approver => approver.approver_details.emp_id === empId);
+
+    if (document.status === 0) {
+      const pendingAtId = document.pending_at_details.emp_id;
+      if (pendingAtId && empId === pendingAtId) {
+        return true; // Valid for both activeTab 3 and 4
+      } else if (pendingAtId && empId !== pendingAtId) {
+        return empId === initiatorId || empId === reviewerId || isApprover; // Valid only for activeTab 3
+      }
+    } else if (document.status === 1) {
+      return empId === initiatorId || empId === reviewerId || isApprover; // Valid for activeTab 1
+    } else if (document.status === 2) {
+      return empId === initiatorId || empId === reviewerId || isApprover; // Valid for activeTab 2
+    } else {
+      return false; // Not a valid member for other statuses
+    }
+  };
 
   const [isBtnDisabled, setIsBtnDisabled] = useState(false);
 
@@ -497,7 +563,7 @@ export default function PolicyDetails({ policy_user_group }) {
         const documentIDDisplay = getDisplayPolicyId(documentID);
         if (selectedDocument?.status == 1 && selectedDocument?.pending_at_id == null) {
           link.download = `${documentIDDisplay}.pdf`;
-        } else { 
+        } else {
           if (type === 1) {
             link.download = version && `${documentIDDisplay}_v${version}.zip`;
           } else if (type === 2) {
@@ -672,6 +738,7 @@ export default function PolicyDetails({ policy_user_group }) {
       JSON.stringify(approvalMembersWithPriority.map((member) => member.value.toString()))
     );
     formData.append("user_group", selectedUserGroupSum || 0);
+    navigate("/list/psg");
 
     const submitForm = customFetchWithAuth(url, "POST", 3, formData)
       .then((response) => {
@@ -682,9 +749,6 @@ export default function PolicyDetails({ policy_user_group }) {
       })
       .then((data) => {
         if (data.status) {
-          setTimeout(() => {
-            navigate("/list/psg");
-          }, 1000);
         } else {
           throw new Error("Submission failed");
         }
@@ -980,13 +1044,13 @@ export default function PolicyDetails({ policy_user_group }) {
                                   </div>
                                 </TableCell>
                               </TableRow>
-                              {selectedDocument.version !== "1.0" && (
+                              {!selectedDocument.version.endsWith(".0") && (
                                 <TableRow>
                                   <TableCell sx={{ pt: 3, pl: 2, verticalAlign: "top" }}>
                                     <b>Previous files</b>
                                   </TableCell>
                                   <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                                    {selectedDocument.version !== "1.0" && (
+                                    {!selectedDocument.version.endsWith(".0") && (
                                       <>
                                         <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                           <b>Sent for review :</b>
@@ -1128,14 +1192,14 @@ export default function PolicyDetails({ policy_user_group }) {
                                   </div>
                                 </TableCell>
                               </TableRow>
-                              {selectedDocument.version !== "1.0" && (
+                              {!selectedDocument.version.endsWith(".0") && (
                                 <>
                                   <TableRow>
                                     <TableCell sx={{ pt: 3, pl: 2, verticalAlign: "top" }}>
                                       <b>Previous files</b>
                                     </TableCell>
                                     <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                                      {selectedDocument.version !== "1.0" && (
+                                      {!selectedDocument.version.endsWith(".0") && (
                                         <>
                                           <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}><b>Sent for review :</b></Typography>
                                           {Object.keys(groupedFiles).map((version, tableIndex) => (
@@ -1198,22 +1262,22 @@ export default function PolicyDetails({ policy_user_group }) {
                                                   </thead>
                                                   <tbody>
                                                     {/* {groupedFiles1[version].map((file) => ( */}
-                                                      <tr>
-                                                        {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                                        <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                                          <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                                            <div className="img-wrapper">
-                                                              <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                                <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                                              </Box>
-                                                            </div>
-                                                          </a>
-                                                        </td>
-                                                        <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
-                                                        {groupedFiles1[version].slice(0, 1).map((file) => (
-                                                          <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                                        ))}
-                                                      </tr>
+                                                    <tr>
+                                                      {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                                      <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                                        <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                                          <div className="img-wrapper">
+                                                            <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                              <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                            </Box>
+                                                          </div>
+                                                        </a>
+                                                      </td>
+                                                      <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
+                                                      {groupedFiles1[version].slice(0, 1).map((file) => (
+                                                        <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                                      ))}
+                                                    </tr>
                                                     {/* ))} */}
                                                   </tbody>
                                                 </table>
@@ -1238,7 +1302,7 @@ export default function PolicyDetails({ policy_user_group }) {
                               <b>Files</b>
                             </TableCell>
                             <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                              {selectedDocument.version === "1.0" && selectedDocument.pending_at_id === selectedDocument.initiator_id && (
+                              {selectedDocument.version.endsWith(".0") && selectedDocument.pending_at_id === selectedDocument.initiator_id && (
                                 <>
                                   <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Files sent for review :</b>
@@ -1255,29 +1319,29 @@ export default function PolicyDetails({ policy_user_group }) {
                                       </thead>
                                       <tbody>
                                         {/* {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).map((file, index) => ( */}
-                                          <tr>
-                                            {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                            <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                                <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                                  </Box>
-                                                </div>
-                                              </a>
-                                            </td>
-                                            <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).slice(0, 1).map((file, index) => (
-                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                            ))}
-                                          </tr>
+                                        <tr>
+                                          {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                          <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                            <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <div className="img-wrapper">
+                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                  <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                </Box>
+                                              </div>
+                                            </a>
+                                          </td>
+                                          <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
+                                          {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).slice(0, 1).map((file, index) => (
+                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                          ))}
+                                        </tr>
                                         {/* ))} */}
                                       </tbody>
                                     </table>
                                   </div>
                                 </>
                               )}
-                              {selectedDocument.version === "1.0" && (
+                              {selectedDocument.version.endsWith(".0") && (
                                 <>
                                   <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Files uploaded by initiator :</b>
@@ -1294,29 +1358,29 @@ export default function PolicyDetails({ policy_user_group }) {
                                       </thead>
                                       <tbody>
                                         {/* {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).map((file, index) => ( */}
-                                          <tr>
-                                            {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                            <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                                <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                                  </Box>
-                                                </div>
-                                              </a>
-                                            </td>
-                                            <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file, index) => (
-                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                            ))}
-                                          </tr>
+                                        <tr>
+                                          {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                          <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                            <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <div className="img-wrapper">
+                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                  <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                </Box>
+                                              </div>
+                                            </a>
+                                          </td>
+                                          <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
+                                          {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file, index) => (
+                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                          ))}
+                                        </tr>
                                         {/* ))} */}
                                       </tbody>
                                     </table>
                                   </div>
                                 </>
                               )}
-                              {selectedDocument.version !== "1.0" && selectedDocument.pending_at_id === selectedDocument.initiator_id && (
+                              {!selectedDocument.version.endsWith(".0") && selectedDocument.pending_at_id === selectedDocument.initiator_id && (
                                 <>
                                   <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}><b>Latest files sent for review :</b></Typography>
                                   <Typography sx={{ marginBottom: 2, textDecoration: "underline" }}>Remarks :</Typography>
@@ -1333,29 +1397,29 @@ export default function PolicyDetails({ policy_user_group }) {
                                       </thead>
                                       <tbody>
                                         {/* {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).map((file, index) => ( */}
-                                          <tr>
-                                            {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                            <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                                <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                                  </Box>
-                                                </div>
-                                              </a>
-                                            </td>
-                                            <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).slice(0, 1).map((file, index) => (
-                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                            ))}
-                                          </tr>
+                                        <tr>
+                                          {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                          <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                            <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <div className="img-wrapper">
+                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                  <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                </Box>
+                                              </div>
+                                            </a>
+                                          </td>
+                                          <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
+                                          {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).slice(0, 1).map((file, index) => (
+                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                          ))}
+                                        </tr>
                                         {/* ))} */}
                                       </tbody>
                                     </table>
                                   </div>
                                 </>
                               )}
-                              {selectedDocument.version !== "1.0" && (
+                              {!selectedDocument.version.endsWith(".0") && (
                                 <>
                                   <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Latest files uploaded by the initiator :</b>
@@ -1372,29 +1436,29 @@ export default function PolicyDetails({ policy_user_group }) {
                                       </thead>
                                       <tbody>
                                         {/* {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).map((file, index) => ( */}
-                                          <tr>
-                                            {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                            <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                                <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                                  </Box>
-                                                </div>
-                                              </a>
-                                            </td>
-                                            <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file, index) => (
-                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                            ))}
-                                          </tr>
+                                        <tr>
+                                          {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                          <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                            <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <div className="img-wrapper">
+                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                  <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                </Box>
+                                              </div>
+                                            </a>
+                                          </td>
+                                          <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
+                                          {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file, index) => (
+                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                          ))}
+                                        </tr>
                                         {/* ))} */}
                                       </tbody>
                                     </table>
                                   </div>
                                 </>
                               )}
-                              {selectedDocument.version !== "1.0" && (
+                              {!selectedDocument.version.endsWith(".0") && (
                                 <>
                                   <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Previous files sent for review :</b>
@@ -1419,22 +1483,22 @@ export default function PolicyDetails({ policy_user_group }) {
                                           </thead>
                                           <tbody>
                                             {/* {groupedFiles[version].map((file, index) => ( */}
-                                              <tr>
-                                                {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                                <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                                  <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                                    <div className="img-wrapper">
-                                                      <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                        <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                                      </Box>
-                                                    </div>
-                                                  </a>
-                                                </td>
-                                                <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
-                                                {groupedFiles[version].slice(0, 1).map((file, index) => (
-                                                  <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                                ))}
-                                              </tr>
+                                            <tr>
+                                              {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                              <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                                <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                                  <div className="img-wrapper">
+                                                    <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                      <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                    </Box>
+                                                  </div>
+                                                </a>
+                                              </td>
+                                              <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
+                                              {groupedFiles[version].slice(0, 1).map((file, index) => (
+                                                <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                              ))}
+                                            </tr>
                                             {/* ))} */}
                                           </tbody>
                                         </table>
@@ -1461,22 +1525,22 @@ export default function PolicyDetails({ policy_user_group }) {
                                           </thead>
                                           <tbody>
                                             {/* {groupedFiles1[version].map((file, index) => ( */}
-                                              <tr>
-                                                {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                                <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                                  <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                                    <div className="img-wrapper">
-                                                      <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                        <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                                      </Box>
-                                                    </div>
-                                                  </a>
-                                                </td>
-                                                <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
-                                                {groupedFiles1[version].slice(0, 1).map((file, index) => (
-                                                  <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                                ))}
-                                              </tr>
+                                            <tr>
+                                              {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                              <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                                <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                                  <div className="img-wrapper">
+                                                    <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                      <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                    </Box>
+                                                  </div>
+                                                </a>
+                                              </td>
+                                              <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
+                                              {groupedFiles1[version].slice(0, 1).map((file, index) => (
+                                                <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                              ))}
+                                            </tr>
                                             {/* ))} */}
                                           </tbody>
                                         </table>
@@ -1495,7 +1559,7 @@ export default function PolicyDetails({ policy_user_group }) {
                               <b>Files</b>
                             </TableCell>
                             <TableCell sx={{ pl: 2, verticalAlign: "top" }}>
-                              {selectedDocument.version === "1.0" && selectedDocument.pending_at_id === selectedDocument.initiator_id && (
+                              {selectedDocument.version.endsWith(".0") && selectedDocument.pending_at_id === selectedDocument.initiator_id && (
                                 <>
                                   <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Files sent for review :</b>
@@ -1512,29 +1576,29 @@ export default function PolicyDetails({ policy_user_group }) {
                                       </thead>
                                       <tbody>
                                         {/* {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).map((file, index) => ( */}
-                                          <tr>
-                                            {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                            <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                                <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                                  </Box>
-                                                </div>
-                                              </a>
-                                            </td>
-                                            <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).slice(0, 1).map((file, index) => (
-                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                            ))}
-                                          </tr>
+                                        <tr>
+                                          {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                          <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                            <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <div className="img-wrapper">
+                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                  <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                </Box>
+                                              </div>
+                                            </a>
+                                          </td>
+                                          <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
+                                          {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).slice(0, 1).map((file, index) => (
+                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                          ))}
+                                        </tr>
                                         {/* ))} */}
                                       </tbody>
                                     </table>
                                   </div>
                                 </>
                               )}
-                              {selectedDocument.version === "1.0" && (
+                              {selectedDocument.version.endsWith(".0") && (
                                 <>
                                   <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Files uploaded by initiator :</b>
@@ -1551,29 +1615,29 @@ export default function PolicyDetails({ policy_user_group }) {
                                       </thead>
                                       <tbody>
                                         {/* {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).map((file, index) => ( */}
-                                          <tr>
-                                            {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                            <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                                <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                                  </Box>
-                                                </div>
-                                              </a>
-                                            </td>
-                                            <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file, index) => (
-                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                            ))}
-                                          </tr>
+                                        <tr>
+                                          {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                          <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                            <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <div className="img-wrapper">
+                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                  <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                </Box>
+                                              </div>
+                                            </a>
+                                          </td>
+                                          <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
+                                          {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file, index) => (
+                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                          ))}
+                                        </tr>
                                         {/* ))} */}
                                       </tbody>
                                     </table>
                                   </div>
                                 </>
                               )}
-                              {selectedDocument.version !== "1.0" && selectedDocument.pending_at_id === selectedDocument.initiator_id && (
+                              {!selectedDocument.version.endsWith(".0") && selectedDocument.pending_at_id === selectedDocument.initiator_id && (
                                 <>
                                   <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Latest files sent for review :</b>
@@ -1590,29 +1654,29 @@ export default function PolicyDetails({ policy_user_group }) {
                                       </thead>
                                       <tbody>
                                         {/* {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).map((file, index) => ( */}
-                                          <tr>
-                                            {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                            <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                                <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: -1, xs: -1 } }}>
-                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                                  </Box>
-                                                </div>
-                                              </a>
-                                            </td>
-                                            <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).slice(0, 1).map((file, index) => (
-                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                            ))}
-                                          </tr>
+                                        <tr>
+                                          {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                          <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                            <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <div className="img-wrapper">
+                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: -1, xs: -1 } }}>
+                                                  <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                </Box>
+                                              </div>
+                                            </a>
+                                          </td>
+                                          <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
+                                          {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 2).slice(0, 1).map((file, index) => (
+                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                          ))}
+                                        </tr>
                                         {/* ))} */}
                                       </tbody>
                                     </table>
                                   </div>
                                 </>
                               )}
-                              {selectedDocument.version !== "1.0" && (
+                              {!selectedDocument.version.endsWith(".0") && (
                                 <>
                                   <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Latest files uploaded by the initiator:</b>
@@ -1629,29 +1693,29 @@ export default function PolicyDetails({ policy_user_group }) {
                                       </thead>
                                       <tbody>
                                         {/* {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).map((file, index) => ( */}
-                                          <tr>
-                                            {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                            <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                              <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                                <div className="img-wrapper">
-                                                  <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                    <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                                  </Box>
-                                                </div>
-                                              </a>
-                                            </td>
-                                            <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                            {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file, index) => (
-                                              <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                            ))}
-                                          </tr>
+                                        <tr>
+                                          {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                          <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                            <a onClick={(e) => { e.preventDefault(); handleFileDownload(selectedDocument.version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                              <div className="img-wrapper">
+                                                <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                  <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                </Box>
+                                              </div>
+                                            </a>
+                                          </td>
+                                          <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
+                                          {selectedDocument.policy_files.filter((file) => file.version === selectedDocument.version && file.type === 1).slice(0, 1).map((file, index) => (
+                                            <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                          ))}
+                                        </tr>
                                         {/* ))} */}
                                       </tbody>
                                     </table>
                                   </div>
                                 </>
                               )}
-                              {selectedDocument.version !== "1.0" && (
+                              {!selectedDocument.version.endsWith(".0") && (
                                 <>
                                   <Typography sx={{ marginBottom: 2, marginTop: 1, textDecoration: "underline" }}>
                                     <b>Previous files sent for review :</b>
@@ -1676,22 +1740,22 @@ export default function PolicyDetails({ policy_user_group }) {
                                           </thead>
                                           <tbody>
                                             {/* {groupedFiles[version].map((file, index) => ( */}
-                                              <tr>
-                                                {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                                <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                                  <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                                    <div className="img-wrapper">
-                                                      <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                        <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                                      </Box>
-                                                    </div>
-                                                  </a>
-                                                </td>
-                                                <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
-                                                {groupedFiles[version].slice(0, 1).map((file, index) => (
-                                                  <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                                ))}
-                                              </tr>
+                                            <tr>
+                                              {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                              <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                                <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 2); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                                  <div className="img-wrapper">
+                                                    <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                      <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                    </Box>
+                                                  </div>
+                                                </a>
+                                              </td>
+                                              <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
+                                              {groupedFiles[version].slice(0, 1).map((file, index) => (
+                                                <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                              ))}
+                                            </tr>
                                             {/* ))} */}
                                           </tbody>
                                         </table>
@@ -1718,22 +1782,22 @@ export default function PolicyDetails({ policy_user_group }) {
                                           </thead>
                                           <tbody>
                                             {/* {groupedFiles1[version].map((file, index) => ( */}
-                                              <tr>
-                                                {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                                <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                                  <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                                    <div className="img-wrapper">
-                                                      <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                        <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                                      </Box>
-                                                    </div>
-                                                  </a>
-                                                </td>
-                                                <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
-                                                {groupedFiles1[version].slice(0, 1).map((file, index) => (
-                                                  <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                                ))}
-                                              </tr>
+                                            <tr>
+                                              {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                              <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                                <a onClick={(e) => { e.preventDefault(); handleFileDownload(version, 1); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                                  <div className="img-wrapper">
+                                                    <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                                      <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                                    </Box>
+                                                  </div>
+                                                </a>
+                                              </td>
+                                              <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {version} </td>
+                                              {groupedFiles1[version].slice(0, 1).map((file, index) => (
+                                                <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                              ))}
+                                            </tr>
                                             {/* ))} */}
                                           </tbody>
                                         </table>
@@ -1764,22 +1828,22 @@ export default function PolicyDetails({ policy_user_group }) {
                                   </thead>
                                   <tbody>
                                     {/* {selectedDocument.policy_files.map((file, index) => ( */}
-                                      <tr>
-                                        {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                        <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                          <a onClick={(e) => { e.preventDefault(); handleFileDownload("", null); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                            <div className="img-wrapper">
-                                              <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                              </Box>
-                                            </div>
-                                          </a>
-                                        </td>
-                                        <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                        {selectedDocument.policy_files.map((file, index) => (
-                                          <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                        ))}
-                                      </tr>
+                                    <tr>
+                                      {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                      <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                        <a onClick={(e) => { e.preventDefault(); handleFileDownload("", null); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                          <div className="img-wrapper">
+                                            <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                              <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                            </Box>
+                                          </div>
+                                        </a>
+                                      </td>
+                                      <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
+                                      {selectedDocument.policy_files.map((file, index) => (
+                                        <td style={{ width: "25%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                      ))}
+                                    </tr>
                                     {/* ))} */}
                                   </tbody>
                                 </table>
@@ -1825,22 +1889,22 @@ export default function PolicyDetails({ policy_user_group }) {
                                   </thead>
                                   <tbody>
                                     {/* {selectedDocument.policy_files.map((file, index) => ( */}
-                                      <tr>
-                                        {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
-                                        <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
-                                          <a onClick={(e) => { e.preventDefault(); handleFileDownload("", null); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
-                                            <div className="img-wrapper">
-                                              <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
-                                                <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
-                                              </Box>
-                                            </div>
-                                          </a>
-                                        </td>
-                                        <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
-                                        {selectedDocument.policy_files.map((file, index) => (
-                                          <td style={{ width: "30%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
-                                        ))}
-                                      </tr>
+                                    <tr>
+                                      {/* <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}> {index + 1} </td> */}
+                                      <td style={{ width: "15%", padding: "8px", borderBottom: "1px solid #ddd" }}>
+                                        <a onClick={(e) => { e.preventDefault(); handleFileDownload("", null); }} target="_blank" rel="noopener noreferrer" download style={{ cursor: "pointer" }}>
+                                          <div className="img-wrapper">
+                                            <Box sx={{ width: { lg: "45%", md: "45%", sm: "65%", xs: "85%" }, ml: { lg: 0, md: 0, sm: 0, xs: 0 } }}>
+                                              <img src={img1} style={{ width: "100%", height: "auto" }} alt="" />
+                                            </Box>
+                                          </div>
+                                        </a>
+                                      </td>
+                                      <td style={{ width: "20%", padding: "8px", borderBottom: "1px solid #ddd" }}> {selectedDocument.version} </td>
+                                      {selectedDocument.policy_files.map((file, index) => (
+                                        <td style={{ width: "30%", padding: "8px", borderBottom: "1px solid #ddd" }}> {new Date(file.createdAt).toLocaleDateString("en-GB")} </td>
+                                      ))}
+                                    </tr>
                                     {/* ))} */}
                                   </tbody>
                                 </table>
@@ -1854,7 +1918,7 @@ export default function PolicyDetails({ policy_user_group }) {
                 )}
               </>
             )}
-            {activeTab == 4 && (
+            {activeTab == 4 && selectedDocument && selectedDocument.pending_at_id === userId && (
               <div>
                 <Typography variant="h5" sx={{ fontFamily: "sans-serif", fontSize: "1.4rem", fontWeight: "bold", marginTop: -2, marginRight: 2 }}>
                   Action:
